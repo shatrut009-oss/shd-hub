@@ -1,21 +1,36 @@
 const express = require('express');
 const path = require('path');
 const cheerio = require('cheerio');
+const { Pool } = require('pg'); // Подключаем базу данных
+
 const app = express();
 const port = 3000;
 
 app.use(express.json());
 app.use(express.static(__dirname));
 
+// --- ПОДКЛЮЧЕНИЕ К SUPABASE ---
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
+
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) console.error('❌ Ошибка подключения БД:', err.message);
+  else console.log('✅ База данных Supabase успешно подключена!');
+});
+
+// --- КАНАЛЫ ---
 const CHANNELS = {
   edits: ['kseshaxs', 'dimonchikshgsh', 'margarinkf547', 'streetlightmeow', 'vladanasv', 'salamandrrrrrrrra', 'kanyyy11', 'myshhkaas', 'banttiiikk', 'xixnow'],
   news: ['shgsh_novosti'],
   backstage: ['hladenko', 'gladmedia', 'gladdrophub']
 };
 
-// Хранилище лайков (стабильное)
 const dbLikes = {};
+const dbComments = [];
 
+// --- ПАРСЕР TELEGRAM ---
 async function fetchTelegramPosts(channels, type) {
   let allPosts = [];
   for (const channel of channels) {
@@ -29,17 +44,14 @@ async function fetchTelegramPosts(channels, type) {
         const imgStyle = $(el).find('.tgme_widget_message_photo_wrap').attr('style');
         const image = imgStyle ? imgStyle.match(/url\('(.*)'\)/)?.[1] : null;
         
-        // Берем только НАСТОЯЩИЕ видео (.mp4), игнорируем ссылки на YouTube/TikTok
+        // Игнорируем TikTok и берем только прямые видео
         const videoTag = $(el).find('.tgme_widget_message_video_wrap video');
         const videoUrl = videoTag.length ? videoTag.attr('src') : null;
         
-        // Уникальный ID поста из Telegram (data-post="channel/123")
         const dataPost = $(el).attr('data-post');
         const postId = dataPost ? dataPost : `${channel}-${i}`;
-        
         const dateStr = $(el).find('time').attr('datetime') || new Date().toISOString();
 
-        // Опросы
         let poll = null;
         const pollEl = $(el).find('.tgme_widget_message_poll');
         if (pollEl.length) {
@@ -51,7 +63,6 @@ async function fetchTelegramPosts(channels, type) {
            if (question) poll = { question, options };
         }
 
-        // Если есть контент
         if (text || image || videoUrl || poll) {
           allPosts.push({
             id: postId,
@@ -61,20 +72,20 @@ async function fetchTelegramPosts(channels, type) {
             image: image,
             videoUrl: videoUrl,
             poll,
-            date: new Date(dateStr).getTime(), // Переводим в миллисекунды для сортировки
-            likes: dbLikes[postId] || 0, // Всегда начинаем с 0
-            comments: 0
+            date: new Date(dateStr).getTime(),
+            likes: dbLikes[postId] || 0,
+            comments: dbComments.filter(c => c.postId === postId).length
           });
         }
       });
     } catch (e) { console.error(`Ошибка парсинга ${channel}:`, e.message); }
   }
   
-  // Сортируем ВСЕ посты по времени (новые сверху)
   allPosts.sort((a, b) => b.date - a.date);
   return allPosts;
 }
 
+// --- API ---
 app.get('/api/posts', async (req, res) => {
   const type = req.query.type;
   try {
@@ -95,26 +106,48 @@ app.post('/api/like', (req, res) => {
   res.json({ likes: dbLikes[postId] });
 });
 
-// Комментарии (имитация)
-const dbComments = [];
 app.get('/api/posts/:id/comments', (req, res) => {
   res.json(dbComments.filter(c => c.postId === req.params.id));
 });
+
 app.post('/api/posts/:id/comments', (req, res) => {
   dbComments.push({ postId: req.params.id, name: req.body.name, text: req.body.text });
   res.json({ success: true });
 });
 
-// Статистика профиля
-app.get('/api/profile/stats', (req, res) => {
-  res.json({ 
-    rank: 140, points: 54, items: 8,
-    messages: 12, likes: 42, comments: 5, 
-    rewards: [
-      { icon: '🏆', title: 'Активист', description: 'Поставил 10 лайков' },
-      { icon: '🔥', title: 'Олдфаг', description: 'С нами с первого сезона' }
-    ] 
-  });
+// --- ПРОФИЛЬ (ИЗ БАЗЫ ДАННЫХ) ---
+app.get('/api/profile/stats', async (req, res) => {
+  const userId = req.headers['x-user-id'];
+  
+  if (!userId || userId === 'guest') {
+    return res.json({ stars: 0, coins: 0, rank: 0, points: 0, items: 0, rewards: [] });
+  }
+
+  try {
+    let userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+    
+    if (userResult.rows.length === 0) {
+      await pool.query(
+        'INSERT INTO users (id, username, first_name) VALUES ($1, $2, $3)',
+        [userId, req.headers['x-username'] || 'unknown', req.headers['x-firstname'] || 'Гость']
+      );
+      userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+    }
+
+    const user = userResult.rows[0];
+    
+    res.json({ 
+      stars: user.stars, 
+      coins: parseFloat(user.coins), 
+      points: user.points,
+      rank: 0, 
+      items: 0,
+      rewards: [] 
+    });
+  } catch (err) {
+    console.error('Ошибка профиля:', err);
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
