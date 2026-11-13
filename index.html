@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!doctype html>
 <html lang="ru">
 <head>
@@ -11,7 +10,6 @@
 </head>
 <body>
 
-<!-- ЗАГРУЗОЧНЫЙ ЭКРАН -->
 <div id="splash" role="button" aria-label="Открыть ШД Hub">
   <svg viewBox="900 310 770 815" aria-hidden="true">
     <g class="half l" fill="#fff" fill-rule="evenodd">
@@ -24,7 +22,6 @@
   <div class="hint">НАЖМИ, ЧТОБЫ ВОЙТИ</div>
 </div>
 
-<!-- ОБОЛОЧКА ПРИЛОЖЕНИЯ -->
 <div id="app">
   <header>
     <div class="brand">ШД <b>HUB</b></div>
@@ -32,37 +29,46 @@
   </header>
 
   <main>
-    <!-- 1. ЭДИТЫ: вертикальная лента видео -->
+    <!-- 1. ЭДИТЫ -->
     <section class="screen active" data-s="edits">
+      <button class="sound-btn" id="soundBtn">🔇 Звук выкл</button>
       <div class="feed" id="feed"></div>
-      <button class="sound-btn" id="soundBtn">🔇 звук</button>
     </section>
 
-    <!-- 2. НОВОСТИ: посты из канала -->
+    <!-- 2. НОВОСТИ -->
     <section class="screen" data-s="news">
       <h2 class="page-title">Новости</h2>
       <div id="newsList"></div>
     </section>
 
-    <!-- 3. ЗАКУЛИСЬЕ: блюр до 50 лайков -->
+    <!-- 3. ЗАКУЛИСЬЕ -->
     <section class="screen" data-s="backstage">
       <h2 class="page-title">Закулисье</h2>
-      <p class="page-sub">Откроется при 50 лайках</p>
+      <p class="page-sub" style="color:#7d7d85; font-size:13px; margin-bottom:14px;">Откроется при 50 лайках</p>
       <div id="backList"></div>
     </section>
 
     <!-- 4. ПРОФИЛЬ -->
-    <section class="screen" data-s="profile">
+    <section class="screen" data-s="profile" style="padding-top:0;">
+      <div class="profile-banner"></div>
       <div class="hero">
-        <div class="avatar" id="avatar">?</div>
+        <div class="avatar-wrapper">
+          <div class="avatar" id="avatar">?</div>
+        </div>
         <div class="nick" id="profName">Гость</div>
         <div class="handle" id="profHandle">@guest</div>
       </div>
 
-      <div class="stats">
-        <div class="stat"><b id="statMsgs">0</b><span>сообщений</span></div>
-        <div class="stat"><b id="statLikes">0</b><span>лайков</span></div>
-        <div class="stat"><b id="statComments">0</b><span>комментариев</span></div>
+      <div class="stats-top">
+        <div class="stat-top"><b id="statRank">0</b><span>Место</span></div>
+        <div class="stat-top"><b id="statPoints">0</b><span>Очков</span></div>
+        <div class="stat-top"><b id="statItems">0</b><span>Ачивок</span></div>
+      </div>
+
+      <div class="stats-bottom">
+        <div class="stat"><b id="statMsgs">0</b><span>Сообщений</span></div>
+        <div class="stat"><b id="statLikes">0</b><span>Лайков</span></div>
+        <div class="stat"><b id="statComments">0</b><span>Комментов</span></div>
       </div>
 
       <h2 class="section-title">Награды</h2>
@@ -80,7 +86,6 @@
   </nav>
 </div>
 
-<!-- ШТОРКА КОММЕНТАРИЕВ -->
 <div id="sheetBg" class="sheet-bg"></div>
 <div id="sheet" class="sheet" aria-hidden="true">
   <div class="sheet-head">
