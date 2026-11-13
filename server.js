@@ -69,7 +69,7 @@ app.get('/api/posts', (req, res) => {
   const filtered = db.posts.filter(p => p.type === type);
   res.json(filtered);
 });
-// 1. Получение реальных новостей из Telegram-канала
+// 6. Получение реальных новостей из Telegram-канала
 app.get('/api/telegram-news', async (req, res) => {
   const news = await fetchTelegramNews();
   res.json(news);
