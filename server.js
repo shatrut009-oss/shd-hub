@@ -13,14 +13,8 @@ const CHANNELS = {
   backstage: ['hladenko', 'gladmedia', 'gladdrophub']
 };
 
-// Временная база для лайков и комментов (чтобы обновлялось в реальном времени)
-const db = {
-  likes: {}, // { postId: count }
-  comments: [] // { postId, name, text }
-};
-
-// Кэш для постов, чтобы не грузить Telegram каждый раз (живет 5 минут)
-let cache = { edits: null, news: null, backstage: null, lastUpdate: 0 };
+// Хранилище лайков (стабильное)
+const dbLikes = {};
 
 async function fetchTelegramPosts(channels, type) {
   let allPosts = [];
@@ -34,9 +28,18 @@ async function fetchTelegramPosts(channels, type) {
         const text = $(el).find('.tgme_widget_message_text').text().trim();
         const imgStyle = $(el).find('.tgme_widget_message_photo_wrap').attr('style');
         const image = imgStyle ? imgStyle.match(/url\('(.*)'\)/)?.[1] : null;
-        const videoUrl = $(el).find('.tgme_widget_message_video_player video').attr('src');
         
-        // Парсим опросы
+        // Берем только НАСТОЯЩИЕ видео (.mp4), игнорируем ссылки на YouTube/TikTok
+        const videoTag = $(el).find('.tgme_widget_message_video_wrap video');
+        const videoUrl = videoTag.length ? videoTag.attr('src') : null;
+        
+        // Уникальный ID поста из Telegram (data-post="channel/123")
+        const dataPost = $(el).attr('data-post');
+        const postId = dataPost ? dataPost : `${channel}-${i}`;
+        
+        const dateStr = $(el).find('time').attr('datetime') || new Date().toISOString();
+
+        // Опросы
         let poll = null;
         const pollEl = $(el).find('.tgme_widget_message_poll');
         if (pollEl.length) {
@@ -48,61 +51,70 @@ async function fetchTelegramPosts(channels, type) {
            if (question) poll = { question, options };
         }
 
-        const postId = `${channel}-${i}`;
-        
+        // Если есть контент
         if (text || image || videoUrl || poll) {
           allPosts.push({
             id: postId,
             type: type,
             author: channel,
             text: text || '',
-            image,
-            videoUrl,
+            image: image,
+            videoUrl: videoUrl,
             poll,
-            date: new Date().toISOString(),
-            likes: db.likes[postId] || Math.floor(Math.random() * 50), // Если лайков нет, ставим рандом для теста
-            comments: db.comments.filter(c => c.postId === postId).length
+            date: new Date(dateStr).getTime(), // Переводим в миллисекунды для сортировки
+            likes: dbLikes[postId] || 0, // Всегда начинаем с 0
+            comments: 0
           });
         }
       });
     } catch (e) { console.error(`Ошибка парсинга ${channel}:`, e.message); }
   }
-  return allPosts.reverse(); // Новые сверху
+  
+  // Сортируем ВСЕ посты по времени (новые сверху)
+  allPosts.sort((a, b) => b.date - a.date);
+  return allPosts;
 }
 
 app.get('/api/posts', async (req, res) => {
   const type = req.query.type;
-  const now = Date.now();
-  
-  // Если кэшу больше 5 минут, обновляем
-  if (!cache[type] || (now - cache.lastUpdate > 300000)) {
-    cache[type] = await fetchTelegramPosts(CHANNELS[type], type);
-    cache.lastUpdate = now;
+  try {
+    const posts = await fetchTelegramPosts(CHANNELS[type], type);
+    res.json(posts);
+  } catch (e) {
+    res.status(500).json({ error: 'Ошибка сервера' });
   }
-  res.json(cache[type]);
 });
 
 app.post('/api/like', (req, res) => {
   const { postId, action } = req.body;
-  if (!db.likes[postId]) db.likes[postId] = Math.floor(Math.random() * 50); // стартовое значение
+  if (dbLikes[postId] === undefined) dbLikes[postId] = 0;
   
-  if (action === 'unlike') db.likes[postId]--;
-  else db.likes[postId]++;
+  if (action === 'unlike' && dbLikes[postId] > 0) dbLikes[postId]--;
+  else if (action === 'like') dbLikes[postId]++;
   
-  res.json({ likes: db.likes[postId] });
+  res.json({ likes: dbLikes[postId] });
 });
 
+// Комментарии (имитация)
+const dbComments = [];
 app.get('/api/posts/:id/comments', (req, res) => {
-  res.json(db.comments.filter(c => c.postId === req.params.id));
+  res.json(dbComments.filter(c => c.postId === req.params.id));
 });
-
 app.post('/api/posts/:id/comments', (req, res) => {
-  db.comments.push({ postId: req.params.id, name: req.body.name, text: req.body.text });
+  dbComments.push({ postId: req.params.id, name: req.body.name, text: req.body.text });
   res.json({ success: true });
 });
 
+// Статистика профиля
 app.get('/api/profile/stats', (req, res) => {
-  res.json({ messages: 5, likes: 42, comments: 12, rewards: [{ icon: '🏆', title: 'Активист', description: 'Поставил 10 лайков' }] });
+  res.json({ 
+    rank: 140, points: 54, items: 8,
+    messages: 12, likes: 42, comments: 5, 
+    rewards: [
+      { icon: '🏆', title: 'Активист', description: 'Поставил 10 лайков' },
+      { icon: '🔥', title: 'Олдфаг', description: 'С нами с первого сезона' }
+    ] 
+  });
 });
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
