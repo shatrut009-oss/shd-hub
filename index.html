@@ -1,0 +1,101 @@
+<!-- index.html -->
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ШД Hub</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ЗАГРУЗОЧНЫЙ ЭКРАН -->
+<div id="splash" role="button" aria-label="Открыть ШД Hub">
+  <svg viewBox="900 310 770 815" aria-hidden="true">
+    <g class="half l" fill="#fff" fill-rule="evenodd">
+      <path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/>
+    </g>
+    <g class="half r" fill="#fff" fill-rule="evenodd">
+      <path d="M1660 322C1627 372 1606 420 1604 455L1602 670L1600 975C1602 1040 1624 1085 1659 1115L1318 970C1304 962 1301 940 1301 910L1301 530C1300 490 1316 462 1346 450Z M1495 510L1493 928L1417 896L1416 542Z"/>
+    </g>
+  </svg>
+  <div class="hint">НАЖМИ, ЧТОБЫ ВОЙТИ</div>
+</div>
+
+<!-- ОБОЛОЧКА ПРИЛОЖЕНИЯ -->
+<div id="app">
+  <header>
+    <div class="brand">ШД <b>HUB</b></div>
+    <div class="who" id="whoLabel">Гость</div>
+  </header>
+
+  <main>
+    <!-- 1. ЭДИТЫ: вертикальная лента видео -->
+    <section class="screen active" data-s="edits">
+      <div class="feed" id="feed"></div>
+      <button class="sound-btn" id="soundBtn">🔇 звук</button>
+    </section>
+
+    <!-- 2. НОВОСТИ: посты из канала -->
+    <section class="screen" data-s="news">
+      <h2 class="page-title">Новости</h2>
+      <div id="newsList"></div>
+    </section>
+
+    <!-- 3. ЗАКУЛИСЬЕ: блюр до 50 лайков -->
+    <section class="screen" data-s="backstage">
+      <h2 class="page-title">Закулисье</h2>
+      <p class="page-sub">Откроется при 50 лайках</p>
+      <div id="backList"></div>
+    </section>
+
+    <!-- 4. ПРОФИЛЬ -->
+    <section class="screen" data-s="profile">
+      <div class="hero">
+        <div class="avatar" id="avatar">?</div>
+        <div class="nick" id="profName">Гость</div>
+        <div class="handle" id="profHandle">@guest</div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><b id="statMsgs">0</b><span>сообщений</span></div>
+        <div class="stat"><b id="statLikes">0</b><span>лайков</span></div>
+        <div class="stat"><b id="statComments">0</b><span>комментариев</span></div>
+      </div>
+
+      <h2 class="section-title">Награды</h2>
+      <div id="rewardsList" class="rewards">
+        <div class="empty">Наград пока нет</div>
+      </div>
+    </section>
+  </main>
+
+  <nav id="nav">
+    <button class="on" data-t="edits">Эдиты</button>
+    <button data-t="news">Новости</button>
+    <button data-t="backstage">Закулисье</button>
+    <button data-t="profile">Профиль</button>
+  </nav>
+</div>
+
+<!-- ШТОРКА КОММЕНТАРИЕВ -->
+<div id="sheetBg" class="sheet-bg"></div>
+<div id="sheet" class="sheet" aria-hidden="true">
+  <div class="sheet-head">
+    <span class="ttl">Комментарии</span>
+    <button id="sheetClose" class="close">✕</button>
+  </div>
+  <div id="sheetList" class="sheet-list"></div>
+  <form id="commentForm" class="comment-form">
+    <input id="commentInput" type="text" placeholder="Напиши комментарий…" maxlength="300" autocomplete="off">
+    <button type="submit">Отправить</button>
+  </form>
+</div>
+
+<div id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
