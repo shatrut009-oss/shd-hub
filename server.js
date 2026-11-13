@@ -119,20 +119,19 @@ app.get('/api/profile/stats', async (req, res) => {
     let userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
     
     if (userResult.rows.length === 0) {
+      // РАСКОДИРУЕМ ИМЯ ОБРАТНО
+      const safeUsername = decodeURIComponent(req.headers['x-username'] || 'unknown');
+      const safeFirstname = decodeURIComponent(req.headers['x-firstname'] || 'Гость');
+
       await pool.query(
         'INSERT INTO users (id, username, first_name) VALUES ($1, $2, $3)',
-        [userId, req.headers['x-username'] || 'unknown', req.headers['x-firstname'] || 'Гость']
+        [userId, safeUsername, safeFirstname]
       );
       userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
     }
 
     const user = userResult.rows[0];
-    
-    res.json({ 
-      stars: user.stars || 0, 
-      coins: parseFloat(user.coins) || 0, 
-      points: user.points || 0
-    });
+    res.json({ stars: user.stars || 0, coins: parseFloat(user.coins) || 0, points: user.points || 0 });
   } catch (err) {
     console.error('Ошибка профиля:', err);
     res.status(500).json({ error: 'Database error' });
