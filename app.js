@@ -147,7 +147,7 @@
   // ===== НОВОСТИ =====
   async function loadNews(){
     try {
-      const items = await api('/api/posts?type=news');
+    const items = await api('/api/telegram-news');
       $('#newsList').innerHTML = items.length ? items.map(n => `
         <article class="post">
           ${n.image ? `<img src="${esc(n.image)}" alt="" loading="lazy">` : ''}
