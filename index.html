@@ -34,22 +34,26 @@
   </header>
 
   <main>
+    <!-- 1. ЭДИТЫ -->
     <section class="screen active" data-s="edits">
       <button class="sound-btn" id="soundBtn">🔇 Звук выкл</button>
       <div class="feed" id="feed"></div>
     </section>
 
+    <!-- 2. НОВОСТИ -->
     <section class="screen" data-s="news">
       <h2 class="page-title">Новости</h2>
       <div id="newsList"></div>
     </section>
 
+    <!-- 3. ЗАКУЛИСЬЕ -->
     <section class="screen" data-s="backstage">
       <h2 class="page-title">Закулисье</h2>
       <p class="page-sub">Откроется при 50 лайках</p>
       <div id="backList"></div>
     </section>
 
+    <!-- 4. ПРОФИЛЬ -->
     <section class="screen" data-s="profile" style="padding:0; background:#07070a;">
       <div class="top-balance">
         <div class="balance-item">
@@ -126,20 +130,7 @@
   <div id="mediaContent"></div>
 </div>
 
-<div id="sheetBg" class="sheet-bg"></div>
-<div id="sheet" class="sheet" aria-hidden="true">
-  <div class="sheet-head">
-    <span class="ttl">Комментарии</span>
-    <button id="sheetClose" class="close">✕</button>
-  </div>
-  <div id="sheetList" class="sheet-list"></div>
-  <form id="commentForm" class="comment-form">
-    <input id="commentInput" type="text" placeholder="Напиши комментарий…" maxlength="300" autocomplete="off">
-    <button type="submit">Отправить</button>
-  </form>
-</div>
-
 <div id="toast"></div>
 <script src="app.js"></script>
 </body>
-                                   </html>
+</html>
