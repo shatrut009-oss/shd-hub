@@ -57,7 +57,7 @@
       feed.innerHTML = posts.map(p => `
         <div class="slide" data-id="${p.id}">
           ${p.videoUrl ? `<video src="${esc(p.videoUrl)}" playsinline muted loop preload="metadata"></video>` : ''}
-          ${p.image && !p.videoUrl ? `<div class="bg-img" style="background-image:url('${esc(p.image)}')"></div>` : ''}
+          ${p.image && !p.videoUrl ? `<div class="bg-img" style="background-image:url('${esc(p.image)}')" onclick="openMedia('${esc(p.image)}', 'image')"></div>` : ''}
           <div class="shade"></div>
           <div class="overlay">
             <a class="author" href="https://t.me/${encodeURIComponent(p.author)}" target="_blank">@${esc(p.author)}</a>
@@ -97,7 +97,7 @@
     feed.querySelectorAll('video').forEach(v => v.muted = !soundOn);
   });
 
-  // Лайки в эдитах
+  // Лайки
   feed.addEventListener('click', async e => {
     const likeBtn = e.target.closest('.like'); if (!likeBtn) return;
     const isLiked = likeBtn.classList.contains('on');
@@ -141,12 +141,6 @@
             <div class="content">
               ${b.image ? `<img src="${esc(b.image)}" style="width:100%;border-radius:10px;margin:8px 0" onclick="openMedia('${esc(b.image)}', 'image')">` : ''}
               <p>${esc(b.text)}</p>
-              ${b.poll ? `
-                <div class="poll" style="background:#15151b; padding:10px; border-radius:10px; margin-top:10px;">
-                  <b>${esc(b.poll.question)}</b>
-                  ${b.poll.options.map(o => `<button class="poll-opt" style="display:block;width:100%;margin-top:6px;padding:8px;background:#222;border-radius:6px;color:#fff;">${esc(o)}</button>`).join('')}
-                </div>
-              ` : ''}
             </div>
           </div>
           <div class="gate">
@@ -179,7 +173,6 @@
         card.classList.remove('locked');
         card.classList.add('unlocked');
       }
-
       try { await api('/api/like', { method: 'POST', body: JSON.stringify({ postId: card.dataset.id, action: 'like' }) }); } catch {}
     }
   });
@@ -194,25 +187,19 @@
   async function loadProfile(){
     try {
       const s = await api('/api/profile/stats');
-      $('#statRank').textContent = s.rank || 0;
-      $('#statPoints').textContent = s.points || 0;
-      $('#statItems').textContent = s.items || 0;
       
-      // Баланс звезд и монет
-      document.querySelector('.top-balance .balance-item:nth-child(1) b').textContent = s.stars || 0;
-      document.querySelector('.top-balance .balance-item:nth-child(2) b').textContent = s.coins || 0;
+      const starsEl = document.querySelector('.top-balance .balance-item:nth-child(1) b');
+      const coinsEl = document.querySelector('.top-balance .balance-item:nth-child(2) b');
       
-      if (s.rewards && s.rewards.length) {
-        $('#rewardsList').innerHTML = s.rewards.map(r => `
-          <div class="reward">
-            <div class="ico">${esc(r.icon)}</div>
-            <div><b>${esc(r.title)}</b><span>${esc(r.description)}</span></div>
-          </div>`).join('');
-      }
-    } catch { toast('Ошибка профиля'); }
+      if (starsEl) starsEl.textContent = s.stars;
+      if (coinsEl) coinsEl.textContent = s.coins;
+      
+    } catch (e) { 
+      console.error(e);
+    }
   }
 
-  // Модалка для просмотра фото
+  // Модалка для просмотра медиа
   window.openMedia = (src, type) => {
     const modal = $('#mediaModal');
     const content = $('#mediaContent');
