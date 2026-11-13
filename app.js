@@ -8,7 +8,6 @@
     username: tgUser && tgUser.username ? tgUser.username : 'guest'
   };
 
-  const LIKES_TO_UNLOCK = 50;
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -39,6 +38,8 @@
 
   // ===== ЭДИТЫ =====
   const feed = $('#feed');
+  let soundOn = false;
+  
   async function loadEdits(){
     try {
       const posts = await api('/api/posts?type=edits');
@@ -51,7 +52,7 @@
           <div class="shade"></div>
           <div class="overlay">
             <a class="author" href="https://t.me/${encodeURIComponent(p.author)}" target="_blank">@${esc(p.author)}</a>
-            <div class="ttl" style="font-size:16px;margin-top:4px;">${esc(p.text.substring(0, 100))}${p.text.length > 100 ? '...' : ''}</div>
+            <div class="ttl" style="font-size:14px;margin-top:4px;color:#ccc;">${esc(p.text.substring(0, 100))}</div>
           </div>
           <div class="side">
             <button class="like" data-id="${p.id}">
@@ -59,6 +60,7 @@
             </button>
           </div>
         </div>`).join('');
+        
       observeVideos();
     } catch { feed.innerHTML = '<div class="empty">Ошибка загрузки</div>'; }
   }
@@ -68,27 +70,38 @@
       entries.forEach(entry => {
         const video = entry.target.querySelector('video');
         if (!video) return;
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) video.play().catch(() => {});
-        else video.pause();
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+          video.muted = !soundOn;
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
       });
     }, { root: feed, threshold: [0.6] });
     feed.querySelectorAll('.slide').forEach(s => io.observe(s));
   }
 
-  // ЛАЙКИ В ЭДИТАХ (Мгновенное обновление)
+  // Кнопка звука
+  $('#soundBtn').addEventListener('click', e => {
+    soundOn = !soundOn;
+    e.currentTarget.textContent = soundOn ? '🔊 Звук вкл' : '🔇 Звук выкл';
+    feed.querySelectorAll('video').forEach(v => v.muted = !soundOn);
+  });
+
+  // Лайки (Мгновенное обновление)
   feed.addEventListener('click', async e => {
     const likeBtn = e.target.closest('.like'); if (!likeBtn) return;
     const isLiked = likeBtn.classList.contains('on');
     const cntEl = likeBtn.querySelector('.cnt');
-    let currentCount = parseInt(cntEl.textContent);
-
-    // Оптимистичное обновление (сразу меняем на экране)
+    
+    // Оптимистичное обновление
     likeBtn.classList.toggle('on', !isLiked);
-    cntEl.textContent = isLiked ? currentCount - 1 : currentCount + 1;
+    let current = parseInt(cntEl.textContent) || 0;
+    cntEl.textContent = isLiked ? current - 1 : current + 1;
 
     try {
       const data = await api('/api/like', { method: 'POST', body: JSON.stringify({ postId: likeBtn.dataset.id, action: isLiked ? 'unlike' : 'like' }) });
-      cntEl.textContent = data.likes; // Синхронизация с сервером
+      cntEl.textContent = data.likes; 
     } catch { toast('Ошибка сети'); }
   });
 
@@ -100,9 +113,8 @@
         <article class="post">
           ${n.image ? `<img src="${esc(n.image)}" alt="">` : ''}
           <div class="body">
-            <h3>Новости ШГШ</h3>
+            <span class="tag">@${esc(n.author)}</span>
             <p>${esc(n.text)}</p>
-            <div class="meta"><span>@${esc(n.author)}</span></div>
           </div>
         </article>`).join('') : '<div class="empty">Новостей пока нет</div>';
     } catch { $('#newsList').innerHTML = '<div class="empty">Ошибка загрузки</div>'; }
@@ -113,7 +125,7 @@
     try {
       const items = await api('/api/posts?type=backstage');
       $('#backList').innerHTML = items.length ? items.map(b => {
-        const unlocked = b.likes >= LIKES_TO_UNLOCK;
+        const unlocked = b.likes >= 50;
         return `
         <article class="post ${unlocked ? 'unlocked' : 'locked'}" data-id="${b.id}">
           <div class="body">
@@ -121,96 +133,41 @@
             <div class="content">
               ${b.image ? `<img src="${esc(b.image)}" style="width:100%;border-radius:10px;margin:8px 0">` : ''}
               <p>${esc(b.text)}</p>
-              ${b.poll ? `
-                <div class="poll" style="background:#15151b; padding:10px; border-radius:10px; margin-top:10px;">
-                  <b>${esc(b.poll.question)}</b>
-                  ${b.poll.options.map(o => `<button class="poll-opt" style="display:block;width:100%;margin-top:6px;padding:8px;background:#222;border-radius:6px;color:#fff;">${esc(o)}</button>`).join('')}
-                </div>
-              ` : ''}
             </div>
           </div>
           <div class="gate">
             <div class="lock-ic">🔒</div>
-            <div class="need">Наберите ${LIKES_TO_UNLOCK} лайков</div>
-            <button class="unlock-btn" style="background:#ff1e3c;padding:8px 16px;border-radius:8px;">Разблокировать</button>
+            <div class="need">Наберите 50 лайков</div>
+            <button class="unlock-btn">Разблокировать</button>
           </div>
-          <div class="body" style="padding-top:0">
-            <div class="counter">
-              <span>♥ <b class="cnt">${b.likes}</b> / ${LIKES_TO_UNLOCK}</span>
-            </div>
+          <div class="body" style="padding-top:10px">
             <div class="meta">
               <div class="actions">
-                <button class="bs-like ${b.likes >= LIKES_TO_UNLOCK ? 'on' : ''}" data-id="${b.id}">♥ Лайк</button>
-                <button class="bs-comments" data-id="${b.id}">💬 <span>${b.comments}</span></button>
+                <button class="bs-like" data-id="${b.id}">♥ <span class="cnt">${b.likes}</span> / 50</button>
               </div>
             </div>
           </div>
         </article>`;
-      }).join('') : '<div class="empty">Пусто</div>';
+      }).join('') : '<div class="empty">Здесь пока пусто</div>';
     } catch { $('#backList').innerHTML = '<div class="empty">Ошибка загрузки</div>'; }
   }
 
   $('#backList').addEventListener('click', async e => {
-    const card = e.target.closest('.post');
-    if (!card) return;
-
-    if (e.target.closest('.poll-opt')) {
-      toast('Голос засчитан (симуляция)');
-      return;
-    }
+    const card = e.target.closest('.post'); if (!card) return;
 
     if (e.target.closest('.bs-like')) {
       const btn = e.target.closest('.bs-like');
-      const cntSpan = card.querySelector('.counter .cnt');
-      let c = parseInt(cntSpan.textContent);
+      const cntSpan = btn.querySelector('.cnt');
+      let c = parseInt(cntSpan.textContent) || 0;
       
-      // Мгновенно обновляем UI
       cntSpan.textContent = c + 1;
-      card.classList.remove('locked');
-      card.classList.add('unlocked');
+      if (c + 1 >= 50) {
+        card.classList.remove('locked');
+        card.classList.add('unlocked');
+      }
 
       try { await api('/api/like', { method: 'POST', body: JSON.stringify({ postId: card.dataset.id, action: 'like' }) }); } catch {}
     }
-
-    if (e.target.closest('.bs-comments')) openComments(card.dataset.id);
-  });
-
-  // ===== КОММЕНТАРИИ =====
-  const sheet = $('#sheet'), sheetBg = $('#sheetBg');
-  let currentPostId = null;
-
-  function openSheet(){ sheet.classList.add('open'); sheetBg.classList.add('open'); }
-  function closeSheet(){ sheet.classList.remove('open'); sheetBg.classList.remove('open'); }
-  $('#sheetClose').addEventListener('click', closeSheet);
-  sheetBg.addEventListener('click', closeSheet);
-
-  async function openComments(postId){
-    currentPostId = postId;
-    openSheet();
-    $('#sheetList').innerHTML = '<div class="empty">Загрузка…</div>';
-    try {
-      const list = await api(`/api/posts/${postId}/comments`);
-      $('#sheetList').innerHTML = list.length ? list.map(c => `<div class="comment"><b>${esc(c.name)}</b><span>${esc(c.text)}</span></div>`).join('') : '<div class="empty">Нет комментариев</div>';
-    } catch { $('#sheetList').innerHTML = '<div class="empty">Ошибка</div>'; }
-  }
-
-  $('#commentForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    const text = $('#commentInput').value.trim();
-    if (!text || !currentPostId) return;
-    try {
-      await api(`/api/posts/${currentPostId}/comments`, { method: 'POST', body: JSON.stringify({ name: me.name, text }) });
-      $('#commentInput').value = '';
-      
-      // Мгновенно обновляем счетчик комментариев на карточке
-      const card = $(`.post[data-id="${currentPostId}"]`);
-      if (card) {
-        const span = card.querySelector('.bs-comments span');
-        if (span) span.textContent = parseInt(span.textContent) + 1;
-      }
-      
-      await openComments(currentPostId);
-    } catch { toast('Ошибка'); }
   });
 
   // ===== ПРОФИЛЬ =====
@@ -222,10 +179,19 @@
   async function loadProfile(){
     try {
       const s = await api('/api/profile/stats');
+      $('#statRank').textContent = s.rank;
+      $('#statPoints').textContent = s.points;
+      $('#statItems').textContent = s.items;
+      
       $('#statMsgs').textContent = s.messages;
       $('#statLikes').textContent = s.likes;
       $('#statComments').textContent = s.comments;
-      $('#rewardsList').innerHTML = s.rewards.map(r => `<div class="reward"><div class="ico">${esc(r.icon)}</div><div><b>${esc(r.title)}</b><span>${esc(r.description)}</span></div></div>`).join('');
+
+      $('#rewardsList').innerHTML = s.rewards.map(r => `
+        <div class="reward">
+          <div class="ico">${esc(r.icon)}</div>
+          <div><b>${esc(r.title)}</b><span>${esc(r.description)}</span></div>
+        </div>`).join('');
     } catch { toast('Ошибка профиля'); }
   }
 
