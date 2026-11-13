@@ -24,56 +24,91 @@
 
 <div id="app">
   <header>
-    <div class="brand">ШД <b>HUB</b></div>
-    <div class="who" id="whoLabel">Гость</div>
+    <div class="brand">
+      <span style="font-family:Oswald; font-size:20px; font-weight:700;">ШД <span style="color:var(--acc)">HUB</span></span>
+    </div>
+    <div class="user-pill">
+      <span id="whoLabel">Гость</span>
+      <div class="avatar-mini" id="headerAvatar">?</div>
+    </div>
   </header>
 
   <main>
-    <!-- 1. ЭДИТЫ -->
     <section class="screen active" data-s="edits">
       <button class="sound-btn" id="soundBtn">🔇 Звук выкл</button>
       <div class="feed" id="feed"></div>
     </section>
 
-    <!-- 2. НОВОСТИ -->
     <section class="screen" data-s="news">
       <h2 class="page-title">Новости</h2>
       <div id="newsList"></div>
     </section>
 
-    <!-- 3. ЗАКУЛИСЬЕ -->
     <section class="screen" data-s="backstage">
       <h2 class="page-title">Закулисье</h2>
-      <p class="page-sub" style="color:#7d7d85; font-size:13px; margin-bottom:14px;">Откроется при 50 лайках</p>
+      <p class="page-sub">Откроется при 50 лайках</p>
       <div id="backList"></div>
     </section>
 
-    <!-- 4. ПРОФИЛЬ -->
-    <section class="screen" data-s="profile" style="padding-top:0;">
-      <div class="profile-banner"></div>
-      <div class="hero">
-        <div class="avatar-wrapper">
-          <div class="avatar" id="avatar">?</div>
+    <section class="screen" data-s="profile" style="padding:0; background:#07070a;">
+      <div class="top-balance">
+        <div class="balance-item">
+          <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" class="ico-img">
+          <b>0</b> <span>Stars</span>
         </div>
-        <div class="nick" id="profName">Гость</div>
-        <div class="handle" id="profHandle">@guest</div>
+        <div class="balance-item">
+          <img src="https://cdn-icons-png.flaticon.com/512/616/616494.png" class="ico-img" style="filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%);">
+          <b>0</b> <span>Монет</span>
+        </div>
       </div>
 
-      <div class="stats-top">
-        <div class="stat-top"><b id="statRank">0</b><span>Место</span></div>
-        <div class="stat-top"><b id="statPoints">0</b><span>Очков</span></div>
-        <div class="stat-top"><b id="statItems">0</b><span>Ачивок</span></div>
-      </div>
+      <div class="profile-main">
+        <div class="hero">
+          <div class="avatar-wrapper">
+            <div class="avatar" id="avatar">?</div>
+          </div>
+          <div class="nick" id="profName">Гость</div>
+          <div class="handle" id="profHandle">@guest</div>
+        </div>
 
-      <div class="stats-bottom">
-        <div class="stat"><b id="statMsgs">0</b><span>Сообщений</span></div>
-        <div class="stat"><b id="statLikes">0</b><span>Лайков</span></div>
-        <div class="stat"><b id="statComments">0</b><span>Комментов</span></div>
-      </div>
+        <div class="profile-grid">
+          <div class="grid-item" style="background: linear-gradient(135deg, #1e1e24, #0c0c0f);">
+            <div class="grid-ico" style="background: rgba(157,77,255,0.2);">👤</div>
+            <span>Мой профиль</span>
+          </div>
+          <div class="grid-item" style="background: linear-gradient(135deg, #0f1a2e, #0c0c0f);">
+            <div class="grid-ico" style="background: rgba(30,144,255,0.2);">🕒</div>
+            <span>История</span>
+          </div>
+          <div class="grid-item" style="background: linear-gradient(135deg, #2e1e0a, #0c0c0f);">
+            <div class="grid-ico" style="background: rgba(255,165,0,0.2);">📦</div>
+            <span>Мои заказы</span>
+          </div>
+          <div class="grid-item" style="background: linear-gradient(135deg, #1e0f2e, #0c0c0f);">
+            <div class="grid-ico" style="background: rgba(157,77,255,0.2);">🖼️</div>
+            <span>Мой НФТ</span>
+          </div>
+          <div class="grid-item" style="background: linear-gradient(135deg, #0f2e1e, #0c0c0f);">
+            <div class="grid-ico" style="background: rgba(0,255,127,0.2);">🛡️</div>
+            <span>Мой клан</span>
+          </div>
+          <div class="grid-item" style="background: linear-gradient(135deg, #2e0f0f, #0c0c0f);">
+            <div class="grid-ico" style="background: rgba(255,30,60,0.2);">⚡</div>
+            <span>Заработать</span>
+          </div>
+        </div>
 
-      <h2 class="section-title">Награды</h2>
-      <div id="rewardsList" class="rewards">
-        <div class="empty">Наград пока нет</div>
+        <h2 class="section-title">Чем займёмся?</h2>
+        <div class="promo-cards">
+          <div class="promo-card" style="background: linear-gradient(45deg, #3a1c00, #000);">
+            <h3>Кейсы</h3>
+            <p>Призы сразу на баланс</p>
+          </div>
+          <div class="promo-card" style="background: linear-gradient(45deg, #2a003a, #000);">
+            <h3>Кружок актёра</h3>
+            <p>Видео-привет лично тебе</p>
+          </div>
+        </div>
       </div>
     </section>
   </main>
@@ -84,6 +119,11 @@
     <button data-t="backstage">Закулисье</button>
     <button data-t="profile">Профиль</button>
   </nav>
+</div>
+
+<div id="mediaModal" class="media-modal">
+  <span class="close-modal" id="closeMedia">✕</span>
+  <div id="mediaContent"></div>
 </div>
 
 <div id="sheetBg" class="sheet-bg"></div>
@@ -100,7 +140,6 @@
 </div>
 
 <div id="toast"></div>
-
 <script src="app.js"></script>
 </body>
-</html>
+                                   </html>
