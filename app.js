@@ -179,10 +179,10 @@
 
   // ===== ПРОФИЛЬ =====
   $('#whoLabel').textContent = me.name;
-  $('#headerAvatar').textContent = (me.name[0] || '?').toUpperCase();
-  $('#profName').textContent = me.name;
-  $('#profHandle').textContent = '@' + me.username;
-  $('#avatar').textContent = (me.name[0] || '?').toUpperCase();
+$('#headerAvatar').textContent = me.name.trim().charAt(0).toUpperCase() || '?';
+$('#profName').textContent = me.name;
+$('#profHandle').textContent = '@' + me.username;
+$('#avatar').textContent = me.name.trim().charAt(0).toUpperCase() || '?';
 
   async function loadProfile(){
     try {
