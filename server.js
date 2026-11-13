@@ -1,15 +1,15 @@
 const express = require('express');
 const path = require('path');
 const cheerio = require('cheerio');
-const { Pool } = require('pg'); // Подключаем базу данных
+const { Pool } = require('pg');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// --- ПОДКЛЮЧЕНИЕ К SUPABASE ---
+// --- ПОДКЛЮЧЕНИЕ К SUPABASE (ЧЕРЕЗ POOLER) ---
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
@@ -28,7 +28,6 @@ const CHANNELS = {
 };
 
 const dbLikes = {};
-const dbComments = [];
 
 // --- ПАРСЕР TELEGRAM ---
 async function fetchTelegramPosts(channels, type) {
@@ -41,13 +40,18 @@ async function fetchTelegramPosts(channels, type) {
       
       $('.tgme_widget_message').each((i, el) => {
         const text = $(el).find('.tgme_widget_message_text').text().trim();
+        
+        // Картинки
         const imgStyle = $(el).find('.tgme_widget_message_photo_wrap').attr('style');
         const image = imgStyle ? imgStyle.match(/url\('(.*)'\)/)?.[1] : null;
         
-        // Игнорируем TikTok и берем только прямые видео
+        // Видео (только прямые файлы)
         const videoTag = $(el).find('.tgme_widget_message_video_wrap video');
         const videoUrl = videoTag.length ? videoTag.attr('src') : null;
         
+        // ФИЛЬТР: Если это вкладка "Эдиты" и там нет фото/видео - пропускаем (убираем черные экраны)
+        if (type === 'edits' && !image && !videoUrl) return;
+
         const dataPost = $(el).attr('data-post');
         const postId = dataPost ? dataPost : `${channel}-${i}`;
         const dateStr = $(el).find('time').attr('datetime') || new Date().toISOString();
@@ -63,20 +67,17 @@ async function fetchTelegramPosts(channels, type) {
            if (question) poll = { question, options };
         }
 
-        if (text || image || videoUrl || poll) {
-          allPosts.push({
-            id: postId,
-            type: type,
-            author: channel,
-            text: text || '',
-            image: image,
-            videoUrl: videoUrl,
-            poll,
-            date: new Date(dateStr).getTime(),
-            likes: dbLikes[postId] || 0,
-            comments: dbComments.filter(c => c.postId === postId).length
-          });
-        }
+        allPosts.push({
+          id: postId,
+          type: type,
+          author: channel,
+          text: text || '',
+          image: image,
+          videoUrl: videoUrl,
+          poll,
+          date: new Date(dateStr).getTime(),
+          likes: dbLikes[postId] || 0
+        });
       });
     } catch (e) { console.error(`Ошибка парсинга ${channel}:`, e.message); }
   }
@@ -106,21 +107,12 @@ app.post('/api/like', (req, res) => {
   res.json({ likes: dbLikes[postId] });
 });
 
-app.get('/api/posts/:id/comments', (req, res) => {
-  res.json(dbComments.filter(c => c.postId === req.params.id));
-});
-
-app.post('/api/posts/:id/comments', (req, res) => {
-  dbComments.push({ postId: req.params.id, name: req.body.name, text: req.body.text });
-  res.json({ success: true });
-});
-
 // --- ПРОФИЛЬ (ИЗ БАЗЫ ДАННЫХ) ---
 app.get('/api/profile/stats', async (req, res) => {
   const userId = req.headers['x-user-id'];
   
   if (!userId || userId === 'guest') {
-    return res.json({ stars: 0, coins: 0, rank: 0, points: 0, items: 0, rewards: [] });
+    return res.json({ stars: 0, coins: 0, points: 0 });
   }
 
   try {
@@ -137,12 +129,9 @@ app.get('/api/profile/stats', async (req, res) => {
     const user = userResult.rows[0];
     
     res.json({ 
-      stars: user.stars, 
-      coins: parseFloat(user.coins), 
-      points: user.points,
-      rank: 0, 
-      items: 0,
-      rewards: [] 
+      stars: user.stars || 0, 
+      coins: parseFloat(user.coins) || 0, 
+      points: user.points || 0
     });
   } catch (err) {
     console.error('Ошибка профиля:', err);
