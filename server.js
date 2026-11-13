@@ -26,6 +26,40 @@ const db = {
   ],
   comments: []
 };
+const cheerio = require('cheerio');
+
+// Функция для получения новостей из Telegram-канала
+async function fetchTelegramNews() {
+  try {
+    const response = await fetch('https://t.me/s/shgsh_novosti');
+    const html = await response.text();
+    const $ = cheerio.load(html);
+    const news = [];
+
+    $('.tgme_widget_message').each((i, el) => {
+      const text = $(el).find('.tgme_widget_message_text').text().trim();
+      const imageStyle = $(el).find('.tgme_widget_message_photo_wrap').attr('style');
+      const image = imageStyle ? imageStyle.match(/url\('(.*)'\)/)?.[1] : null;
+      const date = $(el).find('.tgme_widget_message_date time').attr('datetime');
+
+      if (text || image) {
+        news.push({
+          id: 'tg-' + i,
+          type: 'news',
+          title: 'Новости ШГШ',
+          text: text,
+          image: image,
+          date: date || new Date().toISOString(),
+          tags: ['ШГШ', 'Новости']
+        });
+      }
+    });
+    return news.reverse(); // Чтобы новые посты были сверху
+  } catch (error) {
+    console.error('Ошибка парсинга ТГ:', error);
+    return [];
+  }
+}
 
 // ================= API ЭНДПОИНТЫ =================
 
