@@ -1,6 +1,4 @@
-// app.js
 (() => {
-  // ===== TELEGRAM =====
   const tg = window.Telegram && window.Telegram.WebApp;
   if (tg) { tg.ready(); tg.expand(); }
   const tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
@@ -13,187 +11,137 @@
   const LIKES_TO_UNLOCK = 50;
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const fmtDate = iso => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleDateString('ru-RU', {day:'numeric', month:'long', year:'numeric'}); };
 
   function toast(msg){
-    const t = $('#toast');
-    t.textContent = msg; t.classList.add('show');
+    const t = $('#toast'); t.textContent = msg; t.classList.add('show');
     clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 1800);
   }
 
   async function api(path, opts = {}){
-    const res = await fetch(path, {
-      ...opts,
-      headers: { 'Content-Type': 'application/json', 'X-User-Id': me.id, ...(opts.headers || {}) }
-    });
+    const res = await fetch(path, { ...opts, headers: { 'Content-Type': 'application/json', 'X-User-Id': me.id, ...(opts.headers || {}) } });
     if (!res.ok) throw new Error(`API ${res.status}`);
     return res.json();
   }
 
-  // ===== ИНИЦИАЛИЗАЦИЯ ПРОФИЛЯ (шапка и вкладка) =====
-  function renderHeader(){
-    $('#whoLabel').innerHTML = `<b>${esc(me.name)}</b>`;
-    $('#profName').textContent = me.name;
-    $('#profHandle').textContent = '@' + me.username;
-    $('#avatar').textContent = (me.name[0] || '?').toUpperCase();
-  }
-
-  // ===== СПЛЭШ =====
-  const splash = $('#splash'), app = $('#app');
-  splash.addEventListener('click', () => {
-    splash.classList.add('open');
-    setTimeout(() => { splash.classList.add('gone'); app.classList.add('on'); }, 900);
+  // СПЛЭШ
+  $('#splash').addEventListener('click', () => {
+    $('#splash').classList.add('open');
+    setTimeout(() => { $('#splash').classList.add('gone'); $('#app').classList.add('on'); }, 900);
   });
 
-  // ===== ВКЛАДКИ =====
-  const nav = $('#nav');
-  nav.addEventListener('click', e => {
+  // ВКЛАДКИ
+  $('#nav').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
-    nav.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    document.querySelectorAll('#nav button').forEach(x => x.classList.toggle('on', x === b));
     document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.dataset.s === b.dataset.t));
     if (b.dataset.t === 'profile') loadProfile();
   });
 
-  // ===== ЭДИТЫ: видео-лента =====
+  // ===== ЭДИТЫ =====
   const feed = $('#feed');
-  let soundOn = false;
-  let videoIO = null;
-
   async function loadEdits(){
     try {
-      const videos = await api('/api/posts?type=video');
-      if (!videos.length){ feed.innerHTML = '<div class="empty">Эдитов пока нет</div>'; return; }
-      feed.innerHTML = videos.map(v => `
-        <div class="slide" data-id="${v.id}">
-          <video src="${esc(v.videoUrl)}" playsinline muted loop preload="metadata"></video>
+      const posts = await api('/api/posts?type=edits');
+      if (!posts.length){ feed.innerHTML = '<div class="empty">Эдитов пока нет</div>'; return; }
+      
+      feed.innerHTML = posts.map(p => `
+        <div class="slide" data-id="${p.id}">
+          ${p.videoUrl ? `<video src="${esc(p.videoUrl)}" playsinline muted loop preload="metadata"></video>` : ''}
+          ${p.image && !p.videoUrl ? `<div class="bg-img" style="background-image:url('${esc(p.image)}')"></div>` : ''}
           <div class="shade"></div>
           <div class="overlay">
-            <div class="ttl">${esc(v.title)}</div>
-            <a class="author" href="https://t.me/${encodeURIComponent(v.author)}" target="_blank" rel="noopener">@${esc(v.author)}</a>
+            <a class="author" href="https://t.me/${encodeURIComponent(p.author)}" target="_blank">@${esc(p.author)}</a>
+            <div class="ttl" style="font-size:16px;margin-top:4px;">${esc(p.text.substring(0, 100))}${p.text.length > 100 ? '...' : ''}</div>
           </div>
           <div class="side">
-            <button class="like ${v.liked ? 'on' : ''}" data-id="${v.id}">
-              <span class="ic">♥</span><span class="cnt">${v.likes}</span>
-            </button>
-            <button class="share" data-id="${v.id}">
-              <span class="ic">↗</span><span>Share</span>
+            <button class="like" data-id="${p.id}">
+              <span class="ic">♥</span><span class="cnt">${p.likes}</span>
             </button>
           </div>
         </div>`).join('');
       observeVideos();
-    } catch (err) {
-      feed.innerHTML = '<div class="empty">Не удалось загрузить ленту</div>';
-      console.error(err);
-    }
+    } catch { feed.innerHTML = '<div class="empty">Ошибка загрузки</div>'; }
   }
 
-  // Играем только видимый слайд (порог 60%)
   function observeVideos(){
-    if (videoIO) videoIO.disconnect();
-    videoIO = new IntersectionObserver(entries => {
+    const io = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         const video = entry.target.querySelector('video');
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
-          video.muted = !soundOn;
-          video.play().catch(() => {});
-        } else {
-          video.pause();
-        }
+        if (!video) return;
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) video.play().catch(() => {});
+        else video.pause();
       });
-    }, { root: feed, threshold: [0, 0.6, 1] });
-    feed.querySelectorAll('.slide').forEach(s => videoIO.observe(s));
+    }, { root: feed, threshold: [0.6] });
+    feed.querySelectorAll('.slide').forEach(s => io.observe(s));
   }
 
-  // Тап по видео — пауза/плей
-  feed.addEventListener('click', e => {
-    if (e.target.closest('button,a')) return;
-    const slide = e.target.closest('.slide'); if (!slide) return;
-    const v = slide.querySelector('video');
-    v.paused ? v.play() : v.pause();
-  });
-
-  $('#soundBtn').addEventListener('click', e => {
-    soundOn = !soundOn;
-    e.currentTarget.textContent = soundOn ? '🔊 звук' : '🔇 звук';
-    feed.querySelectorAll('video').forEach(v => v.muted = !soundOn);
-  });
-
-  // ===== ЛАЙКИ И ШАРИНГ В ЛЕНТЕ =====
+  // ЛАЙКИ В ЭДИТАХ (Мгновенное обновление)
   feed.addEventListener('click', async e => {
-    const likeBtn = e.target.closest('.like');
-    const shareBtn = e.target.closest('.share');
+    const likeBtn = e.target.closest('.like'); if (!likeBtn) return;
+    const isLiked = likeBtn.classList.contains('on');
+    const cntEl = likeBtn.querySelector('.cnt');
+    let currentCount = parseInt(cntEl.textContent);
 
-    if (likeBtn) {
-      try {
-        const data = await api('/api/like', {
-          method: 'POST',
-          body: JSON.stringify({ postId: Number(likeBtn.dataset.id), name: me.name })
-        });
-        likeBtn.classList.toggle('on', data.liked);
-        likeBtn.querySelector('.cnt').textContent = data.likes;
-        toast(data.liked ? 'Лайк поставлен ♥' : 'Лайк снят');
-      } catch { toast('Ошибка сети'); }
-    }
+    // Оптимистичное обновление (сразу меняем на экране)
+    likeBtn.classList.toggle('on', !isLiked);
+    cntEl.textContent = isLiked ? currentCount - 1 : currentCount + 1;
 
-    if (shareBtn) {
-      const slide = shareBtn.closest('.slide');
-      const title = slide.querySelector('.ttl').textContent;
-      const link = location.origin + '/#' + shareBtn.dataset.id;
-      const url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(title + ' — ШД Hub')}`;
-      tg && tg.openTelegramLink ? tg.openTelegramLink(url) : window.open(url, '_blank');
-    }
+    try {
+      const data = await api('/api/like', { method: 'POST', body: JSON.stringify({ postId: likeBtn.dataset.id, action: isLiked ? 'unlike' : 'like' }) });
+      cntEl.textContent = data.likes; // Синхронизация с сервером
+    } catch { toast('Ошибка сети'); }
   });
 
   // ===== НОВОСТИ =====
   async function loadNews(){
     try {
-    const items = await api('/api/telegram-news');
+      const items = await api('/api/posts?type=news');
       $('#newsList').innerHTML = items.length ? items.map(n => `
         <article class="post">
-          ${n.image ? `<img src="${esc(n.image)}" alt="" loading="lazy">` : ''}
+          ${n.image ? `<img src="${esc(n.image)}" alt="">` : ''}
           <div class="body">
-            <div class="tags">${(n.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
-            <h3>${esc(n.title)}</h3>
+            <h3>Новости ШГШ</h3>
             <p>${esc(n.text)}</p>
-            <div class="meta"><span>${fmtDate(n.date)}</span></div>
+            <div class="meta"><span>@${esc(n.author)}</span></div>
           </div>
         </article>`).join('') : '<div class="empty">Новостей пока нет</div>';
     } catch { $('#newsList').innerHTML = '<div class="empty">Ошибка загрузки</div>'; }
   }
 
-  // ===== ЗАКУЛИСЬЕ: блюр до 50 лайков =====
+  // ===== ЗАКУЛИСЬЕ =====
   async function loadBackstage(){
     try {
       const items = await api('/api/posts?type=backstage');
       $('#backList').innerHTML = items.length ? items.map(b => {
         const unlocked = b.likes >= LIKES_TO_UNLOCK;
-        const pct = Math.min(100, Math.round(b.likes / LIKES_TO_UNLOCK * 100));
         return `
         <article class="post ${unlocked ? 'unlocked' : 'locked'}" data-id="${b.id}">
           <div class="body">
-            <div class="tags">${(b.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
-            <h3>${esc(b.title)}</h3>
+             <span class="tag">@${esc(b.author)}</span>
             <div class="content">
-              ${b.image ? `<img src="${esc(b.image)}" alt="" style="width:100%;border-radius:10px;margin:8px 0">` : ''}
+              ${b.image ? `<img src="${esc(b.image)}" style="width:100%;border-radius:10px;margin:8px 0">` : ''}
               <p>${esc(b.text)}</p>
+              ${b.poll ? `
+                <div class="poll" style="background:#15151b; padding:10px; border-radius:10px; margin-top:10px;">
+                  <b>${esc(b.poll.question)}</b>
+                  ${b.poll.options.map(o => `<button class="poll-opt" style="display:block;width:100%;margin-top:6px;padding:8px;background:#222;border-radius:6px;color:#fff;">${esc(o)}</button>`).join('')}
+                </div>
+              ` : ''}
             </div>
           </div>
           <div class="gate">
             <div class="lock-ic">🔒</div>
             <div class="need">Наберите ${LIKES_TO_UNLOCK} лайков</div>
-            <button class="unlock-btn">Разблокировать</button>
-            <div class="warn">Наберите ${LIKES_TO_UNLOCK} лайков, чтобы открыть пост</div>
+            <button class="unlock-btn" style="background:#ff1e3c;padding:8px 16px;border-radius:8px;">Разблокировать</button>
           </div>
           <div class="body" style="padding-top:0">
             <div class="counter">
-              <span>♥ ${b.likes} / ${LIKES_TO_UNLOCK}</span>
-              <div class="bar"><i style="width:${pct}%"></i></div>
-              <span>${fmtDate(b.date)}</span>
+              <span>♥ <b class="cnt">${b.likes}</b> / ${LIKES_TO_UNLOCK}</span>
             </div>
             <div class="meta">
               <div class="actions">
-                <button class="bs-like ${b.liked ? 'on' : ''}" data-id="${b.id}">♥ Лайк</button>
-                <button class="bs-comments" data-id="${b.id}">💬 ${b.comments || 0}</button>
+                <button class="bs-like ${b.likes >= LIKES_TO_UNLOCK ? 'on' : ''}" data-id="${b.id}">♥ Лайк</button>
+                <button class="bs-comments" data-id="${b.id}">💬 <span>${b.comments}</span></button>
               </div>
             </div>
           </div>
@@ -203,38 +151,36 @@
   }
 
   $('#backList').addEventListener('click', async e => {
-    const card = e.target.closest('.post.locked, .post.unlocked');
+    const card = e.target.closest('.post');
     if (!card) return;
-    const id = Number(card.dataset.id);
 
-    // Кнопка "Разблокировать": если лайков мало, показываем предупреждение
-    if (e.target.closest('.unlock-btn')) {
-      const gate = card.querySelector('.gate');
-      gate.classList.add('warned');
-      toast(`Наберите ${LIKES_TO_UNLOCK} лайков`);
+    if (e.target.closest('.poll-opt')) {
+      toast('Голос засчитан (симуляция)');
       return;
     }
 
     if (e.target.closest('.bs-like')) {
-      try {
-        const data = await api('/api/like', {
-          method: 'POST',
-          body: JSON.stringify({ postId: id, name: me.name })
-        });
-        await loadBackstage(); // перерисовываем, чтобы обновить блюр и счётчик
-        toast(data.liked ? 'Лайк поставлен ♥' : 'Лайк снят');
-      } catch { toast('Ошибка сети'); }
+      const btn = e.target.closest('.bs-like');
+      const cntSpan = card.querySelector('.counter .cnt');
+      let c = parseInt(cntSpan.textContent);
+      
+      // Мгновенно обновляем UI
+      cntSpan.textContent = c + 1;
+      card.classList.remove('locked');
+      card.classList.add('unlocked');
+
+      try { await api('/api/like', { method: 'POST', body: JSON.stringify({ postId: card.dataset.id, action: 'like' }) }); } catch {}
     }
 
-    if (e.target.closest('.bs-comments')) openComments(id);
+    if (e.target.closest('.bs-comments')) openComments(card.dataset.id);
   });
 
   // ===== КОММЕНТАРИИ =====
   const sheet = $('#sheet'), sheetBg = $('#sheetBg');
   let currentPostId = null;
 
-  function openSheet(){ sheet.classList.add('open'); sheetBg.classList.add('open'); sheet.setAttribute('aria-hidden','false'); }
-  function closeSheet(){ sheet.classList.remove('open'); sheetBg.classList.remove('open'); sheet.setAttribute('aria-hidden','true'); }
+  function openSheet(){ sheet.classList.add('open'); sheetBg.classList.add('open'); }
+  function closeSheet(){ sheet.classList.remove('open'); sheetBg.classList.remove('open'); }
   $('#sheetClose').addEventListener('click', closeSheet);
   sheetBg.addEventListener('click', closeSheet);
 
@@ -244,48 +190,46 @@
     $('#sheetList').innerHTML = '<div class="empty">Загрузка…</div>';
     try {
       const list = await api(`/api/posts/${postId}/comments`);
-      $('#sheetList').innerHTML = list.length
-        ? list.map(c => `<div class="comment"><b>${esc(c.name)}</b><span>${esc(c.text)}</span></div>`).join('')
-        : '<div class="empty">Комментариев пока нет</div>';
-    } catch { $('#sheetList').innerHTML = '<div class="empty">Ошибка загрузки</div>'; }
+      $('#sheetList').innerHTML = list.length ? list.map(c => `<div class="comment"><b>${esc(c.name)}</b><span>${esc(c.text)}</span></div>`).join('') : '<div class="empty">Нет комментариев</div>';
+    } catch { $('#sheetList').innerHTML = '<div class="empty">Ошибка</div>'; }
   }
 
   $('#commentForm').addEventListener('submit', async e => {
     e.preventDefault();
-    const input = $('#commentInput');
-    const text = input.value.trim();
-    if (!text || currentPostId == null) return;
+    const text = $('#commentInput').value.trim();
+    if (!text || !currentPostId) return;
     try {
-      await api(`/api/posts/${currentPostId}/comments`, {
-        method: 'POST',
-        body: JSON.stringify({ name: me.name, text })
-      });
-      input.value = '';
+      await api(`/api/posts/${currentPostId}/comments`, { method: 'POST', body: JSON.stringify({ name: me.name, text }) });
+      $('#commentInput').value = '';
+      
+      // Мгновенно обновляем счетчик комментариев на карточке
+      const card = $(`.post[data-id="${currentPostId}"]`);
+      if (card) {
+        const span = card.querySelector('.bs-comments span');
+        if (span) span.textContent = parseInt(span.textContent) + 1;
+      }
+      
       await openComments(currentPostId);
-      toast('Комментарий добавлен');
-    } catch { toast('Не удалось отправить'); }
+    } catch { toast('Ошибка'); }
   });
 
   // ===== ПРОФИЛЬ =====
+  $('#whoLabel').innerHTML = `<b>${esc(me.name)}</b>`;
+  $('#profName').textContent = me.name;
+  $('#profHandle').textContent = '@' + me.username;
+  $('#avatar').textContent = (me.name[0] || '?').toUpperCase();
+
   async function loadProfile(){
     try {
       const s = await api('/api/profile/stats');
       $('#statMsgs').textContent = s.messages;
       $('#statLikes').textContent = s.likes;
       $('#statComments').textContent = s.comments;
-      const rewards = s.rewards || [];
-      $('#rewardsList').innerHTML = rewards.length
-        ? rewards.map(r => `
-          <div class="reward">
-            <div class="ico">${esc(r.icon || '★')}</div>
-            <div><b>${esc(r.title)}</b><span>${esc(r.description)}</span></div>
-          </div>`).join('')
-        : '<div class="empty">Наград пока нет</div>';
-    } catch { toast('Не удалось загрузить профиль'); }
+      $('#rewardsList').innerHTML = s.rewards.map(r => `<div class="reward"><div class="ico">${esc(r.icon)}</div><div><b>${esc(r.title)}</b><span>${esc(r.description)}</span></div></div>`).join('');
+    } catch { toast('Ошибка профиля'); }
   }
 
-  // ===== СТАРТ =====
-  renderHeader();
+  // СТАРТ
   loadEdits();
   loadNews();
   loadBackstage();
