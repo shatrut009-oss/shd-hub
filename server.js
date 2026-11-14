@@ -9,18 +9,13 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// --- ПОДКЛЮЧЕНИЕ К БАЗЕ ---
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
-pool.query('SELECT NOW()', (err) => {
-  if (err) console.error('❌ Ошибка БД:', err.message);
-  else console.log('✅ База данных Supabase подключена!');
-});
-
-// --- SVG ИКОНКИ ПЕРСОНАЖЕЙ (Data URI) ---
+// --- SVG ИКОНКИ ПЕРСОНАЖЕЙ (оставляем те же, чтобы не раздувать код) ---
+// (ВСТАВЬ СЮДА ВСЕ КОНСТАНТЫ IMG_... ИЗ ПРЕДЫДУЩЕГО СООБЩЕНИЯ)
 const IMG_DIMA_1 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='30' cy='30' r='12' fill='%234a4a4a'/><circle cx='70' cy='30' r='12' fill='%234a4a4a'/><path d='M20,40 Q50,90 80,40 L80,20 Q50,0 20,20 Z' fill='%234a4a4a'/><rect x='30' y='45' width='40' height='12' rx='4' fill='%23111'/><circle cx='40' cy='51' r='3' fill='%23fff'/><circle cx='60' cy='51' r='3' fill='%23fff'/></svg>";
 const IMG_DIMA_2 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='22' fill='%23e0ac69'/><path d='M20,100 Q20,70 50,65 Q80,70 80,100 Z' fill='%23333'/><path d='M25,40 Q50,10 75,40 Q75,25 50,20 Q25,25 25,40 Z' fill='%23222'/><circle cx='40' cy='45' r='3' fill='%23000'/><circle cx='60' cy='45' r='3' fill='%23000'/></svg>";
 const IMG_KSU_1 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23fce4d6'/><path d='M30,90 L40,65 L60,65 L70,90 Z' fill='%23ffb6c1'/><path d='M25,45 Q25,20 50,20 Q75,20 75,45 Q80,70 90,80 Q60,70 50,80 Q40,70 10,80 Q20,70 25,45 Z' fill='%23f4d03f'/><circle cx='42' cy='45' r='2' fill='%23000'/><circle cx='58' cy='45' r='2' fill='%23000'/></svg>";
@@ -48,7 +43,6 @@ const IMG_MILK_2 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='ht
 const IMG_MILK_3 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23fce4d6'/><path d='M20,100 Q20,70 50,65 Q80,70 80,100 Z' fill='%23222'/><path d='M25,45 Q25,20 50,20 Q75,20 75,45 Q80,70 90,80 Q60,70 50,80 Q40,70 10,80 Q20,70 25,45 Z' fill='%23111'/></svg>";
 const IMG_MILK_4 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><path d='M20,100 Q20,70 50,65 Q80,70 80,100 Z' fill='%23222'/><path d='M25,45 Q25,20 75,20 Q75,45 75,60 Q25,60 25,45 Z' fill='%234caf50'/><circle cx='40' cy='40' r='3' fill='%23000'/><circle cx='60' cy='40' r='3' fill='%23000'/></svg>";
 
-// --- ПЕРСОНАЖИ ---
 const CHARACTERS = [
   { name: 'Дима (Балаклава)', rarity: 'Обычный', chance: 15, image: IMG_DIMA_1 },
   { name: 'Дима', rarity: 'Обычный', chance: 15, image: IMG_DIMA_2 },
@@ -84,7 +78,6 @@ const CASES = {
   'palochka': { name: 'Палочка', price: 13, currency: 'stars' }
 };
 
-// --- КАНАЛЫ И ПАРСЕР ТГ ---
 const CHANNELS = {
   edits: ['kseshaxs', 'dimonchikshgsh', 'margarinkf547', 'streetlightmeow', 'vladanasv', 'salamandrrrrrrrra', 'kanyyy11', 'myshhkaas', 'banttiiikk', 'xixnow'],
   news: ['shgsh_novosti'],
@@ -99,47 +92,27 @@ async function fetchTelegramPosts(channels, type) {
       const res = await fetch(`https://t.me/s/${channel}`);
       const html = await res.text();
       const $ = cheerio.load(html);
-      
       $('.tgme_widget_message').each((i, el) => {
         const text = $(el).find('.tgme_widget_message_text').text().trim();
         const imgStyle = $(el).find('.tgme_widget_message_photo_wrap').attr('style');
         const image = imgStyle ? imgStyle.match(/url\('(.*)'\)/)?.[1] : null;
         const videoTag = $(el).find('.tgme_widget_message_video_wrap video');
         const videoUrl = videoTag.length ? videoTag.attr('src') : null;
-        
         if (type === 'edits' && !image && !videoUrl) return;
-
         const dataPost = $(el).attr('data-post');
         const postId = dataPost ? dataPost : `${channel}-${i}`;
         const dateStr = $(el).find('time').attr('datetime') || new Date().toISOString();
-
-        allPosts.push({
-          id: postId, type: type, author: channel, text: text || '',
-          image: image, videoUrl: videoUrl,
-          date: new Date(dateStr).getTime(), likes: dbLikes[postId] || 0
-        });
+        allPosts.push({ id: postId, type: type, author: channel, text: text || '', image: image, videoUrl: videoUrl, date: new Date(dateStr).getTime(), likes: dbLikes[postId] || 0 });
       });
-    } catch (e) { console.error(`Ошибка парсинга ${channel}:`, e.message); }
+    } catch (e) {}
   }
   allPosts.sort((a, b) => b.date - a.date);
   return allPosts;
 }
 
-// --- API ЭНДПОИНТЫ ---
-app.get('/api/posts', async (req, res) => {
-  try {
-    const posts = await fetchTelegramPosts(CHANNELS[req.query.type] || [], req.query.type);
-    res.json(posts);
-  } catch (e) { res.json([]); }
-});
-
-app.post('/api/like', (req, res) => {
-  const { postId, action } = req.body;
-  if (dbLikes[postId] === undefined) dbLikes[postId] = 0;
-  if (action === 'unlike' && dbLikes[postId] > 0) dbLikes[postId]--;
-  else if (action === 'like') dbLikes[postId]++;
-  res.json({ likes: dbLikes[postId] });
-});
+// API
+app.get('/api/posts', async (req, res) => { try { res.json(await fetchTelegramPosts(CHANNELS[req.query.type] || [], req.query.type)); } catch (e) { res.json([]); } });
+app.post('/api/like', (req, res) => { const { postId, action } = req.body; if (dbLikes[postId] === undefined) dbLikes[postId] = 0; if (action === 'unlike' && dbLikes[postId] > 0) dbLikes[postId]--; else if (action === 'like') dbLikes[postId]++; res.json({ likes: dbLikes[postId] }); });
 
 app.get('/api/profile/stats', async (req, res) => {
   const userId = req.query.id;
@@ -154,19 +127,43 @@ app.get('/api/profile/stats', async (req, res) => {
   } catch (err) { res.json({ stars: 0, coins: 0 }); }
 });
 
-app.get('/api/history', async (req, res) => {
-  try { const hist = await pool.query('SELECT * FROM history WHERE user_id = $1 ORDER BY created_at DESC', [req.query.id]); res.json(hist.rows); } catch (err) { res.json([]); }
+app.get('/api/history', async (req, res) => { try { const hist = await pool.query('SELECT * FROM history WHERE user_id = $1 ORDER BY created_at DESC', [req.query.id]); res.json(hist.rows); } catch (err) { res.json([]); } });
+
+// ЛОТЕРЕЯ (Топ)
+app.get('/api/leaderboard', async (req, res) => {
+  try {
+    const top = await pool.query('SELECT username, first_name, coins FROM users ORDER BY coins DESC LIMIT 5');
+    res.json(top.rows);
+  } catch (err) { res.json([]); }
 });
 
+// ЕЖЕДНЕВКА (Капельки)
+app.post('/api/daily-bonus', async (req, res) => {
+  const { userId } = req.body;
+  try {
+    const userRes = await pool.query('SELECT last_daily FROM users WHERE id = $1', [userId]);
+    const lastDaily = userRes.rows[0].last_daily;
+    const now = new Date();
+    
+    if (lastDaily && (now - new Date(lastDaily)) < 24 * 60 * 60 * 1000) {
+      return res.status(400).json({ error: 'Приходите завтра!' });
+    }
+
+    await pool.query('UPDATE users SET coins = coins + 0.5, last_daily = $1 WHERE id = $2', [now, userId]);
+    await pool.query('INSERT INTO history (user_id, title, description, amount) VALUES ($1, $2, $3, $4)', [userId, 'Ежедневный бонус', 'Капельки', '+0.5']);
+    
+    res.json({ success: true, message: 'Вы получили 0.5 монеты!' });
+  } catch (e) { res.status(500).json({ error: 'Ошибка' }); }
+});
+
+// ОПЛАТА И КЕЙСЫ
 app.post('/api/create-invoice', async (req, res) => {
-  const { amount } = req.body;
   try {
     const response = await fetch(`https://api.telegram.org/bot${process.env.BOT_TOKEN}/createInvoiceLink`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: 'Пополнение', description: `Покупка ${amount} звезд`, payload: `topup_${Date.now()}`, currency: 'XTR', prices: [{ label: 'Stars', amount }] })
+      body: JSON.stringify({ title: 'Пополнение', description: `Покупка ${req.body.amount} звезд`, payload: `topup_${Date.now()}`, currency: 'XTR', prices: [{ label: 'Stars', amount: req.body.amount }] })
     });
-    const data = await response.json();
-    res.json({ url: data.result });
+    const data = await response.json(); res.json({ url: data.result });
   } catch (err) { res.status(500).json({ error: 'Error' }); }
 });
 
@@ -177,12 +174,9 @@ app.post('/api/confirm-payment', async (req, res) => {
   res.json({ success: true });
 });
 
-// --- КЕЙСЫ ---
 app.post('/api/open-case', async (req, res) => {
   const { userId, caseId } = req.body;
   const caseInfo = CASES[caseId];
-  if (!caseInfo) return res.status(400).json({ error: 'Кейс не найден' });
-
   try {
     const userRes = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
     const user = userRes.rows[0];
@@ -192,29 +186,18 @@ app.post('/api/open-case', async (req, res) => {
     if (caseInfo.currency === 'coins') await pool.query('UPDATE users SET coins = coins - $1 WHERE id = $2', [caseInfo.price, userId]);
     else await pool.query('UPDATE users SET stars = stars - $1 WHERE id = $2', [caseInfo.price, userId]);
 
-    const rand = Math.random() * 100;
-    let cumulative = 0;
-    let drop = CHARACTERS[0];
-    for (const char of CHARACTERS) {
-      cumulative += char.chance;
-      if (rand <= cumulative) { drop = char; break; }
-    }
-
+    const rand = Math.random() * 100; let cumulative = 0; let drop = CHARACTERS[0];
+    for (const char of CHARACTERS) { cumulative += char.chance; if (rand <= cumulative) { drop = char; break; } }
     await pool.query('INSERT INTO inventory (user_id, character_name, rarity) VALUES ($1, $2, $3)', [userId, drop.name, drop.rarity]);
     await pool.query('INSERT INTO history (user_id, title, description, amount) VALUES ($1, $2, $3, $4)', [userId, 'Кейс', `Выпал ${drop.name}`, `-${caseInfo.price}`]);
-
     res.json({ success: true, drop });
-  } catch (err) { res.status(500).json({ error: 'Ошибка сервера' }); }
+  } catch (err) { res.status(500).json({ error: 'Ошибка' }); }
 });
 
 app.get('/api/inventory', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM inventory WHERE user_id = $1 ORDER BY created_at DESC', [req.query.id]);
-    const inv = result.rows.map(item => {
-      const charData = CHARACTERS.find(ch => ch.name === item.character_name);
-      return { ...item, image: charData ? charData.image : '' };
-    });
-    res.json(inv);
+    res.json(result.rows.map(item => { const charData = CHARACTERS.find(ch => ch.name === item.character_name); return { ...item, image: charData ? charData.image : '' }; }));
   } catch (err) { res.json([]); }
 });
 
