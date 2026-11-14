@@ -8,7 +8,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// СПИСОК ТВОИХ КАНАЛОВ
+// ВСЕ ТВОИ КАНАЛЫ
 const CHANNELS = { 
   edits: ['kseshaxs', 'dimonchikshgsh', 'margarinkf547', 'streetlightmeow', 'vladanasv', 'salamandrrrrrrrra', 'kanyyy11', 'myshhkaas', 'banttiiikk', 'xixnow'], 
   news: ['shgsh_novosti', 'hladenko', 'gladmedia', 'gladdrophub'] 
@@ -25,15 +25,15 @@ async function fetchTelegramPosts(channels, type) {
       $('.tgme_widget_message').each((i, el) => {
         const text = $(el).find('.tgme_widget_message_text').text().trim();
         
-        // Ищем картинки
+        // Картинки
         const imgStyle = $(el).find('.tgme_widget_message_photo_wrap').attr('style');
         const image = imgStyle ? imgStyle.match(/url\('(.*)'\)/)?.[1] : null;
         
-        // Ищем видео
+        // Видео (только прямые mp4)
         const videoTag = $(el).find('.tgme_widget_message_video_wrap video');
         const videoUrl = videoTag.length ? videoTag.attr('src') : null;
         
-        // Для Эдитов берем только посты с видео или фото
+        // В Эдиты берем только если есть фото или видео
         if (type === 'edits' && !image && !videoUrl) return;
 
         allPosts.push({ 
@@ -48,6 +48,8 @@ async function fetchTelegramPosts(channels, type) {
       });
     } catch (e) { console.error(`Ошибка парсинга ${channel}:`, e.message); }
   }
+  
+  // Сортируем: самые новые сверху
   return allPosts.sort((a, b) => b.date - a.date);
 }
 
