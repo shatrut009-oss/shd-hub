@@ -1,205 +1,226 @@
 const express = require('express');
 const path = require('path');
-const cheerio = require('cheerio');
 const { Pool } = require('pg');
 
 const app = express();
-const port = process.env.PORT || 3000;
-
 app.use(express.json());
-app.use(express.static(__dirname));
+app.use(express.static(__dirname, { index: false }));
 
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const API = `https://api.telegram.org/bot${BOT_TOKEN}`;
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
-// --- SVG ИКОНКИ ПЕРСОНАЖЕЙ (оставляем те же, чтобы не раздувать код) ---
-// (ВСТАВЬ СЮДА ВСЕ КОНСТАНТЫ IMG_... ИЗ ПРЕДЫДУЩЕГО СООБЩЕНИЯ)
-const IMG_DIMA_1 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='30' cy='30' r='12' fill='%234a4a4a'/><circle cx='70' cy='30' r='12' fill='%234a4a4a'/><path d='M20,40 Q50,90 80,40 L80,20 Q50,0 20,20 Z' fill='%234a4a4a'/><rect x='30' y='45' width='40' height='12' rx='4' fill='%23111'/><circle cx='40' cy='51' r='3' fill='%23fff'/><circle cx='60' cy='51' r='3' fill='%23fff'/></svg>";
-const IMG_DIMA_2 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='22' fill='%23e0ac69'/><path d='M20,100 Q20,70 50,65 Q80,70 80,100 Z' fill='%23333'/><path d='M25,40 Q50,10 75,40 Q75,25 50,20 Q25,25 25,40 Z' fill='%23222'/><circle cx='40' cy='45' r='3' fill='%23000'/><circle cx='60' cy='45' r='3' fill='%23000'/></svg>";
-const IMG_KSU_1 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23fce4d6'/><path d='M30,90 L40,65 L60,65 L70,90 Z' fill='%23ffb6c1'/><path d='M25,45 Q25,20 50,20 Q75,20 75,45 Q80,70 90,80 Q60,70 50,80 Q40,70 10,80 Q20,70 25,45 Z' fill='%23f4d03f'/><circle cx='42' cy='45' r='2' fill='%23000'/><circle cx='58' cy='45' r='2' fill='%23000'/></svg>";
-const IMG_KSU_2 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23fce4d6'/><path d='M30,90 L40,65 L60,65 L70,90 Z' fill='%23fff'/><path d='M45,65 L55,65 L50,85 Z' fill='%23ff1e3c'/><path d='M25,45 Q25,20 50,20 Q75,20 75,45 Q80,70 90,80 Q60,70 50,80 Q40,70 10,80 Q20,70 25,45 Z' fill='%23f4d03f'/></svg>";
-const IMG_KSU_3 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23fce4d6'/><path d='M20,100 Q20,70 50,65 Q80,70 80,100 Z' fill='%23222'/><path d='M25,45 Q25,20 50,20 Q75,20 75,45 Q80,70 90,80 Q60,70 50,80 Q40,70 10,80 Q20,70 25,45 Z' fill='%23f4d03f'/></svg>";
-const IMG_RITA_1 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23fce4d6'/><path d='M20,100 Q20,70 50,65 Q80,70 80,100 Z' fill='%23111'/><path d='M25,45 Q25,20 50,20 Q75,20 75,45 Q80,70 90,80 Q60,70 50,80 Q40,70 10,80 Q20,70 25,45 Z' fill='%23f4d03f'/></svg>";
-const IMG_RITA_2 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='50' r='25' fill='%23fce4d6'/><path d='M20,50 Q20,20 50,20 Q80,20 80,50 Q85,80 90,90 L10,90 Q15,80 20,50 Z' fill='%23f4d03f'/></svg>";
-const IMG_ALENA_1 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23fce4d6'/><path d='M30,20 Q50,10 70,20 L70,35 Q50,25 30,35 Z' fill='%23111'/><path d='M20,100 Q20,70 50,65 Q80,70 80,100 Z' fill='%23222'/></svg>";
-const IMG_ALENA_2 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23fce4d6'/><path d='M20,100 Q20,70 50,65 Q80,70 80,100 Z' fill='%23fff'/><path d='M30,60 L70,100 L60,100 L20,60 Z' fill='%232e8b57'/><path d='M30,30 Q50,15 70,30 Q80,50 70,70 Q50,85 30,70 Q20,50 30,30 Z' fill='%238b4513'/></svg>";
-const IMG_ALENA_3 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23fce4d6'/><path d='M20,100 Q20,70 50,65 Q80,70 80,100 Z' fill='%23ff9800'/><path d='M25,45 Q25,20 50,20 Q75,20 75,45 Q80,70 90,80 Q60,70 50,80 Q40,70 10,80 Q20,70 25,45 Z' fill='%238b4513'/></svg>";
-const IMG_SALAM_1 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23fce4d6'/><path d='M30,20 L40,10 L60,10 L70,20 Q60,30 50,30 Q40,30 30,20 Z' fill='%23fff'/><path d='M20,100 Q20,70 50,65 Q80,70 80,100 Z' fill='%23fff'/><path d='M45,65 L55,65 L50,80 Z' fill='%23ff1e3c'/></svg>";
-const IMG_SALAM_2 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23fce4d6'/><path d='M25,45 Q25,20 50,20 Q75,20 75,45 Q80,70 90,80 Q60,70 50,80 Q40,70 10,80 Q20,70 25,45 Z' fill='%23f4d03f'/><path d='M20,100 Q20,70 50,65 Q80,70 80,100 Z' fill='%23fff'/><path d='M45,65 L55,65 L50,85 Z' fill='%23ff1e3c'/></svg>";
-const IMG_NAT_1 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23fce4d6'/><path d='M25,45 Q25,20 50,20 Q75,20 75,45 Q80,70 90,80 Q60,70 50,80 Q40,70 10,80 Q20,70 25,45 Z' fill='%23f4d03f'/><path d='M20,100 Q20,70 50,65 Q80,70 80,100 Z' fill='%23fff'/><path d='M45,65 L55,65 L50,85 Z' fill='%23ff1e3c'/></svg>";
-const IMG_NAT_2 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23fce4d6'/><path d='M25,45 Q25,20 50,20 Q75,20 75,45 Q80,70 90,80 Q60,70 50,80 Q40,70 10,80 Q20,70 25,45 Z' fill='%23f4d03f'/><circle cx='30' cy='20' r='8' fill='%23fff'/><circle cx='70' cy='20' r='8' fill='%23fff'/></svg>";
-const IMG_NAT_3 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23fce4d6'/><path d='M20,100 Q20,70 50,65 Q80,70 80,100 Z' fill='%23222'/><path d='M25,45 Q25,20 50,20 Q75,20 75,45 Q80,70 90,80 Q60,70 50,80 Q40,70 10,80 Q20,70 25,45 Z' fill='%23f4d03f'/></svg>";
-const IMG_NAT_4 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23fce4d6'/><path d='M25,45 Q25,20 50,20 Q75,20 75,45 Q80,70 90,80 Q60,70 50,80 Q40,70 10,80 Q20,70 25,45 Z' fill='%23f4d03f'/><path d='M40,55 Q50,60 60,55' stroke='%23000' stroke-width='2' fill='none'/></svg>";
-const IMG_GLAD_1 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23e0ac69'/><path d='M30,50 Q30,70 50,70 Q70,70 70,50 Z' fill='%23222'/><path d='M20,100 Q20,65 50,60 Q80,65 80,100 Z' fill='%23111'/></svg>";
-const IMG_GLAD_2 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23e0ac69'/><path d='M30,50 Q30,70 50,70 Q70,70 70,50 Z' fill='%23222'/><path d='M20,100 Q20,65 50,60 Q80,65 80,100 Z' fill='%23fff'/></svg>";
-const IMG_GLAD_3 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23e0ac69'/><path d='M30,50 Q30,70 50,70 Q70,70 70,50 Z' fill='%23222'/><path d='M25,35 Q50,15 75,35 Q75,25 50,20 Q25,25 25,35 Z' fill='%23ffd700'/><path d='M20,100 Q20,65 50,60 Q80,65 80,100 Z' fill='%23ffeb3b'/></svg>";
-const IMG_GLAD_4 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23e0ac69'/><path d='M30,50 Q30,70 50,70 Q70,70 70,50 Z' fill='%23222'/><path d='M20,100 Q20,65 50,60 Q80,65 80,100 Z' fill='%23222'/></svg>";
-const IMG_GLAD_5 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23e0ac69'/><path d='M30,50 Q30,70 50,70 Q70,70 70,50 Z' fill='%23222'/><path d='M20,100 Q20,65 50,60 Q80,65 80,100 Z' fill='%23333'/></svg>";
-const IMG_GLAD_6 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='25' fill='%23e0ac69'/><path d='M30,50 Q30,70 50,70 Q70,70 70,50 Z' fill='%23222'/></svg>";
-const IMG_MILK_1 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23fce4d6'/><path d='M20,100 Q20,70 50,65 Q80,70 80,100 Z' fill='%23fff'/><path d='M35,65 Q50,70 65,65' stroke='%23000' stroke-width='4' fill='none'/><path d='M25,45 Q25,20 50,20 Q75,20 75,45 Q80,70 90,80 Q60,70 50,80 Q40,70 10,80 Q20,70 25,45 Z' fill='%238b4513'/></svg>";
-const IMG_MILK_2 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><path d='M20,100 Q20,70 50,65 Q80,70 80,100 Z' fill='%23fff'/><path d='M25,45 Q25,20 75,20 Q75,45 75,60 Q25,60 25,45 Z' fill='%234caf50'/><circle cx='40' cy='40' r='3' fill='%23000'/><circle cx='60' cy='40' r='3' fill='%23000'/><rect x='45' y='50' width='10' height='5' fill='%23000'/></svg>";
-const IMG_MILK_3 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><circle cx='50' cy='45' r='20' fill='%23fce4d6'/><path d='M20,100 Q20,70 50,65 Q80,70 80,100 Z' fill='%23222'/><path d='M25,45 Q25,20 50,20 Q75,20 75,45 Q80,70 90,80 Q60,70 50,80 Q40,70 10,80 Q20,70 25,45 Z' fill='%23111'/></svg>";
-const IMG_MILK_4 = "data:image/svg+xml;utf8,<svg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'><rect width='100' height='100' rx='20' fill='%231c1c22'/><path d='M20,100 Q20,70 50,65 Q80,70 80,100 Z' fill='%23222'/><path d='M25,45 Q25,20 75,20 Q75,45 75,60 Q25,60 25,45 Z' fill='%234caf50'/><circle cx='40' cy='40' r='3' fill='%23000'/><circle cx='60' cy='40' r='3' fill='%23000'/></svg>";
-
-const CHARACTERS = [
-  { name: 'Дима (Балаклава)', rarity: 'Обычный', chance: 15, image: IMG_DIMA_1 },
-  { name: 'Дима', rarity: 'Обычный', chance: 15, image: IMG_DIMA_2 },
-  { name: 'Ксюша (Розовый)', rarity: 'Обычный', chance: 10, image: IMG_KSU_1 },
-  { name: 'Ксюша (Школа)', rarity: 'Обычный', chance: 10, image: IMG_KSU_2 },
-  { name: 'Ксюша (Куртка)', rarity: 'Обычный', chance: 10, image: IMG_KSU_3 },
-  { name: 'Рита (Коктейль)', rarity: 'Редкий', chance: 7, image: IMG_RITA_1 },
-  { name: 'Рита', rarity: 'Редкий', chance: 8, image: IMG_RITA_2 },
-  { name: 'Алёна (Ванная)', rarity: 'Редкий', chance: 5, image: IMG_ALENA_1 },
-  { name: 'Алёна (Лента)', rarity: 'Редкий', chance: 5, image: IMG_ALENA_2 },
-  { name: 'Алёна', rarity: 'Редкий', chance: 5, image: IMG_ALENA_3 },
-  { name: 'Саламандра (Машина)', rarity: 'Эпический', chance: 3, image: IMG_SALAM_1 },
-  { name: 'Саламандра', rarity: 'Эпический', chance: 2, image: IMG_SALAM_2 },
-  { name: 'Наташа (Школа)', rarity: 'Эпический', chance: 1.5, image: IMG_NAT_1 },
-  { name: 'Наташа (Цветок)', rarity: 'Эпический', chance: 1.5, image: IMG_NAT_2 },
-  { name: 'Наташа', rarity: 'Эпический', chance: 0.5, image: IMG_NAT_3 },
-  { name: 'Наташа (Улыбка)', rarity: 'Эпический', chance: 0.5, image: IMG_NAT_4 },
-  { name: 'Гладенко (Боксер)', rarity: 'Легендарный', chance: 0.2, image: IMG_GLAD_1 },
-  { name: 'Гладенко (Врач)', rarity: 'Легендарный', chance: 0.2, image: IMG_GLAD_2 },
-  { name: 'Гладенко (Строитель)', rarity: 'Легендарный', chance: 0.2, image: IMG_GLAD_3 },
-  { name: 'Гладенко (Костюм)', rarity: 'Легендарный', chance: 0.1, image: IMG_GLAD_4 },
-  { name: 'Гладенко', rarity: 'Легендарный', chance: 0.1, image: IMG_GLAD_5 },
-  { name: 'Гладенко (Портрет)', rarity: 'Легендарный', chance: 0.1, image: IMG_GLAD_6 },
-  { name: 'Миллкис (Чокер)', rarity: 'Мифический', chance: 0.05, image: IMG_MILK_1 },
-  { name: 'Миллкис (Зеленая маска)', rarity: 'Мифический', chance: 0.05, image: IMG_MILK_2 },
-  { name: 'Миллкис', rarity: 'Мифический', chance: 0.05, image: IMG_MILK_3 },
-  { name: 'Миллкис (Экшн)', rarity: 'Мифический', chance: 0.05, image: IMG_MILK_4 }
-];
-
 const CASES = {
-  'dnevnik': { name: 'Дневничок', price: 3, currency: 'coins' },
-  'shpargalka': { name: 'Шпаргалка', price: 10, currency: 'stars' },
-  'palochka': { name: 'Палочка', price: 13, currency: 'stars' }
+  diary: { name: 'Дневничок', price: 3,  cur: 'coins', odds: { common: 60, rare: 30, epic: 9,  legend: 1 } },
+  cheat: { name: 'Шпаргалка', price: 10, cur: 'stars', odds: { common: 55, rare: 30, epic: 12, legend: 3 } },
+  stick: { name: 'Палочка',   price: 13, cur: 'stars', odds: { common: 45, rare: 35, epic: 15, legend: 5 } }
 };
 
-const CHANNELS = {
-  edits: ['kseshaxs', 'dimonchikshgsh', 'margarinkf547', 'streetlightmeow', 'vladanasv', 'salamandrrrrrrrra', 'kanyyy11', 'myshhkaas', 'banttiiikk', 'xixnow'],
-  news: ['shgsh_novosti'],
-  backstage: ['hladenko', 'gladmedia', 'gladdrophub']
+const CHARACTERS = {
+  common: ['Школьник', 'Буфетчица'],
+  rare:   ['Наташа', 'Харитонов'],
+  epic:   ['Ксюша', 'Гладенко'],
+  legend: ['Дима']
 };
-const dbLikes = {};
 
-async function fetchTelegramPosts(channels, type) {
-  let allPosts = [];
-  for (const channel of channels) {
-    try {
-      const res = await fetch(`https://t.me/s/${channel}`);
-      const html = await res.text();
-      const $ = cheerio.load(html);
-      $('.tgme_widget_message').each((i, el) => {
-        const text = $(el).find('.tgme_widget_message_text').text().trim();
-        const imgStyle = $(el).find('.tgme_widget_message_photo_wrap').attr('style');
-        const image = imgStyle ? imgStyle.match(/url\('(.*)'\)/)?.[1] : null;
-        const videoTag = $(el).find('.tgme_widget_message_video_wrap video');
-        const videoUrl = videoTag.length ? videoTag.attr('src') : null;
-        if (type === 'edits' && !image && !videoUrl) return;
-        const dataPost = $(el).attr('data-post');
-        const postId = dataPost ? dataPost : `${channel}-${i}`;
-        const dateStr = $(el).find('time').attr('datetime') || new Date().toISOString();
-        allPosts.push({ id: postId, type: type, author: channel, text: text || '', image: image, videoUrl: videoUrl, date: new Date(dateStr).getTime(), likes: dbLikes[postId] || 0 });
-      });
-    } catch (e) {}
-  }
-  allPosts.sort((a, b) => b.date - a.date);
-  return allPosts;
+const DAILY_COINS = 0.5;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS streak INTEGER DEFAULT 0')
+  .catch(err => console.error('migration:', err.message));
+
+// id и имя приходят через query params, а не через headers (кириллица ломает headers)
+const qid = req => (req.query.id || (req.body && req.body.id) || '').toString();
+const qname = req => (req.query.name || (req.body && req.body.name) || 'Гость').toString();
+
+async function getUser(id, name) {
+  await pool.query(
+    `INSERT INTO users (id, first_name) VALUES ($1, $2)
+     ON CONFLICT (id) DO UPDATE SET first_name = EXCLUDED.first_name`,
+    [id, name]
+  );
+  const { rows } = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+  return rows[0];
 }
 
-// API
-app.get('/api/posts', async (req, res) => { try { res.json(await fetchTelegramPosts(CHANNELS[req.query.type] || [], req.query.type)); } catch (e) { res.json([]); } });
-app.post('/api/like', (req, res) => { const { postId, action } = req.body; if (dbLikes[postId] === undefined) dbLikes[postId] = 0; if (action === 'unlike' && dbLikes[postId] > 0) dbLikes[postId]--; else if (action === 'like') dbLikes[postId]++; res.json({ likes: dbLikes[postId] }); });
+const fmtUser = u => ({
+  id: String(u.id),
+  name: u.first_name,
+  stars: u.stars,
+  coins: Number(u.coins),
+  streak: u.streak || 0
+});
 
+const roll = odds => {
+  let r = Math.random() * 100;
+  for (const [k, v] of Object.entries(odds)) if ((r -= v) < 0) return k;
+  return 'common';
+};
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+// ---------- ПРОФИЛЬ ----------
 app.get('/api/profile/stats', async (req, res) => {
-  const userId = req.query.id;
-  if (!userId || userId === 'guest') return res.json({ stars: 0, coins: 0 });
   try {
-    let userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
-    if (userResult.rows.length === 0) {
-      await pool.query('INSERT INTO users (id, username, first_name) VALUES ($1, $2, $3)', [userId, req.query.username || 'unknown', req.query.name || 'Гость']);
-      userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
-    }
-    res.json({ stars: userResult.rows[0].stars || 0, coins: parseFloat(userResult.rows[0].coins) || 0 });
-  } catch (err) { res.json({ stars: 0, coins: 0 }); }
+    const u = await getUser(qid(req), qname(req));
+    const last = u.last_daily ? new Date(u.last_daily).getTime() : 0;
+    const waitMs = Math.max(0, DAY_MS - (Date.now() - last));
+    res.json({ ...fmtUser(u), canClaim: waitMs === 0, waitMs });
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Ошибка базы' }); }
 });
 
-app.get('/api/history', async (req, res) => { try { const hist = await pool.query('SELECT * FROM history WHERE user_id = $1 ORDER BY created_at DESC', [req.query.id]); res.json(hist.rows); } catch (err) { res.json([]); } });
-
-// ЛОТЕРЕЯ (Топ)
-app.get('/api/leaderboard', async (req, res) => {
+app.get('/api/daily-bonus', async (req, res) => {
+  const id = qid(req);
   try {
-    const top = await pool.query('SELECT username, first_name, coins FROM users ORDER BY coins DESC LIMIT 5');
-    res.json(top.rows);
-  } catch (err) { res.json([]); }
+    const u = await getUser(id, qname(req));
+    const last = u.last_daily ? new Date(u.last_daily).getTime() : 0;
+    const elapsed = Date.now() - last;
+    if (elapsed < DAY_MS) return res.json({ ok: false, waitMs: DAY_MS - elapsed });
+
+    // Серия сбрасывается, если пропущено больше 48 часов
+    const streak = (elapsed < 2 * DAY_MS ? (u.streak || 0) : 0) + 1;
+    const { rows } = await pool.query(
+      `UPDATE users SET coins = coins + $2, streak = $3, last_daily = NOW()
+       WHERE id = $1 RETURNING *`,
+      [id, DAILY_COINS, streak]
+    );
+    await pool.query(
+      `INSERT INTO history (user_id, title, description, amount) VALUES ($1, $2, $3, $4)`,
+      [id, 'Ежедневный бонус', `Серия: ${streak} дн.`, '+0.5 монеты']
+    );
+    res.json({ ok: true, ...fmtUser(rows[0]) });
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Ошибка базы' }); }
 });
 
-// ЕЖЕДНЕВКА (Капельки)
-app.post('/api/daily-bonus', async (req, res) => {
-  const { userId } = req.body;
+app.get('/api/history', async (req, res) => {
   try {
-    const userRes = await pool.query('SELECT last_daily FROM users WHERE id = $1', [userId]);
-    const lastDaily = userRes.rows[0].last_daily;
-    const now = new Date();
-    
-    if (lastDaily && (now - new Date(lastDaily)) < 24 * 60 * 60 * 1000) {
-      return res.status(400).json({ error: 'Приходите завтра!' });
-    }
-
-    await pool.query('UPDATE users SET coins = coins + 0.5, last_daily = $1 WHERE id = $2', [now, userId]);
-    await pool.query('INSERT INTO history (user_id, title, description, amount) VALUES ($1, $2, $3, $4)', [userId, 'Ежедневный бонус', 'Капельки', '+0.5']);
-    
-    res.json({ success: true, message: 'Вы получили 0.5 монеты!' });
-  } catch (e) { res.status(500).json({ error: 'Ошибка' }); }
-});
-
-// ОПЛАТА И КЕЙСЫ
-app.post('/api/create-invoice', async (req, res) => {
-  try {
-    const response = await fetch(`https://api.telegram.org/bot${process.env.BOT_TOKEN}/createInvoiceLink`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: 'Пополнение', description: `Покупка ${req.body.amount} звезд`, payload: `topup_${Date.now()}`, currency: 'XTR', prices: [{ label: 'Stars', amount: req.body.amount }] })
-    });
-    const data = await response.json(); res.json({ url: data.result });
-  } catch (err) { res.status(500).json({ error: 'Error' }); }
-});
-
-app.post('/api/confirm-payment', async (req, res) => {
-  const { userId, amount } = req.body;
-  await pool.query('UPDATE users SET stars = stars + $1 WHERE id = $2', [amount, userId]);
-  await pool.query('INSERT INTO history (user_id, title, description, amount) VALUES ($1, $2, $3, $4)', [userId, 'Пополнение', 'Покупка звезд', `+${amount}`]);
-  res.json({ success: true });
-});
-
-app.post('/api/open-case', async (req, res) => {
-  const { userId, caseId } = req.body;
-  const caseInfo = CASES[caseId];
-  try {
-    const userRes = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
-    const user = userRes.rows[0];
-    if (caseInfo.currency === 'coins' && parseFloat(user.coins) < caseInfo.price) return res.status(400).json({ error: 'Мало монет!' });
-    if (caseInfo.currency === 'stars' && user.stars < caseInfo.price) return res.status(400).json({ error: 'Мало звезд!' });
-
-    if (caseInfo.currency === 'coins') await pool.query('UPDATE users SET coins = coins - $1 WHERE id = $2', [caseInfo.price, userId]);
-    else await pool.query('UPDATE users SET stars = stars - $1 WHERE id = $2', [caseInfo.price, userId]);
-
-    const rand = Math.random() * 100; let cumulative = 0; let drop = CHARACTERS[0];
-    for (const char of CHARACTERS) { cumulative += char.chance; if (rand <= cumulative) { drop = char; break; } }
-    await pool.query('INSERT INTO inventory (user_id, character_name, rarity) VALUES ($1, $2, $3)', [userId, drop.name, drop.rarity]);
-    await pool.query('INSERT INTO history (user_id, title, description, amount) VALUES ($1, $2, $3, $4)', [userId, 'Кейс', `Выпал ${drop.name}`, `-${caseInfo.price}`]);
-    res.json({ success: true, drop });
-  } catch (err) { res.status(500).json({ error: 'Ошибка' }); }
+    const { rows } = await pool.query(
+      `SELECT title, description, amount, created_at FROM history
+       WHERE user_id = $1 ORDER BY created_at DESC LIMIT 100`, [qid(req)]);
+    res.json(rows);
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Ошибка базы' }); }
 });
 
 app.get('/api/inventory', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM inventory WHERE user_id = $1 ORDER BY created_at DESC', [req.query.id]);
-    res.json(result.rows.map(item => { const charData = CHARACTERS.find(ch => ch.name === item.character_name); return { ...item, image: charData ? charData.image : '' }; }));
-  } catch (err) { res.json([]); }
+    const { rows } = await pool.query(
+      `SELECT character_name, rarity, created_at FROM inventory
+       WHERE user_id = $1 ORDER BY created_at DESC`, [qid(req)]);
+    res.json(rows);
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Ошибка базы' }); }
+});
+
+app.get('/api/leaderboard', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT first_name AS name, coins FROM users ORDER BY coins DESC LIMIT 5`);
+    res.json(rows);
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Ошибка базы' }); }
+});
+
+// ---------- КЕЙСЫ ----------
+app.post('/api/open-case', async (req, res) => {
+  const id = qid(req);
+  const c = CASES[req.body && req.body.caseKey];
+  if (!c) return res.status(400).json({ error: 'Неизвестный кейс' });
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(
+      `INSERT INTO users (id, first_name) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING`,
+      [id, qname(req)]);
+    const { rows: [u] } = await client.query('SELECT * FROM users WHERE id = $1 FOR UPDATE', [id]);
+
+    const balance = c.cur === 'stars' ? u.stars : Number(u.coins);
+    if (balance < c.price) {
+      await client.query('ROLLBACK');
+      return res.status(402).json({ error: `Недостаточно ${c.cur === 'stars' ? 'звёзд' : 'монет'}` });
+    }
+
+    await client.query(
+      `UPDATE users SET ${c.cur} = ${c.cur} - $2 WHERE id = $1`, [id, c.price]);
+
+    const rarity = roll(c.odds);
+    const character = pick(CHARACTERS[rarity]);
+
+    await client.query(
+      `INSERT INTO inventory (user_id, character_name, rarity) VALUES ($1, $2, $3)`,
+      [id, character, rarity]);
+    await client.query(
+      `INSERT INTO history (user_id, title, description, amount) VALUES ($1, $2, $3, $4)`,
+      [id, 'Открытие кейса', `Кейс «${c.name}»: ${character}`,
+       `-${c.price} ${c.cur === 'stars' ? '★' : 'монет'}`]);
+
+    await client.query('COMMIT');
+    res.json({ character, rarity });
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error(e);
+    res.status(500).json({ error: 'Ошибка базы' });
+  } finally {
+    client.release();
+  }
+});
+
+// ---------- ПОПОЛНЕНИЕ ЗВЁЗД (Telegram Stars) ----------
+app.post('/api/create-invoice', async (req, res) => {
+  const id = qid(req);
+  const stars = Math.floor(Number(req.body && req.body.stars));
+  if (!(stars >= 1 && stars <= 10000)) return res.status(400).json({ error: 'Некорректная сумма' });
+
+  try {
+    const r = await fetch(`${API}/createInvoiceLink`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Пополнение звёзд',
+        description: `Пополнение баланса в ШД Hub на ${stars} ★`,
+        payload: `topup:${id}:${stars}`,
+        provider_token: '',
+        currency: 'XTR',
+        prices: [{ label: `${stars} звёзд`, amount: stars }]
+      })
+    });
+    const j = await r.json();
+    if (!j.ok) return res.status(500).json({ error: j.description });
+    res.json({ url: j.result });
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Ошибка Telegram' }); }
+});
+
+// Вебхук бота: подтверждаем предоплату и зачисляем звёзды после оплаты
+app.post('/telegram-webhook', async (req, res) => {
+  if (process.env.WEBHOOK_SECRET &&
+      req.get('x-telegram-bot-api-secret-token') !== process.env.WEBHOOK_SECRET) {
+    return res.sendStatus(403);
+  }
+  res.sendStatus(200);
+  const upd = req.body || {};
+  try {
+    if (upd.pre_checkout_query) {
+      await fetch(`${API}/answerPreCheckoutQuery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pre_checkout_query_id: upd.pre_checkout_query.id, ok: true })
+      });
+    }
+    const sp = upd.message && upd.message.successful_payment;
+    if (sp) {
+      const [, uid, stars] = sp.invoice_payload.split(':');
+      const marker = `Платёж ${sp.telegram_payment_charge_id}`;
+      const dup = await pool.query('SELECT 1 FROM history WHERE description = $1', [marker]);
+      if (!dup.rows.length) {
+        await pool.query('UPDATE users SET stars = stars + $2 WHERE id = $1', [uid, Number(stars)]);
+        await pool.query(
+          `INSERT INTO history (user_id, title, description, amount) VALUES ($1, $2, $3, $4)`,
+          [uid, 'Пополнение звёзд', marker, `+${stars} ★`]);
+      }
+    }
+  } catch (e) { console.error('webhook:', e); }
 });
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-app.listen(port, '0.0.0.0', () => console.log(`Server started on port ${port}`));
+
+app.listen(process.env.PORT || 3000, () => console.log('ШД Hub запущен'));
