@@ -8,6 +8,22 @@
 <script>window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.ready();</script>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script>
+  // Показывает ошибки JavaScript прямо на экране, чтобы их можно было прочитать в Telegram
+  function shdShowError(text){
+    let box = document.getElementById('shdErr');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'shdErr';
+      box.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:99;background:#5a0010;color:#fff;padding:10px;font:12px/1.4 monospace;white-space:pre-wrap;max-height:40vh;overflow:auto';
+      document.addEventListener('DOMContentLoaded', () => document.body.appendChild(box));
+      if (document.body) document.body.appendChild(box);
+    }
+    box.textContent += text + '\n';
+  }
+  window.addEventListener('error', e => shdShowError('Ошибка JS: ' + e.message + ' (строка ' + e.lineno + ')'));
+  window.addEventListener('unhandledrejection', e => shdShowError('Ошибка запроса: ' + (e.reason && e.reason.message || e.reason)));
+</script>
 </head>
 <body>
 
@@ -59,6 +75,6 @@
     }, 900);
   }
 </script>
-<script src="app.js"></script>
+<script src="app.js" onerror="shdShowError('Файл app.js не найден на сервере. Загрузите его в корень репозитория и сделайте Manual Deploy на Render.')"></script>
 </body>
 </html>
