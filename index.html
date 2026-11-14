@@ -11,6 +11,15 @@
 <body>
 
 <div id="splash" role="button">
+  <!-- ВОЗВРАЩАЕМ ЛОГОТИП DD -->
+  <svg viewBox="900 310 770 815" aria-hidden="true">
+    <g class="half l" fill="#fff" fill-rule="evenodd">
+      <path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/>
+    </g>
+    <g class="half r" fill="#fff" fill-rule="evenodd">
+      <path d="M1660 322C1627 372 1606 420 1604 455L1602 670L1600 975C1602 1040 1624 1085 1659 1115L1318 970C1304 962 1301 940 1301 910L1301 530C1300 490 1316 462 1346 450Z M1495 510L1493 928L1417 896L1416 542Z"/>
+    </g>
+  </svg>
   <div class="hint">НАЖМИ, ЧТОБЫ ВОЙТИ</div>
 </div>
 
@@ -25,26 +34,22 @@
   </header>
 
   <main>
-    <!-- ЭДИТЫ -->
     <section class="screen active" data-s="edits">
       <button class="sound-btn" id="soundBtn">🔇 Звук выкл</button>
       <div class="feed" id="feed"></div>
     </section>
 
-    <!-- НОВОСТИ -->
     <section class="screen" data-s="news">
       <h2 class="page-title">Новости</h2>
       <div id="newsList"></div>
     </section>
 
-    <!-- ЗАКУЛИСЬЕ -->
     <section class="screen" data-s="backstage">
       <h2 class="page-title">Закулисье</h2>
       <p class="page-sub">Откроется при 50 лайках</p>
       <div id="backList"></div>
     </section>
 
-    <!-- ПРОФИЛЬ -->
     <section class="screen" data-s="profile" style="padding:0; background:#07070a;">
       <div class="top-bar">
         <div class="top-item"><img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" class="ico-img"> <b id="topStars">0</b></div>
@@ -114,15 +119,19 @@
   </nav>
 </div>
 
-<!-- МОДАЛКА ПОПОЛНЕНИЯ -->
+<!-- МОДАЛКА ПОПОЛНЕНИЯ (С ВОЗМОЖНОСТЬЮ ВВОДА) -->
 <div id="modalTopUp" class="modal-overlay">
   <div class="modal-content">
     <h3 style="font-family:Oswald; font-size:24px; margin-bottom:10px;">Пополнить звёзды</h3>
     <p style="color:#888; font-size:13px; margin-bottom:20px;">Оплата проходит внутри Telegram. Звёзды сразу лягут на баланс.</p>
+    
     <div class="amount-box">
       <div style="color:#888; font-size:12px; margin-bottom:5px;">СУММА ПОПОЛНЕНИЯ</div>
-      <div class="amount-display">⭐ <span id="selectedAmount">250</span></div>
+      <div class="amount-display">
+        ⭐ <input type="number" id="customAmount" value="250" min="1" style="background:none; border:none; color:#fff; font-size:40px; font-family:Oswald; width:120px; text-align:center; outline:none;">
+      </div>
     </div>
+
     <div class="amount-grid">
       <button class="amt-btn" data-amt="50">⭐ 50</button>
       <button class="amt-btn" data-amt="100">⭐ 100</button>
@@ -130,22 +139,20 @@
       <button class="amt-btn" data-amt="500">⭐ 500</button>
       <button class="amt-btn" data-amt="1000">⭐ 1000</button>
     </div>
+
     <button class="btn-pay" id="btnPay">Оплатить ⭐ <span id="payAmount">250</span></button>
     <button class="btn-close" id="closeTopUp">Закрыть</button>
   </div>
 </div>
 
-<!-- МОДАЛКА ИСТОРИИ -->
 <div id="modalHistory" class="modal-overlay">
   <div class="modal-content" style="height:80vh;">
     <h3 style="font-family:Oswald; font-size:24px; margin-bottom:5px;">История</h3>
-    <p style="color:#888; font-size:13px; margin-bottom:20px;">Монеты и события. Свежие сверху.</p>
-    <div id="historyList" style="flex:1; overflow-y:auto;"></div>
+    <div id="historyList" style="flex:1; overflow-y:auto; margin-top:10px;"></div>
     <button class="btn-close" id="closeHistory" style="margin-top:15px;">Понятно</button>
   </div>
 </div>
 
-<!-- МОДАЛКА ПРОСМОТРА ФОТО/ВИДЕО -->
 <div id="mediaModal" class="media-modal">
   <span class="close-modal" id="closeMedia">✕</span>
   <div id="mediaContent"></div>
