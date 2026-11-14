@@ -5,32 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ШД Hub</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.ready();</script>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<script>
-  // Показывает ошибки JavaScript прямо на экране, чтобы их можно было прочитать в Telegram
-  function shdShowError(text){
-    let box = document.getElementById('shdErr');
-    if (!box) {
-      box = document.createElement('div');
-      box.id = 'shdErr';
-      box.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:99;background:#5a0010;color:#fff;padding:10px;font:12px/1.4 monospace;white-space:pre-wrap;max-height:40vh;overflow:auto';
-      document.addEventListener('DOMContentLoaded', () => document.body.appendChild(box));
-      if (document.body) document.body.appendChild(box);
-    }
-    box.textContent += text + '\n';
-  }
-  window.addEventListener('error', e => shdShowError('Ошибка JS: ' + e.message + ' (строка ' + e.lineno + ')'));
-  window.addEventListener('unhandledrejection', e => shdShowError('Ошибка запроса: ' + (e.reason && e.reason.message || e.reason)));
-</script>
 </head>
 <body>
 
-<div id="splash" onclick="shdEnter()">
+<div id="splash">
   <svg viewBox="900 310 770 815" aria-hidden="true">
-    <g class="half l" fill="#fff" fill-rule="evenodd"><path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/></g>
-    <g class="half r" fill="#fff" fill-rule="evenodd"><path d="M1660 322C1627 372 1606 420 1604 455L1602 670L1600 975C1602 1040 1624 1085 1659 1115L1318 970C1304 962 1301 940 1301 910L1301 530C1300 490 1316 462 1346 450Z M1495 510L1493 928L1417 896L1416 542Z"/></g>
+    <g class="half l" fill="#fff"><path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/></g>
+    <g class="half r" fill="#fff"><path d="M1660 322C1627 372 1606 420 1604 455L1602 670L1600 975C1602 1040 1624 1085 1659 1115L1318 970C1304 962 1301 940 1301 910L1301 530C1300 490 1316 462 1346 450Z M1495 510L1493 928L1417 896L1416 542Z"/></g>
   </svg>
   <div class="hint">НАЖМИ, ЧТОБЫ ВОЙТИ</div>
 </div>
@@ -45,36 +28,23 @@
     </div>
   </header>
   <main>
-    <section class="screen on" id="sc-home"></section>
+    <section class="screen on" id="sc-edits"></section>
     <section class="screen" id="sc-news"></section>
+    <section class="screen" id="sc-home"></section>
     <section class="screen" id="sc-games"></section>
-    <section class="screen" id="sc-lot"></section>
     <section class="screen" id="sc-clan"></section>
   </main>
   <nav class="tabs" id="tabs">
-    <button class="tab on" data-tab="home">Профиль</button>
+    <button class="tab on" data-tab="edits">Эдиты</button>
     <button class="tab" data-tab="news">Новости</button>
+    <button class="tab" data-tab="home">Профиль</button>
     <button class="tab" data-tab="games">Игры</button>
-    <button class="tab" data-tab="lot">Лотерея</button>
     <button class="tab" data-tab="clan">Кланы</button>
   </nav>
 </div>
 
 <div id="modal" class="modal hidden"><div class="sheet"><div class="grab"></div><div id="mBody"></div><button class="btn g w" data-a="close">Закрыть</button></div></div>
 <div id="toast"></div>
-
-<script>
-  function shdEnter(){
-    const s = document.getElementById('splash');
-    if (!s || s.dataset.go) return;
-    s.dataset.go = '1';
-    s.classList.add('open');
-    setTimeout(() => {
-      s.classList.add('gone');
-      document.getElementById('app').classList.add('on');
-    }, 900);
-  }
-</script>
-<script src="app.js" onerror="shdShowError('Файл app.js не найден на сервере. Загрузите его в корень репозитория и сделайте Manual Deploy на Render.')"></script>
+<script src="app.js"></script>
 </body>
 </html>
