@@ -24,9 +24,9 @@
     if (type === 'click') { osc.frequency.setValueAtTime(600, now); gain.gain.setValueAtTime(0.05, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1); osc.start(); osc.stop(now + 0.1); }
     else if (type === 'win') { osc.type = 'triangle'; osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.3); gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3); osc.start(); osc.stop(now + 0.3); }
     else if (type === 'lose') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, now); osc.frequency.exponentialRampToValueAtTime(50, now + 0.4); gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4); osc.start(); osc.stop(now + 0.4); }
+    else if (type === 'step') { osc.type = 'sine'; osc.frequency.setValueAtTime(150, now); gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2); osc.start(); osc.stop(now + 0.2); }
   }
   function playTone(freq) { if(!audioCtx) return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.frequency.value = freq; osc.connect(gain); gain.connect(audioCtx.destination); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5); osc.start(); osc.stop(audioCtx.currentTime + 0.5); }
-  
   function vibrate(style = 'light') { if (TG && TG.HapticFeedback) { if (style === 'success') TG.HapticFeedback.notificationOccurred('success'); else if (style === 'error') TG.HapticFeedback.notificationOccurred('error'); else TG.HapticFeedback.impactOccurred(style); } }
 
   // СПРАВОЧНИКИ
@@ -44,7 +44,7 @@
     if (!r.ok) throw new Error(j.error || 'Ошибка'); return j;
   }
 
-  async function refresh(){ try { const [p, inv] = await Promise.all([ api('GET', '/api/profile'), api('GET', '/api/inventory') ]); Object.assign(P, p); INV = inv; renderAll(); } catch (e) {} }
+  async function refresh(){ try { const [p, inv] = await Promise.all([ api('GET', '/api/profile'), api('GET', '/api/inventory') ]); Object.assign(P, p); INV = inv; renderAll(); } catch (e) { console.error(e); } }
   const cavHtml = (name, img, rar, big) => `<div class="cav ${big ? 'big' : ''}" style="--c:${RAR[rar][1]}">${img ? `<img src="${esc(img)}" alt="">` : ''}${esc(name[0])}</div>`;
 
   function renderHeader(){
@@ -78,6 +78,7 @@
     } catch { el.innerHTML = '<div class="sub">Ошибка загрузки</div>'; }
   }
 
+  // ===== ПРОФИЛЬ =====
   function renderHome(){
     const el = $('#sc-home'); if(!el) return;
     el.innerHTML = `<div class="col">
@@ -106,7 +107,7 @@
     </div>`;
   }
 
-  // ИГРЫ ЛОГИКА
+  // ===== ИГРЫ ЛОГИКА =====
   function playTir(){
     openModal_(`<h2>Тир</h2><div class="arena" id="arena" style="height:300px; position:relative;"><div id="target" style="position:absolute; font-size:50px; transition:all 0.3s; cursor:pointer;" onclick="window.tirHit()">🥫</div></div>`);
     const move = () => { const t = $('#target'); if(t) { t.style.left = (10+Math.random()*70)+'%'; t.style.top = (10+Math.random()*70)+'%'; } };
@@ -118,7 +119,7 @@
     G.t.push(setInterval(() => { const a = $('#arena'); if(!a) return; const b = document.createElement('div'); b.textContent = '🎈'; b.style.position = 'absolute'; b.style.left = Math.random()*80+'%'; b.style.bottom = '-50px'; b.style.fontSize = '40px'; b.style.transition = 'bottom 2s linear'; a.appendChild(b); setTimeout(()=>b.style.bottom = '110%', 10); setTimeout(()=>b.remove(), 2000); b.onclick = () => { playSound('win'); vibrate('light'); b.remove(); }; }, 500));
   }
   function playMines(){
-    openModal_(`<h2>Сапёр (5 мин)</h2><div class="row" style="margin-bottom:10px"><select id="mCur" style="padding:5px; border-radius:5px; background:#15151b; color:#fff; border:1px solid #333"><option value="stars">★ Звезды</option><option value="coins">◆ Монеты</option><option value="ruch">✎ Ручки</option></select><input id="mBet" type="number" value="1" style="width:60px; padding:5px; border-radius:5px; background:#15151b; color:#fff; border:1px solid #333"></div><button class="btn w" onclick="window.startMines()">Начать игру</button><div id="mGrid" style="display:grid; grid-template-columns:repeat(5,1fr); gap:5px; margin-top:15px;"></div>`);
+    openModal_(`<h2>Сапёр (5 мин)</h2><div class="row" style="margin-bottom:10px"><select id="mCur" style="padding:5px; border-radius:5px; background:#15151b; color:#fff; border:1px solid #333"><option value="stars">★ Звезды</option><option value="coins">◆ Монеты</option><option value="ruch">✎ Ручки</option></select><input id="mBet" type="number" value="1" min="1" style="width:80px; padding:5px; border-radius:5px; background:#15151b; color:#fff; border:1px solid #333"></div><button class="btn w" onclick="window.startMines()">Начать игру</button><div id="mGrid" style="display:grid; grid-template-columns:repeat(5,1fr); gap:5px; margin-top:15px;"></div>`);
     window.startMines = async () => {
       const bet = +$('#mBet').value; const cur = $('#mCur').value;
       if(bet < 1) return toast('Мин. ставка 1');
@@ -140,9 +141,10 @@
     window.cashoutMines = async () => { try { const r = await api('POST', '/api/games/mines/cashout'); toast(`Выигрыш: +${r.win}`); playSound('win'); vibrate('success'); closeModal(); refresh(); } catch(e) { toast(e.message); } };
   }
   function playCoin(){
-    openModal_(`<h2>Монетка</h2><div class="row" style="margin-bottom:10px"><select id="cCur" style="padding:5px; border-radius:5px; background:#15151b; color:#fff; border:1px solid #333"><option value="stars">★ Звезды</option><option value="coins">◆ Монеты</option><option value="ruch">✎ Ручки</option></select><input id="cBet" type="number" value="1" style="width:60px; padding:5px; border-radius:5px; background:#15151b; color:#fff; border:1px solid #333"></div><div class="row" style="gap:10px;"><button class="btn" style="flex:1" onclick="window.flipCoin('heads')">Орёл</button><button class="btn" style="flex:1" onclick="window.flipCoin('tails')">Решка</button></div><div id="coinRes" style="text-align:center; font-size:50px; margin-top:20px;"></div>`);
+    openModal_(`<h2>Монетка</h2><div class="row" style="margin-bottom:10px"><select id="cCur" style="padding:5px; border-radius:5px; background:#15151b; color:#fff; border:1px solid #333"><option value="stars">★ Звезды</option><option value="coins">◆ Монеты</option><option value="ruch">✎ Ручки</option></select><input id="cBet" type="number" value="1" min="1" style="width:80px; padding:5px; border-radius:5px; background:#15151b; color:#fff; border:1px solid #333"></div><div class="row" style="gap:10px;"><button class="btn" style="flex:1" onclick="window.flipCoin('heads')">Орёл</button><button class="btn" style="flex:1" onclick="window.flipCoin('tails')">Решка</button></div><div id="coinRes" style="text-align:center; font-size:50px; margin-top:20px;"></div>`);
     window.flipCoin = async (choice) => {
       const bet = +$('#cBet').value; const cur = $('#cCur').value;
+      if(bet < 1) return toast('Мин. ставка 1');
       try { const r = await api('POST', '/api/games/coinflip', { bet, cur, choice }); $('#coinRes').textContent = r.result === 'heads' ? '🦅' : '👑'; if(r.win) { playSound('win'); vibrate('success'); toast('Ты выиграл!'); refresh(); } else { playSound('lose'); vibrate('error'); toast('Проиграл'); } } catch(e) { toast(e.message); }
     };
   }
@@ -150,19 +152,72 @@
     openModal_(`<h2>Гитара</h2><div style="display:flex; flex-direction:column; gap:10px; margin-top:20px;">${[1,2,3,4,5,6].map(n => `<div style="height:30px; background:#333; border-radius:15px; border-top:2px solid #777;" onclick="window.strum(${200+n*50})"></div>`).join('')}</div><div class="sub" style="text-align:center;margin-top:10px">Нажимай на струны</div>`);
     window.strum = (freq) => { playTone(freq); vibrate('light'); };
   }
+  
+  // ДЕТАЛИЗИРОВАННАЯ ИГРА С МАМОЙ
   function playMom(){
-    openModal_(`<h2>Прятки с мамой</h2><div style="text-align:center; font-size:50px; margin:20px 0;" id="momFace">👩</div><button class="btn w" id="doHw" style="background:#4ade80; color:#000;">ДЕЛАТЬ УРОКИ</button><div class="sub" style="text-align:center; margin-top:10px;">Зажми кнопку, чтобы играть. Отпусти — чтобы делать уроки.</div>`);
+    openModal_(`<h2>Прятки с мамой</h2>
+      <div class="mom-room">
+        <div class="mom-door" id="momDoor"></div>
+        <div class="mom-face" id="momFace">👩</div>
+        <div class="mom-desk">
+          <div class="mom-book"></div>
+          <div class="mom-book"></div>
+          <div class="mom-laptop" id="laptop"></div>
+        </div>
+      </div>
+      <button class="btn w" id="doHw" style="background:#4ade80; color:#000; margin-top:15px; font-size:18px; padding:15px;">ДЕЛАТЬ УРОКИ (Отпусти чтобы играть)</button>
+      <div class="sub" style="text-align:center; margin-top:10px;">Зажми кнопку, чтобы играть в комп. Если придет мама (откроется дверь) — сразу отпускай!</div>
+    `);
+    
     let isPlaying = false; const hwBtn = $('#doHw');
-    hwBtn.addEventListener('pointerdown', () => { isPlaying = false; hwBtn.textContent = '📚 ДЕЛАЮ УРОКИ...'; });
-    hwBtn.addEventListener('pointerup', () => { isPlaying = true; hwBtn.textContent = '🎮 ИГРАЮ В КОМП...'; });
+    const laptop = $('#laptop');
+    
+    hwBtn.addEventListener('pointerdown', () => { 
+      isPlaying = true; 
+      hwBtn.textContent = '🎮 ИГРАЮ В КОМП...'; 
+      hwBtn.style.background = '#ff1e3c';
+      laptop.style.background = '#4da3ff'; // Экран загорелся
+    });
+    
+    hwBtn.addEventListener('pointerup', () => { 
+      isPlaying = false; 
+      hwBtn.textContent = '📚 ДЕЛАЮ УРОКИ...'; 
+      hwBtn.style.background = '#4ade80';
+      laptop.style.background = '#000'; // Экран потух
+    });
+
+    // Цикл игры
     const momInterval = setInterval(() => {
-      const mom = $('#momFace'); if(!mom) { clearInterval(momInterval); return; }
-      mom.style.transform = `translateX(${Math.random()*200-100}px)`;
-      if(Math.random() > 0.8) {
-        if(isPlaying) { clearInterval(momInterval); playSound('lose'); vibrate('error'); mom.textContent = '😡'; toast('Мама спалила!'); setTimeout(closeModal, 2000); }
-        else { playSound('win'); mom.textContent = '👩‍🦱'; }
+      const mom = $('#momFace'); const door = $('#momDoor');
+      if(!mom || !door) { clearInterval(momInterval); return; }
+      
+      // Случайное событие: мама идет
+      if(Math.random() > 0.6) { // 40% шанс что она пойдет
+        playSound('step'); // Шаги
+        door.style.transform = 'perspective(400px) rotateY(-60deg)'; // Дверь открывается
+        door.style.transformOrigin = 'left';
+        mom.classList.add('show');
+        
+        // Проверка через секунду
+        setTimeout(() => {
+          if(isPlaying) { 
+            clearInterval(momInterval); playSound('lose'); vibrate('error'); 
+            mom.textContent = '😡'; toast('Мама спалила! Ты играл!'); 
+            setTimeout(closeModal, 2000); 
+          } else {
+            playSound('win'); vibrate('success'); mom.textContent = '👩‍🦱'; toast('Мама проверила, ты делал уроки!');
+          }
+        }, 800);
+
+        // Уходим
+        setTimeout(() => {
+          if(!mom) return;
+          door.style.transform = 'none';
+          mom.classList.remove('show');
+        }, 2000);
       }
-    }, 1000);
+    }, 2500);
+    
     G.t.push(momInterval);
   }
 
@@ -174,7 +229,17 @@
   if (modal) modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
   const ACT = {
-    close: () => closeModal(), topup: () => openModal_(`<h2>Пополнить</h2>`), passport: () => toast('Паспорт'), coll: () => toast('Коллекция'), cases: () => toast('Кейсы'), rating: () => toast('Рейтинг'), kap: () => toast('Капельки'),
+    close: () => closeModal(), 
+    topup: () => openModal_(`<h2>Пополнить</h2><button class="btn w" data-a="close">Тест кнопки</button>`), 
+    passport: () => openModal_(`<h2>Паспорт</h2><div class="list"><div class="item"><div class="grow">В боте</div><b>${Math.floor((Date.now() - P.joined) / D)} дн.</b></div><div class="item"><div class="grow">Персонажей</div><b>${INV.length}</b></div></div>`), 
+    coll: () => openModal_(`<h2>Коллекция</h2><div class="list">${INV.length ? INV.map(c => `<div class="item">${cavHtml(c.name, c.img, c.rar)}<div class="grow"><b>${esc(c.name)}</b><div class="sub">№${c.tir}</div></div><span class="tag" style="color:${RAR[c.rar][1]}">${RAR[c.rar][0]}</span></div>`).join('') : '<div class="sub">Пока пусто. Открой кейс!</div>'}</div>`), 
+    cases: () => openModal_(`<h2>Кейсы</h2><div class="list">${CASE_LIST.map(c => `<div class="item"><div class="grow"><b>${c.name}</b></div><button class="btn sm" data-a="open" data-k="${c.k}">Открыть</button></div>`).join('')}</div><div id="stage" class="stage">Выбери кейс</div>`), 
+    rating: () => openModal_(`<h2>Рейтинг</h2><div class="card row"><div><div class="lab">Твоё место</div><div class="big">1</div></div><div style="text-align:right"><div class="lab">Очков</div><div class="big">${Number(P.points).toFixed(1)}</div></div></div>`), 
+    kap: () => openModal_(`<h2>Капельки</h2><div class="card row"><div><div class="lab">Капелек</div><div class="big">💧 ${P.kap}</div></div><button class="btn sm" data-a="kapget">Получить</button></div>`),
+    kapget: () => run(async () => { await api('POST', '/api/kap'); toast('Получено'); playSound('win'); vibrate('success'); await refresh(); closeModal(); }),
+    open: el => run(async () => { const st = $('#stage'); if(st) st.textContent='...'; const { result } = await api('POST', '/api/open-case', { caseKey: el.dataset.k }); await new Promise(r=>setTimeout(r,800)); if(st) st.innerHTML = `<div class="win"><b>${result.name || 'Монета'}</b></div>`; playSound('win'); vibrate('success'); await refresh(); }),
+    daily: () => run(async () => { const { result } = await api('POST', '/api/open-case', { caseKey: 'free' }); toast('Кейс открыт'); playSound('win'); vibrate('success'); await refresh(); }),
+    ruch: () => run(async () => { const r = await api('POST', '/api/ruch'); toast(`+${r.gain} ✎`); playSound('win'); vibrate('success'); await refresh(); }),
     gameTir: () => playTir(), gameBalls: () => playBalls(), gameMines: () => playMines(), gameCoin: () => playCoin(), gameGuitar: () => playGuitar(), gameMom: () => playMom()
   };
 
