@@ -25,31 +25,34 @@
   </header>
 
   <main>
-    <section class="screen active" data-s="edits"><button class="sound-btn" id="soundBtn">🔇 Звук выкл</button><div class="feed" id="feed"></div></section>
-    <section class="screen" data-s="news"><h2 class="page-title">Новости</h2><div id="newsList"></div></section>
-    <section class="screen" data-s="backstage"><h2 class="page-title">Закулисье</h2><div id="backList"></div></section>
+    <!-- ЭДИТЫ -->
+    <section class="screen active" data-s="edits">
+      <button class="sound-btn" id="soundBtn">🔇 Звук выкл</button>
+      <div class="feed" id="feed"></div>
+    </section>
+
+    <!-- НОВОСТИ -->
+    <section class="screen" data-s="news">
+      <h2 class="page-title">Новости</h2>
+      <div id="newsList"></div>
+    </section>
+
+    <!-- ЗАКУЛИСЬЕ -->
+    <section class="screen" data-s="backstage">
+      <h2 class="page-title">Закулисье</h2>
+      <p class="page-sub">Откроется при 50 лайках</p>
+      <div id="backList"></div>
+    </section>
 
     <!-- ПРОФИЛЬ -->
     <section class="screen" data-s="profile" style="padding:0; background:#07070a;">
-      
-      <!-- ВЕРХНЯЯ ПАНЕЛЬ (Звезды, Монеты) -->
       <div class="top-bar">
-        <div class="top-item">
-          <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" class="ico-img"> 
-          <b id="topStars">0</b>
-        </div>
-        <div class="top-item">
-          <img src="https://cdn-icons-png.flaticon.com/512/616/616494.png" class="ico-img" style="filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg);"> 
-          <b id="topCoins">0</b>
-        </div>
-        <div class="top-item">
-          <img src="https://cdn-icons-png.flaticon.com/512/542/542638.png" class="ico-img" style="filter: invert(100%);"> 
-          <b>0</b>
-        </div>
+        <div class="top-item"><img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" class="ico-img"> <b id="topStars">0</b></div>
+        <div class="top-item"><img src="https://cdn-icons-png.flaticon.com/512/616/616494.png" class="ico-img" style="filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg);"> <b id="topCoins">0</b></div>
+        <div class="top-item"><img src="https://cdn-icons-png.flaticon.com/512/542/542638.png" class="ico-img" style="filter: invert(100%);"> <b>0</b></div>
       </div>
 
       <div class="profile-main">
-        <!-- БЛОК БАЛАНСА -->
         <div class="balance-card">
           <div class="bal-left">
             <div class="bal-title">Баланс звёзд</div>
@@ -58,7 +61,6 @@
           <button class="btn-topup" id="btnTopUp">+ Пополнить</button>
         </div>
 
-        <!-- СЕТКА 3 ИКОНКИ -->
         <div class="grid-3">
           <div class="g-item" id="btnMyProfile">
             <img id="profAvatar" class="g-avatar" src="" style="display:none;">
@@ -75,21 +77,18 @@
           </div>
         </div>
 
-        <!-- БЛОК ЗАРАБОТКА И РЕЙТИНГА -->
         <div class="earn-card" id="btnEarn">
           <div class="earn-title">Твоё место в рейтинге <span style="color:#5c9aff">Актив</span></div>
-          <div class="earn-place"><b>9 428</b> место из 105 650</div>
+          <div class="earn-place"><b>9 428</b> <span>место из 105 650</span></div>
           <div class="earn-sub">2 монеты · 13/100 баллов <span style="color:#5c9aff;float:right;">Открыть ›</span></div>
         </div>
 
-        <!-- КЕЙСЫ -->
         <h2 class="section-title">Кейсы</h2>
         <div class="case-banner" id="btnCases">
           <div class="case-title">Ежедневный — бесплатно</div>
           <div class="case-img">🎁</div>
         </div>
 
-        <!-- ЛОТЕРЕЯ -->
         <h2 class="section-title">Лотерея</h2>
         <div class="promo-grid">
           <div class="promo-item" id="btnLottery">
@@ -115,17 +114,15 @@
   </nav>
 </div>
 
-<!-- МОДАЛКА: ПОПОЛНЕНИЕ ЗВЕЗД -->
+<!-- МОДАЛКА ПОПОЛНЕНИЯ -->
 <div id="modalTopUp" class="modal-overlay">
   <div class="modal-content">
     <h3 style="font-family:Oswald; font-size:24px; margin-bottom:10px;">Пополнить звёзды</h3>
     <p style="color:#888; font-size:13px; margin-bottom:20px;">Оплата проходит внутри Telegram. Звёзды сразу лягут на баланс.</p>
-    
     <div class="amount-box">
       <div style="color:#888; font-size:12px; margin-bottom:5px;">СУММА ПОПОЛНЕНИЯ</div>
       <div class="amount-display">⭐ <span id="selectedAmount">250</span></div>
     </div>
-
     <div class="amount-grid">
       <button class="amt-btn" data-amt="50">⭐ 50</button>
       <button class="amt-btn" data-amt="100">⭐ 100</button>
@@ -133,22 +130,25 @@
       <button class="amt-btn" data-amt="500">⭐ 500</button>
       <button class="amt-btn" data-amt="1000">⭐ 1000</button>
     </div>
-
     <button class="btn-pay" id="btnPay">Оплатить ⭐ <span id="payAmount">250</span></button>
     <button class="btn-close" id="closeTopUp">Закрыть</button>
   </div>
 </div>
 
-<!-- МОДАЛКА: ИСТОРИЯ -->
+<!-- МОДАЛКА ИСТОРИИ -->
 <div id="modalHistory" class="modal-overlay">
   <div class="modal-content" style="height:80vh;">
     <h3 style="font-family:Oswald; font-size:24px; margin-bottom:5px;">История</h3>
     <p style="color:#888; font-size:13px; margin-bottom:20px;">Монеты и события. Свежие сверху.</p>
-    <div id="historyList" style="flex:1; overflow-y:auto;">
-      <!-- Сюда будут падать записи -->
-    </div>
+    <div id="historyList" style="flex:1; overflow-y:auto;"></div>
     <button class="btn-close" id="closeHistory" style="margin-top:15px;">Понятно</button>
   </div>
+</div>
+
+<!-- МОДАЛКА ПРОСМОТРА ФОТО/ВИДЕО -->
+<div id="mediaModal" class="media-modal">
+  <span class="close-modal" id="closeMedia">✕</span>
+  <div id="mediaContent"></div>
 </div>
 
 <div id="toast"></div>
