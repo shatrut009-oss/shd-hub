@@ -10,8 +10,9 @@
 </head>
 <body>
 
+<!-- ЗАГРУЗОЧНЫЙ ЭКРАН -->
 <div id="splash" role="button">
-  <!-- ВОЗВРАЩАЕМ ЛОГОТИП DD -->
+  <div class="splash-glow"></div>
   <svg viewBox="900 310 770 815" aria-hidden="true">
     <g class="half l" fill="#fff" fill-rule="evenodd">
       <path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/>
@@ -34,27 +35,14 @@
   </header>
 
   <main>
-    <section class="screen active" data-s="edits">
-      <button class="sound-btn" id="soundBtn">🔇 Звук выкл</button>
-      <div class="feed" id="feed"></div>
-    </section>
-
-    <section class="screen" data-s="news">
-      <h2 class="page-title">Новости</h2>
-      <div id="newsList"></div>
-    </section>
-
-    <section class="screen" data-s="backstage">
-      <h2 class="page-title">Закулисье</h2>
-      <p class="page-sub">Откроется при 50 лайках</p>
-      <div id="backList"></div>
-    </section>
+    <section class="screen active" data-s="edits"><button class="sound-btn" id="soundBtn">🔇 Звук выкл</button><div class="feed" id="feed"></div></section>
+    <section class="screen" data-s="news"><h2 class="page-title">Новости</h2><div id="newsList"></div></section>
+    <section class="screen" data-s="backstage"><h2 class="page-title">Закулисье</h2><p class="page-sub">Откроется при 50 лайках</p><div id="backList"></div></section>
 
     <section class="screen" data-s="profile" style="padding:0; background:#07070a;">
       <div class="top-bar">
         <div class="top-item"><img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" class="ico-img"> <b id="topStars">0</b></div>
         <div class="top-item"><img src="https://cdn-icons-png.flaticon.com/512/616/616494.png" class="ico-img" style="filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg);"> <b id="topCoins">0</b></div>
-        <div class="top-item"><img src="https://cdn-icons-png.flaticon.com/512/542/542638.png" class="ico-img" style="filter: invert(100%);"> <b>0</b></div>
       </div>
 
       <div class="profile-main">
@@ -67,45 +55,21 @@
         </div>
 
         <div class="grid-3">
-          <div class="g-item" id="btnMyProfile">
-            <img id="profAvatar" class="g-avatar" src="" style="display:none;">
-            <div id="profAvatarText" class="g-avatar">?</div>
-            <span>Мой профиль</span>
-          </div>
-          <div class="g-item" id="btnHistory">
-            <div class="g-icon" style="background:rgba(30,144,255,0.2);">🕒</div>
-            <span>История</span>
-          </div>
-          <div class="g-item" id="btnCharacters">
-            <div class="g-icon" style="background:rgba(255,165,0,0.2);">📦</div>
-            <span>Мои персонажи</span>
-          </div>
-        </div>
-
-        <div class="earn-card" id="btnEarn">
-          <div class="earn-title">Твоё место в рейтинге <span style="color:#5c9aff">Актив</span></div>
-          <div class="earn-place"><b>9 428</b> <span>место из 105 650</span></div>
-          <div class="earn-sub">2 монеты · 13/100 баллов <span style="color:#5c9aff;float:right;">Открыть ›</span></div>
+          <div class="g-item" id="btnMyProfile"><img id="profAvatar" class="g-avatar" src="" style="display:none;"><div id="profAvatarText" class="g-avatar">?</div><span>Мой профиль</span></div>
+          <div class="g-item" id="btnHistory"><div class="g-icon" style="background:rgba(30,144,255,0.2);">🕒</div><span>История</span></div>
+          <div class="g-item" id="btnCharacters"><div class="g-icon" style="background:rgba(255,165,0,0.2);">📦</div><span>Мои персонажи</span></div>
         </div>
 
         <h2 class="section-title">Кейсы</h2>
         <div class="case-banner" id="btnCases">
-          <div class="case-title">Ежедневный — бесплатно</div>
+          <div class="case-title">Открыть кейсы</div>
           <div class="case-img">🎁</div>
         </div>
 
         <h2 class="section-title">Лотерея</h2>
         <div class="promo-grid">
-          <div class="promo-item" id="btnLottery">
-            <div class="p-icon">🎟️</div>
-            <h3>Лотерея</h3>
-            <p>Больше билетов — выше шанс</p>
-          </div>
-          <div class="promo-item" id="btnDrops">
-            <div class="p-icon">💧</div>
-            <h3>Капельки</h3>
-            <p>Обмен на монеты</p>
-          </div>
+          <div class="promo-item" id="btnLottery"><div class="p-icon">🎟️</div><h3>Лотерея</h3><p>Больше билетов — выше шанс</p></div>
+          <div class="promo-item" id="btnDrops"><div class="p-icon">💧</div><h3>Капельки</h3><p>Обмен на монеты</p></div>
         </div>
       </div>
     </section>
@@ -119,45 +83,63 @@
   </nav>
 </div>
 
-<!-- МОДАЛКА ПОПОЛНЕНИЯ (С ВОЗМОЖНОСТЬЮ ВВОДА) -->
+<!-- МОДАЛКА ВЫБОРА КЕЙСА -->
+<div id="modalCases" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="font-family:Oswald; font-size:24px; margin-bottom:15px; text-align:center;">Выбери кейс</h3>
+    <div class="case-list">
+      <div class="case-card case-dnevnik" onclick="openCase('dnevnik')"><div class="cc-left"><h4>Дневничок</h4><span>Обычные персонажи</span></div><div class="cc-price">⚡ 3</div></div>
+      <div class="case-card case-shpargalka" onclick="openCase('shpargalka')"><div class="cc-left"><h4>Шпаргалка</h4><span>Хорошие шансы</span></div><div class="cc-price">⭐ 10</div></div>
+      <div class="case-card case-palochka" onclick="openCase('palochka')"><div class="cc-left"><h4>Палочка</h4><span>Высокий шанс на редких</span></div><div class="cc-price">⭐ 13</div></div>
+    </div>
+    <button class="btn-close" id="closeCases">Закрыть</button>
+  </div>
+</div>
+
+<!-- АНИМАЦИЯ КЕЙСА -->
+<div id="modalCaseAnim" class="modal-overlay" style="z-index:1001; background:rgba(0,0,0,0.95);">
+  <div class="case-anim-content">
+    <h3 id="animStatus">Крутим...</h3>
+    <div class="roulette-box" id="rouletteBox">🎁</div>
+    <button class="btn-pay" id="btnCollect" style="display:none; margin-top:30px; width:100%;">Забрать</button>
+  </div>
+</div>
+
+<!-- МОИ ПЕРСОНАЖИ -->
+<div id="modalInventory" class="modal-overlay">
+  <div class="modal-content" style="height:80vh;">
+    <h3 style="font-family:Oswald; font-size:24px; margin-bottom:10px;">Мои персонажи</h3>
+    <div id="inventoryList" style="flex:1; overflow-y:auto; display:grid; grid-template-columns:repeat(2,1fr); gap:10px;"></div>
+    <button class="btn-close" id="closeInventory" style="margin-top:15px;">Закрыть</button>
+  </div>
+</div>
+
+<!-- ПОПОЛНЕНИЕ -->
 <div id="modalTopUp" class="modal-overlay">
   <div class="modal-content">
     <h3 style="font-family:Oswald; font-size:24px; margin-bottom:10px;">Пополнить звёзды</h3>
-    <p style="color:#888; font-size:13px; margin-bottom:20px;">Оплата проходит внутри Telegram. Звёзды сразу лягут на баланс.</p>
-    
     <div class="amount-box">
-      <div style="color:#888; font-size:12px; margin-bottom:5px;">СУММА ПОПОЛНЕНИЯ</div>
-      <div class="amount-display">
-        ⭐ <input type="number" id="customAmount" value="250" min="1" style="background:none; border:none; color:#fff; font-size:40px; font-family:Oswald; width:120px; text-align:center; outline:none;">
-      </div>
+      <div style="color:#888; font-size:12px; margin-bottom:5px;">СУММА</div>
+      <div class="amount-display">⭐ <input type="number" id="customAmount" value="250" min="1" style="background:none; border:none; color:#fff; font-size:40px; font-family:Oswald; width:120px; text-align:center; outline:none;"></div>
     </div>
-
     <div class="amount-grid">
-      <button class="amt-btn" data-amt="50">⭐ 50</button>
-      <button class="amt-btn" data-amt="100">⭐ 100</button>
-      <button class="amt-btn active" data-amt="250">⭐ 250</button>
-      <button class="amt-btn" data-amt="500">⭐ 500</button>
-      <button class="amt-btn" data-amt="1000">⭐ 1000</button>
+      <button class="amt-btn" data-amt="50">⭐ 50</button><button class="amt-btn" data-amt="100">⭐ 100</button><button class="amt-btn active" data-amt="250">⭐ 250</button><button class="amt-btn" data-amt="500">⭐ 500</button>
     </div>
-
     <button class="btn-pay" id="btnPay">Оплатить ⭐ <span id="payAmount">250</span></button>
     <button class="btn-close" id="closeTopUp">Закрыть</button>
   </div>
 </div>
 
+<!-- ИСТОРИЯ -->
 <div id="modalHistory" class="modal-overlay">
   <div class="modal-content" style="height:80vh;">
-    <h3 style="font-family:Oswald; font-size:24px; margin-bottom:5px;">История</h3>
-    <div id="historyList" style="flex:1; overflow-y:auto; margin-top:10px;"></div>
-    <button class="btn-close" id="closeHistory" style="margin-top:15px;">Понятно</button>
+    <h3 style="font-family:Oswald; font-size:24px; margin-bottom:10px;">История</h3>
+    <div id="historyList" style="flex:1; overflow-y:auto;"></div>
+    <button class="btn-close" id="closeHistory" style="margin-top:15px;">Закрыть</button>
   </div>
 </div>
 
-<div id="mediaModal" class="media-modal">
-  <span class="close-modal" id="closeMedia">✕</span>
-  <div id="mediaContent"></div>
-</div>
-
+<div id="mediaModal" class="media-modal"><span class="close-modal" id="closeMedia">✕</span><div id="mediaContent"></div></div>
 <div id="toast"></div>
 <script src="app.js"></script>
 </body>
