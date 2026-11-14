@@ -9,7 +9,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// --- ПОДКЛЮЧЕНИЕ К SUPABASE (ЧЕРЕЗ POOLER) ---
+// --- ПОДКЛЮЧЕНИЕ К БАЗЕ (БЕЗ ПАДЕНИЙ) ---
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
@@ -20,7 +20,6 @@ pool.query('SELECT NOW()', (err, res) => {
   else console.log('✅ База данных Supabase успешно подключена!');
 });
 
-// --- КАНАЛЫ ---
 const CHANNELS = {
   edits: ['kseshaxs', 'dimonchikshgsh', 'margarinkf547', 'streetlightmeow', 'vladanasv', 'salamandrrrrrrrra', 'kanyyy11', 'myshhkaas', 'banttiiikk', 'xixnow'],
   news: ['shgsh_novosti'],
@@ -29,7 +28,6 @@ const CHANNELS = {
 
 const dbLikes = {};
 
-// --- ПАРСЕР TELEGRAM ---
 async function fetchTelegramPosts(channels, type) {
   let allPosts = [];
   for (const channel of channels) {
@@ -40,16 +38,12 @@ async function fetchTelegramPosts(channels, type) {
       
       $('.tgme_widget_message').each((i, el) => {
         const text = $(el).find('.tgme_widget_message_text').text().trim();
-        
-        // Картинки
         const imgStyle = $(el).find('.tgme_widget_message_photo_wrap').attr('style');
         const image = imgStyle ? imgStyle.match(/url\('(.*)'\)/)?.[1] : null;
-        
-        // Видео (только прямые файлы)
         const videoTag = $(el).find('.tgme_widget_message_video_wrap video');
         const videoUrl = videoTag.length ? videoTag.attr('src') : null;
         
-        // ФИЛЬТР: Если это вкладка "Эдиты" и там нет фото/видео - пропускаем (убираем черные экраны)
+        // Фильтр для Эдитов (чтобы не было пустых постов)
         if (type === 'edits' && !image && !videoUrl) return;
 
         const dataPost = $(el).attr('data-post');
@@ -81,35 +75,33 @@ async function fetchTelegramPosts(channels, type) {
       });
     } catch (e) { console.error(`Ошибка парсинга ${channel}:`, e.message); }
   }
-  
   allPosts.sort((a, b) => b.date - a.date);
   return allPosts;
 }
 
-// --- API ---
 app.get('/api/posts', async (req, res) => {
   const type = req.query.type;
   try {
-    const posts = await fetchTelegramPosts(CHANNELS[type], type);
+    const posts = await fetchTelegramPosts(CHANNELS[type] || [], type);
     res.json(posts);
   } catch (e) {
-    res.status(500).json({ error: 'Ошибка сервера' });
+    res.json([]);
   }
 });
 
 app.post('/api/like', (req, res) => {
   const { postId, action } = req.body;
   if (dbLikes[postId] === undefined) dbLikes[postId] = 0;
-  
   if (action === 'unlike' && dbLikes[postId] > 0) dbLikes[postId]--;
   else if (action === 'like') dbLikes[postId]++;
-  
   res.json({ likes: dbLikes[postId] });
 });
 
-// --- ПРОФИЛЬ (ИЗ БАЗЫ ДАННЫХ) ---
+// --- ПРОФИЛЬ (БЕЗОПАСНАЯ ПЕРЕДАЧА ДАННЫХ) ---
 app.get('/api/profile/stats', async (req, res) => {
-  const userId = req.headers['x-user-id'];
+  const userId = req.query.id;
+  const username = req.query.username || 'unknown';
+  const firstname = req.query.name || 'Гость';
   
   if (!userId || userId === 'guest') {
     return res.json({ stars: 0, coins: 0, points: 0 });
@@ -119,13 +111,10 @@ app.get('/api/profile/stats', async (req, res) => {
     let userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
     
     if (userResult.rows.length === 0) {
-      // РАСКОДИРУЕМ ИМЯ ОБРАТНО
-      const safeUsername = decodeURIComponent(req.headers['x-username'] || 'unknown');
-      const safeFirstname = decodeURIComponent(req.headers['x-firstname'] || 'Гость');
-
+      // Создаем нового пользователя
       await pool.query(
         'INSERT INTO users (id, username, first_name) VALUES ($1, $2, $3)',
-        [userId, safeUsername, safeFirstname]
+        [userId, username, firstname]
       );
       userResult = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
     }
@@ -134,7 +123,8 @@ app.get('/api/profile/stats', async (req, res) => {
     res.json({ stars: user.stars || 0, coins: parseFloat(user.coins) || 0, points: user.points || 0 });
   } catch (err) {
     console.error('Ошибка профиля:', err);
-    res.status(500).json({ error: 'Database error' });
+    // Если база упала, отдаем нули, чтобы интерфейс не ломался
+    res.json({ stars: 0, coins: 0, points: 0 });
   }
 });
 
