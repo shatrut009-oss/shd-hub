@@ -14,10 +14,10 @@ app.use(express.json({ limit: '50kb' }));
 app.use((req, res, next) => { if (/^\/(server\.js|package(-lock)?\.json|\.env)$/i.test(req.path)) return res.sendStatus(404); next(); });
 app.use(express.static(__dirname, { index: false }));
 
-// --- КАНАЛЫ ---
+// --- ВСЕ КАНАЛЫ ---
 const CHANNELS = { 
   edits: ['kseshaxs', 'dimonchikshgsh', 'margarinkf547', 'streetlightmeow', 'vladanasv', 'salamandrrrrrrrra', 'kanyyy11', 'myshhkaas', 'banttiiikk', 'xixnow'], 
-  news: ['shgsh_novosti', 'hladenko'] 
+  news: ['shgsh_novosti', 'hladenko', 'gladmedia', 'gladdrophub'] 
 };
 
 async function fetchTelegramPosts(channels, type) {
@@ -32,7 +32,11 @@ async function fetchTelegramPosts(channels, type) {
         const videoTag = $(el).find('.tgme_widget_message_video_wrap video');
         const videoUrl = videoTag.length ? videoTag.attr('src') : null;
         if (type === 'edits' && !image && !videoUrl) return;
-        allPosts.push({ id: $(el).attr('data-post') || `${channel}-${i}`, type, author: channel, text: text || '', image, videoUrl, date: new Date($(el).find('time').attr('datetime') || Date.now()).getTime() });
+        
+        const dateStr = $(el).find('time').attr('datetime') || new Date().toISOString();
+        const dataPost = $(el).attr('data-post') || `${channel}-${i}`;
+
+        allPosts.push({ id: dataPost, type, author: channel, text: text || '', image, videoUrl, date: new Date(dateStr).getTime() });
       });
     } catch (e) { console.error(`TG parse error ${channel}:`, e.message); }
   }
@@ -108,9 +112,12 @@ app.post('/api/kap', auth, wrap(async (req, res) => { const r = await pool.query
 app.post('/api/game/tap', auth, wrap(async (req, res) => { const level = Number((req.body || {}).level); const r = await pool.query(`UPDATE users SET ruch = ruch + LEAST(80, 10 + (FLOOR(lvl_tap / 3.0) * 2))::int, lvl_tap = lvl_tap + 1 WHERE id = $1 AND lvl_tap = $2 RETURNING lvl_tap`, [req.uid, level]); if (!r.rowCount) fail(409, 'Уже'); res.json({ ok: true, level: r.rows[0].lvl_tap }); }));
 app.post('/api/game/drop', auth, wrap(async (req, res) => { const score = Math.max(0, Math.min(500, Math.floor(Number((req.body || {}).score)) || 0)); const gain = Math.min(100, Math.floor(score / 5)); const r = await pool.query(`UPDATE users SET ruch = ruch + $2, best_drop = GREATEST(best_drop, $3), last_drop = NOW() WHERE id = $1 AND (last_drop IS NULL OR last_drop <= NOW() - INTERVAL '60 seconds') RETURNING id`, [req.uid, gain, score]); if (!r.rowCount) fail(429, 'Ждите'); res.json({ ok: true, gain }); }));
 
+// --- ИГРЫ СО СТАВКАМИ (ИСПРАВЛЕНО) ---
 app.post('/api/games/mines/start', auth, wrap(async (req, res) => {
-  const { bet, cur } = req.body; if (![1, 3].includes(bet)) fail(400, 'Неверная ставка');
-  await withTx(async db => { const { rows: [u] } = await db.query('SELECT * FROM users WHERE id = $1 FOR UPDATE', [req.uid]); if (u[cur] < bet) fail(402, 'Мало средств'); await db.query(`UPDATE users SET ${cur} = ${cur} - $2 WHERE id = $1`, [req.uid, bet]); const mines = []; while (mines.length < 5) { const r = rnd(25); if (!mines.includes(r)) mines.push(r); } activeMines[req.uid] = { mines, bet, cur, mult: 1.0, opened: 0 }; });
+  const { bet, cur } = req.body; 
+  const amount = Math.floor(Number(bet));
+  if (!amount || amount < 1) fail(400, 'Минимальная ставка 1');
+  await withTx(async db => { const { rows: [u] } = await db.query('SELECT * FROM users WHERE id = $1 FOR UPDATE', [req.uid]); if (u[cur] < amount) fail(402, 'Мало средств'); await db.query(`UPDATE users SET ${cur} = ${cur} - $2 WHERE id = $1`, [req.uid, amount]); const mines = []; while (mines.length < 5) { const r = rnd(25); if (!mines.includes(r)) mines.push(r); } activeMines[req.uid] = { mines, bet: amount, cur, mult: 1.0, opened: 0 }; });
   res.json({ ok: true, gridSize: 25 });
 }));
 app.post('/api/games/mines/click', auth, wrap(async (req, res) => {
@@ -123,8 +130,10 @@ app.post('/api/games/mines/cashout', auth, wrap(async (req, res) => {
   await pool.query(`UPDATE users SET ${game.cur} = ${game.cur} + $2 WHERE id = $1`, [req.uid, win]); delete activeMines[req.uid]; res.json({ ok: true, win });
 }));
 app.post('/api/games/coinflip', auth, wrap(async (req, res) => {
-  const { bet, cur, choice } = req.body; if (![1, 5, 10].includes(bet)) fail(400, 'Неверная ставка');
-  await withTx(async db => { const { rows: [u] } = await db.query('SELECT * FROM users WHERE id = $1 FOR UPDATE', [req.uid]); if (u[cur] < bet) fail(402, 'Мало средств'); await db.query(`UPDATE users SET ${cur} = ${cur} - $2 WHERE id = $1`, [req.uid, bet]); const result = rnd(2) === 0 ? 'heads' : 'tails'; if (result === choice) { await db.query(`UPDATE users SET ${cur} = ${cur} + $2 WHERE id = $1`, [req.uid, bet * 2]); res.json({ win: true, result }); } else res.json({ win: false, result }); });
+  const { bet, cur, choice } = req.body; 
+  const amount = Math.floor(Number(bet));
+  if (!amount || amount < 1) fail(400, 'Минимальная ставка 1');
+  await withTx(async db => { const { rows: [u] } = await db.query('SELECT * FROM users WHERE id = $1 FOR UPDATE', [req.uid]); if (u[cur] < amount) fail(402, 'Мало средств'); await db.query(`UPDATE users SET ${cur} = ${cur} - $2 WHERE id = $1`, [req.uid, amount]); const result = rnd(2) === 0 ? 'heads' : 'tails'; if (result === choice) { await db.query(`UPDATE users SET ${cur} = ${cur} + $2 WHERE id = $1`, [req.uid, amount * 2]); res.json({ win: true, result }); } else res.json({ win: false, result }); });
 }));
 
 async function tgCall(method, body){ const r = await fetch(`${TG_API}/${method}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); const j = await r.json(); if (!j.ok) throw new Error(j.description); return j.result; }
