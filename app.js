@@ -22,33 +22,23 @@
     url.searchParams.append('id', me.id);
     url.searchParams.append('username', me.username);
     url.searchParams.append('name', me.name);
-    url.searchParams.append('avatar', me.avatar);
 
     const res = await fetch(url.toString(), { ...opts, headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) } });
     if (!res.ok) throw new Error(`API ${res.status}`);
     return res.json();
   }
 
-  // АВАТАРКИ
+  // ЗАСТАВКА
   if (me.avatar) {
-    $('#headerAvatar').src = me.avatar;
-    $('#headerAvatar').style.display = 'block';
-    $('#headerAvatarText').style.display = 'none';
-    $('#profAvatar').src = me.avatar;
-    $('#profAvatar').style.display = 'block';
-    $('#profAvatarText').style.display = 'none';
+    $('#headerAvatar').src = me.avatar; $('#headerAvatar').style.display = 'block'; $('#headerAvatarText').style.display = 'none';
+    $('#profAvatar').src = me.avatar; $('#profAvatar').style.display = 'block'; $('#profAvatarText').style.display = 'none';
   } else {
-    $('#headerAvatarText').textContent = me.name[0].toUpperCase();
-    $('#profAvatarText').textContent = me.name[0].toUpperCase();
+    $('#headerAvatarText').textContent = me.name[0].toUpperCase(); $('#profAvatarText').textContent = me.name[0].toUpperCase();
   }
 
-  // СПЛЭШ
   $('#splash').addEventListener('click', () => {
-    $('#splash').classList.add('open'); // Анимация разъезда
-    setTimeout(() => {
-      $('#splash').classList.add('gone'); 
-      $('#app').classList.add('on');
-    }, 800);
+    $('#splash').classList.add('open');
+    setTimeout(() => { $('#splash').classList.add('gone'); $('#app').classList.add('on'); }, 800);
   });
 
   // ВКЛАДКИ
@@ -59,10 +49,8 @@
     if (b.dataset.t === 'profile') loadProfile();
   });
 
-  // --- ЭДИТЫ, НОВОСТИ, ЗАКУЛИСЬЕ ---
-  // (Код парсинга и лайков оставляем прежним, он не менялся)
+  // ЭДИТЫ
   const feed = $('#feed'); let soundOn = false;
-  
   async function loadEdits(){
     try {
       const posts = await api('/api/posts?type=edits');
@@ -78,7 +66,6 @@
       observeVideos();
     } catch { feed.innerHTML = '<div class="empty">Ошибка загрузки</div>'; }
   }
-
   function observeVideos(){
     const io = new IntersectionObserver(entries => {
       entries.forEach(entry => {
@@ -89,23 +76,19 @@
     }, { root: feed, threshold: [0.6] });
     feed.querySelectorAll('.slide').forEach(s => io.observe(s));
   }
-
   $('#soundBtn').addEventListener('click', e => {
-    soundOn = !soundOn;
-    e.currentTarget.textContent = soundOn ? '🔊 Звук вкл' : '🔇 Звук выкл';
+    soundOn = !soundOn; e.currentTarget.textContent = soundOn ? '🔊 Звук вкл' : '🔇 Звук выкл';
     feed.querySelectorAll('video').forEach(v => v.muted = !soundOn);
   });
-
   feed.addEventListener('click', async e => {
     const likeBtn = e.target.closest('.like'); if (!likeBtn) return;
-    const isLiked = likeBtn.classList.contains('on');
-    const cntEl = likeBtn.querySelector('.cnt');
+    const isLiked = likeBtn.classList.contains('on'); const cntEl = likeBtn.querySelector('.cnt');
     likeBtn.classList.toggle('on', !isLiked);
-    let current = parseInt(cntEl.textContent) || 0;
-    cntEl.textContent = isLiked ? current - 1 : current + 1;
+    let current = parseInt(cntEl.textContent) || 0; cntEl.textContent = isLiked ? current - 1 : current + 1;
     try { const data = await api('/api/like', { method: 'POST', body: JSON.stringify({ postId: likeBtn.dataset.id, action: isLiked ? 'unlike' : 'like' }) }); cntEl.textContent = data.likes; } catch { toast('Ошибка сети'); }
   });
 
+  // НОВОСТИ
   async function loadNews(){
     try {
       const items = await api('/api/posts?type=news');
@@ -114,6 +97,7 @@
     } catch { $('#newsList').innerHTML = '<div class="empty">Ошибка загрузки</div>'; }
   }
 
+  // ЗАКУЛИСЬЕ
   async function loadBackstage(){
     try {
       const items = await api('/api/posts?type=backstage');
@@ -123,7 +107,6 @@
       }).join('') : '<div class="empty">Пусто</div>';
     } catch { $('#backList').innerHTML = '<div class="empty">Ошибка загрузки</div>'; }
   }
-
   $('#backList').addEventListener('click', async e => {
     const card = e.target.closest('.post'); if (!card) return;
     if (e.target.closest('.bs-like')) {
@@ -133,100 +116,98 @@
     }
   });
 
-  // --- ПРОФИЛЬ ---
+  // ПРОФИЛЬ
   $('#whoLabel').textContent = me.name;
-
   async function loadProfile(){
     try {
       const s = await api('/api/profile/stats');
-      $('#topStars').textContent = s.stars;
-      $('#mainStars').textContent = s.stars;
-      $('#topCoins').textContent = s.coins;
-    } catch (e) { console.error(e); }
+      $('#topStars').textContent = s.stars; $('#mainStars').textContent = s.stars; $('#topCoins').textContent = s.coins;
+    } catch (e) {}
   }
 
-  // --- ВВОД СУММЫ ---
-  const customAmountInput = $('#customAmount');
-  
-  customAmountInput.addEventListener('input', (e) => {
-    selectedAmt = parseInt(e.target.value) || 1;
-    $('#payAmount').textContent = selectedAmt;
-  });
+  // КЕЙСЫ
+  $('#btnCases').addEventListener('click', () => $('#modalCases').classList.add('active'));
+  $('#closeCases').addEventListener('click', () => $('#modalCases').classList.remove('active'));
 
+  window.openCase = async (caseId) => {
+    $('#modalCases').classList.remove('active');
+    const animModal = $('#modalCaseAnim'); const box = $('#rouletteBox'); const status = $('#animStatus'); const btnCollect = $('#btnCollect');
+    animModal.classList.add('active'); status.textContent = 'Крутим...'; btnCollect.style.display = 'none'; box.className = 'roulette-box spinning'; box.innerHTML = '🎁';
+
+    const interval = setInterval(() => { box.innerHTML = `<img src="https://api.dicebear.com/7.x/adventurer/svg?seed=${Math.random()}" style="width:100%; height:100%; border-radius:20px;">`; }, 100);
+
+    try {
+      const res = await api('/api/open-case', { method: 'POST', body: JSON.stringify({ userId: me.id, caseId }) });
+      setTimeout(() => {
+        clearInterval(interval); box.className = 'roulette-box result';
+        box.innerHTML = `<img src="${res.drop.image}" style="width:100%; height:100%; border-radius:20px;">`;
+        status.innerHTML = `Выпал:<br><b style="font-size:24px; color:#fff;">${res.drop.name}</b><br><span style="color:${getRarityColor(res.drop.rarity)}; font-weight:bold;">${res.drop.rarity}</span>`;
+        btnCollect.style.display = 'block';
+        btnCollect.onclick = () => { animModal.classList.remove('active'); loadProfile(); };
+      }, 2000);
+    } catch (e) { clearInterval(interval); animModal.classList.remove('active'); toast(e.message.includes('400') ? 'Недостаточно средств!' : 'Ошибка сервера'); }
+  };
+
+  // ИНВЕНТАРЬ
+  $('#btnCharacters').addEventListener('click', async () => {
+    $('#modalInventory').classList.add('active'); $('#inventoryList').innerHTML = '<div class="empty">Загрузка...</div>';
+    try {
+      const inv = await api('/api/inventory');
+      if (!inv.length) return $('#inventoryList').innerHTML = '<div class="empty" style="grid-column:1/-1;">Нет персонажей</div>';
+      $('#inventoryList').innerHTML = inv.map(c => `<div class="inv-card"><img src="${c.image}" style="width:80px; height:80px; border-radius:16px; margin-bottom:10px; background:#222;"><b>${c.character_name}</b><span style="color:${getRarityColor(c.rarity)}">${c.rarity}</span></div>`).join('');
+    } catch { $('#inventoryList').innerHTML = '<div class="empty">Ошибка</div>'; }
+  });
+  $('#closeInventory').addEventListener('click', () => $('#modalInventory').classList.remove('active'));
+
+  function getRarityColor(r) {
+    if (r === 'Мифический') return '#ff1e3c'; if (r === 'Легендарный') return '#ffb800'; if (r === 'Эпический') return '#9d4dff'; if (r === 'Редкий') return '#00d2ff'; return '#aaa';
+  }
+
+  // ОПЛАТА
+  let selectedAmt = 250; const customAmountInput = $('#customAmount');
+  customAmountInput.addEventListener('input', (e) => { selectedAmt = parseInt(e.target.value) || 1; $('#payAmount').textContent = selectedAmt; });
   document.querySelectorAll('.amt-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      document.querySelectorAll('.amt-btn').forEach(b => b.classList.remove('active'));
-      e.currentTarget.classList.add('active');
-      selectedAmt = parseInt(e.currentTarget.dataset.amt);
-      customAmountInput.value = selectedAmt;
-      $('#payAmount').textContent = selectedAmt;
+      document.querySelectorAll('.amt-btn').forEach(b => b.classList.remove('active')); e.currentTarget.classList.add('active');
+      selectedAmt = parseInt(e.currentTarget.dataset.amt); customAmountInput.value = selectedAmt; $('#payAmount').textContent = selectedAmt;
     });
   });
-
-  let selectedAmt = 250; // Изначально 250
-  
-  $('#btnTopUp').addEventListener('click', () => {
-    $('#modalTopUp').classList.add('active');
-    customAmountInput.value = selectedAmt;
-    $('#payAmount').textContent = selectedAmt;
-  });
+  $('#btnTopUp').addEventListener('click', () => { $('#modalTopUp').classList.add('active'); customAmountInput.value = selectedAmt; $('#payAmount').textContent = selectedAmt; });
   $('#closeTopUp').addEventListener('click', () => $('#modalTopUp').classList.remove('active'));
 
-  // --- ОПЛАТА ---
   $('#btnPay').addEventListener('click', async () => {
     try {
       $('#btnPay').textContent = 'Загрузка...';
       const res = await api('/api/create-invoice', { method: 'POST', body: JSON.stringify({ amount: selectedAmt }) });
-      
-      if (res.url) {
-        if (window.Telegram && window.Telegram.WebApp.openInvoice) {
-          // ВЫЗОВ ОФИЦИАЛЬНОГО ОКНА ОПЛАТЫ
-          window.Telegram.WebApp.openInvoice(res.url, (status) => {
-            if (status === 'paid') {
-              toast('Оплата успешна! Звезды зачислены.');
-              api('/api/confirm-payment', { method: 'POST', body: JSON.stringify({ userId: me.id, amount: selectedAmt }) }).then(() => {
-                loadProfile();
-                $('#modalTopUp').classList.remove('active');
-              });
-            } else {
-              toast('Оплата отменена или произошла ошибка: ' + status);
-            }
-            $('#btnPay').innerHTML = `Оплатить ⭐ <span id="payAmount">${selectedAmt}</span>`;
-          });
-        } else {
-          toast('Ошибка: ваша версия Telegram не поддерживает оплату.');
+      if (res.url && window.Telegram.WebApp.openInvoice) {
+        window.Telegram.WebApp.openInvoice(res.url, (status) => {
+          if (status === 'paid') {
+            toast('Оплата успешна!');
+            api('/api/confirm-payment', { method: 'POST', body: JSON.stringify({ userId: me.id, amount: selectedAmt }) }).then(() => { loadProfile(); $('#modalTopUp').classList.remove('active'); });
+          } else { toast('Оплата отменена'); }
           $('#btnPay').innerHTML = `Оплатить ⭐ <span id="payAmount">${selectedAmt}</span>`;
-        }
-      } else {
-        toast('Ошибка сервера: счет не создан.');
-        $('#btnPay').innerHTML = `Оплатить ⭐ <span id="payAmount">${selectedAmt}</span>`;
-      }
-    } catch (e) {
-      toast('Ошибка запроса: проверьте логи Render.');
-      $('#btnPay').innerHTML = `Оплатить ⭐ <span id="payAmount">${selectedAmt}</span>`;
-    }
+        });
+      } else { toast('Ошибка сервера'); $('#btnPay').innerHTML = `Оплатить ⭐ <span id="payAmount">${selectedAmt}</span>`; }
+    } catch (e) { toast('Ошибка'); $('#btnPay').innerHTML = `Оплатить ⭐ <span id="payAmount">${selectedAmt}</span>`; }
   });
 
-  // --- ИСТОРИЯ ---
+  // ИСТОРИЯ
   $('#btnHistory').addEventListener('click', async () => {
-    $('#modalHistory').classList.add('active');
-    $('#historyList').innerHTML = '<div class="empty">Загрузка...</div>';
+    $('#modalHistory').classList.add('active'); $('#historyList').innerHTML = '<div class="empty">Загрузка...</div>';
     try {
       const hist = await api('/api/history');
       if (!hist.length) { $('#historyList').innerHTML = '<div class="empty">История пуста</div>'; return; }
-      $('#historyList').innerHTML = hist.map(h => `<div class="history-item"><div class="h-left"><div class="h-icon">⚡</div><div><b>${esc(h.title)}</b><span>${esc(h.description)}</span></div></div><div class="h-right"><b style="color:#0f0">${esc(h.amount)}</b><span>${new Date(h.created_at).toLocaleDateString()}</span></div></div>`).join('');
+      $('#historyList').innerHTML = hist.map(h => `<div class="history-item"><div class="h-left"><b>${esc(h.title)}</b><span>${esc(h.description)}</span></div><div class="h-right"><b style="color:#0f0">${esc(h.amount)}</b><span>${new Date(h.created_at).toLocaleDateString()}</span></div></div>`).join('');
     } catch(e) { $('#historyList').innerHTML = '<div class="empty">Ошибка загрузки</div>'; }
   });
   $('#closeHistory').addEventListener('click', () => $('#modalHistory').classList.remove('active'));
 
-  // Заглушки
+  // ЗАГЛУШКИ
   $('#btnMyProfile').addEventListener('click', () => toast('Ты уже в профиле'));
-  $('#btnCharacters').addEventListener('click', () => toast('Персонажей пока нет'));
-  $('#btnEarn').addEventListener('click', () => toast('Ежедневный бонус скоро!'));
-  $('#btnCases').addEventListener('click', () => toast('Кейсы появятся завтра!'));
-  $('#btnLottery').addEventListener('click', () => toast('Лотерея скоро откроется!'));
+  $('#btnLottery').addEventListener('click', () => toast('Лотерея скоро!'));
   $('#btnDrops').addEventListener('click', () => toast('Капельки скоро!'));
 
+  // МЕДИА
   window.openMedia = (src, type) => {
     const modal = $('#mediaModal'); const content = $('#mediaContent');
     content.innerHTML = type === 'video' ? `<video src="${src}" controls autoplay></video>` : `<img src="${src}">`;
