@@ -5,46 +5,126 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ШД Hub</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="splash">
-  <svg viewBox="900 310 770 815" aria-hidden="true">
-    <g class="half l" fill="#fff"><path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/></g>
-    <g class="half r" fill="#fff"><path d="M1660 322C1627 372 1606 420 1604 455L1602 670L1600 975C1602 1040 1624 1085 1659 1115L1318 970C1304 962 1301 940 1301 910L1301 530C1300 490 1316 462 1346 450Z M1495 510L1493 928L1417 896L1416 542Z"/></g>
-  </svg>
-  <div class="hint">НАЖМИ, ЧТОБЫ ВОЙТИ</div>
-</div>
-
 <div id="app">
-  <header class="top">
-    <div class="user"><div class="av" id="av"></div><div class="nick" id="nick"></div></div>
-    <div class="chips">
-      <span class="chip s">★<b id="cS">0</b></span>
-      <span class="chip c">◆<b id="cC">0</b></span>
-      <span class="chip r">✎<b id="cR">0</b></span>
+  <!-- ШАПКА (Фото 13) -->
+  <header class="top-header">
+    <div class="user-info">
+      <div class="avatar" id="userAvatar"></div>
+      <div class="user-text">
+        <div class="username" id="userName">Загрузка...</div>
+        <div class="user-tag" id="userTag">@...</div>
+      </div>
+    </div>
+    <div class="balances">
+      <div class="bal-item star"><span class="ico">⭐</span> <span id="balStars">0</span></div>
+      <div class="bal-item coin"><span class="ico">⚡</span> <span id="balCoins">0</span></div>
+      <div class="bal-item tg"><span class="ico">✈️</span> <span id="balTg">0</span></div>
     </div>
   </header>
+
   <main>
-    <section class="screen on" id="sc-edits"></section>
-    <section class="screen" id="sc-news"></section>
-    <section class="screen" id="sc-home"></section>
-    <section class="screen" id="sc-games"></section>
-    <section class="screen" id="sc-clan"></section>
+    <!-- ГЛАВНЫЙ ЭКРАН (Фото 1) -->
+    <section class="screen active" id="screen-home">
+      
+      <!-- Большой баннер -->
+      <div class="promo-banner">
+        <div class="promo-text">
+          <h1>ИГРА ОТ ШГШ 🔥</h1>
+          <p>Школа Романтики — решения за тобой.</p>
+          <button class="btn-play">🔴 ИГРАТЬ <span>→</span></button>
+        </div>
+        <div class="promo-dots">
+          <span></span><span class="active"></span><span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <!-- Маленький баннер (Школа Романтики) -->
+      <div class="mini-banner" style="background: linear-gradient(90deg, #1a0b2e, #3b0e3e);">
+        <div class="mb-text">
+          <h2>ШКОЛА РОМАНТИКИ</h2>
+          <span class="badge red">ИГРА ОТ ШГШ</span>
+        </div>
+        <div class="mb-img">👩‍🎓👨‍🎓</div>
+        <span class="badge new">НОВОЕ</span>
+      </div>
+
+      <!-- Магазин (Фото 5) -->
+      <div class="action-card" style="background: linear-gradient(90deg, #b48520, #e0b33c);">
+        <div class="ac-text">
+          <h2>Магазин</h2>
+          <span class="badge white">НОВОЕ</span>
+        </div>
+        <div class="ac-img">🛒</div>
+      </div>
+
+      <!-- NFT Актеры -->
+      <div class="action-card" style="background: linear-gradient(90deg, #6a2c91, #9b51e0);">
+        <div class="ac-text">
+          <h2>НФТ актёры</h2>
+          <span class="badge dark">ПОПУЛЯРНОЕ</span>
+        </div>
+        <div class="ac-img">🖼️</div>
+      </div>
+
+      <!-- Кейсы -->
+      <div class="action-card" style="background: linear-gradient(90deg, #a11f1f, #e63946);">
+        <div class="ac-text">
+          <h2>Кейсы</h2>
+          <span class="badge white">ОТКРОЙ БЕСПЛАТНО</span>
+        </div>
+        <div class="ac-img">🎁</div>
+      </div>
+
+    </section>
+
+    <!-- ЗАГЛУШКИ ДЛЯ ДРУГИХ ЭКРАНОВ -->
+    <section class="screen" id="screen-games">
+      <h2 style="color:#fff; margin-top:20px; text-align:center;">Игры скоро появятся...</h2>
+    </section>
+    <section class="screen" id="screen-rating">
+      <h2 style="color:#fff; margin-top:20px; text-align:center;">Рейтинг скоро появится...</h2>
+    </section>
+    <section class="screen" id="screen-lottery">
+      <h2 style="color:#fff; margin-top:20px; text-align:center;">Лотерея скоро появится...</h2>
+    </section>
+    <section class="screen" id="screen-nft">
+      <h2 style="color:#fff; margin-top:20px; text-align:center;">NFT скоро появятся...</h2>
+    </section>
+    <section class="screen" id="screen-profile">
+      <h2 style="color:#fff; margin-top:20px; text-align:center;">Профиль скоро появится...</h2>
+    </section>
   </main>
-  <nav class="tabs" id="tabs">
-    <button class="tab on" data-tab="edits">Эдиты</button>
-    <button class="tab" data-tab="news">Новости</button>
-    <button class="tab" data-tab="home">Профиль</button>
-    <button class="tab" data-tab="games">Игры</button>
-    <button class="tab" data-tab="clan">Кланы</button>
+
+  <!-- НИЖНЕЕ МЕНЮ (Фото 1) -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-target="screen-games">
+      <div class="nav-icon" style="background:#ff1e3c;">🎮</div>
+      <span>Игры</span>
+    </button>
+    <button class="nav-btn" data-target="screen-rating">
+      <div class="nav-icon" style="background:transparent;">🏆</div>
+      <span>Рейтинг</span>
+    </button>
+    <button class="nav-btn" data-target="screen-lottery">
+      <div class="nav-icon" style="background:transparent;">🎟️</div>
+      <span>Лотерея</span>
+    </button>
+    <button class="nav-btn" data-target="screen-nft">
+      <div class="nav-icon" style="background:transparent;">✨</div>
+      <span>НФТ</span>
+    </button>
+    <button class="nav-btn" data-target="screen-profile">
+      <div class="nav-icon" style="background:transparent;">👤</div>
+      <span>Профиль</span>
+    </button>
   </nav>
 </div>
 
-<div id="modal" class="modal hidden"><div class="sheet"><div class="grab"></div><div id="mBody"></div><button class="btn g w" data-a="close">Закрыть</button></div></div>
-<div id="toast"></div>
 <script src="app.js"></script>
 </body>
 </html>
