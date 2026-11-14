@@ -137,6 +137,11 @@ app.post('/api/create-invoice', async (req, res) => {
   const { amount } = req.body;
   const botToken = process.env.BOT_TOKEN;
 
+  if (!botToken) {
+    console.error('❌ ОШИБКА: BOT_TOKEN не добавлен в переменные окружения на Render!');
+    return res.status(500).json({ error: 'Server configuration error: No Bot Token' });
+  }
+
   try {
     const response = await fetch(`https://api.telegram.org/bot${botToken}/createInvoiceLink`, {
       method: 'POST',
@@ -151,12 +156,20 @@ app.post('/api/create-invoice', async (req, res) => {
     });
 
     const data = await response.json();
-    if (data.ok) res.json({ url: data.result });
-    else res.status(400).json({ error: 'Ошибка создания счета' });
-  } catch (error) { res.status(500).json({ error: 'Server error' }); }
+    
+    if (data.ok) {
+      res.json({ url: data.result });
+    } else {
+      console.error('❌ Ошибка от Telegram API:', data);
+      res.status(400).json({ error: 'Ошибка создания счета в Telegram' });
+    }
+  } catch (error) { 
+    console.error('❌ Ошибка сервера при создании счета:', error);
+    res.status(500).json({ error: 'Server error' }); 
+  }
 });
 
-// Подтверждение оплаты (для теста)
+// Подтверждение оплаты
 app.post('/api/confirm-payment', async (req, res) => {
   const { userId, amount } = req.body;
   try {
