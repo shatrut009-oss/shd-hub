@@ -78,8 +78,18 @@ main{flex:1;position:relative;overflow:hidden}
 .grab{width:40px;height:4px;border-radius:4px;background:#333;margin:0 auto}
 .arena { position: relative; overflow: hidden; border-radius: 16px; border: 1px dashed var(--line); background: #050507; min-height: 300px; }
 #mGrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 15px; }
-#mGrid > div { transition: background 0.2s; display:flex; align-items:center; justify-content:center; height:50px; border-radius:10px; cursor:pointer; font-size:20px; }
+#mGrid > div { transition: background 0.2s; display:flex; align-items:center; justify-content:center; height:50px; border-radius:10px; cursor:pointer; font-size:20px; background:#15151b; }
 #mGrid > div:active { transform: scale(0.95); }
+
+/* Стили для игры Прятки с мамой */
+.mom-room { position: relative; width: 100%; height: 400px; background: #1a1a24; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px; border: 2px solid #333; }
+.mom-door { width: 80px; height: 140px; background: #4a2c1b; border: 4px solid #2b170c; border-radius: 8px 8px 0 0; position: absolute; right: 20px; bottom: 0; transition: transform 0.3s; }
+.mom-door.open { transform: perspective(400px) rotateY(-60deg); transform-origin: left; }
+.mom-face { font-size: 60px; position: absolute; right: 40px; bottom: 120px; opacity: 0; transition: opacity 0.3s; }
+.mom-face.show { opacity: 1; }
+.mom-desk { width: 150px; height: 80px; background: #2b2b36; border-radius: 10px; position: absolute; left: 20px; bottom: 20px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px; }
+.mom-laptop { width: 60px; height: 40px; background: #000; border: 2px solid #555; border-radius: 4px; }
+.mom-book { width: 40px; height: 10px; background: #ccc; border-radius: 2px; margin: 2px; }
 
 #toast{position:fixed;left:50%;bottom:calc(var(--sb) + 84px);transform:translate(-50%,16px);background:var(--card2);border:1px solid var(--acc);padding:10px 16px;border-radius:14px;font-size:13px;opacity:0;transition:.3s;z-index:80;pointer-events:none;max-width:92vw;text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
