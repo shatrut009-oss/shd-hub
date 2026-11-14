@@ -10,6 +10,21 @@
 </head>
 <body>
 
+<!-- ЗАСТАВКА -->
+<div id="splash">
+  <div class="splash-glow"></div>
+  <svg viewBox="900 310 770 815" aria-hidden="true">
+    <g class="half l" fill="#fff" fill-rule="evenodd">
+      <path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/>
+    </g>
+    <g class="half r" fill="#fff" fill-rule="evenodd">
+      <path d="M1660 322C1627 372 1606 420 1604 455L1602 670L1600 975C1602 1040 1624 1085 1659 1115L1318 970C1304 962 1301 940 1301 910L1301 530C1300 490 1316 462 1346 450Z M1495 510L1493 928L1417 896L1416 542Z"/>
+    </g>
+  </svg>
+  <div class="hint">НАЖМИ, ЧТОБЫ ВОЙТИ</div>
+</div>
+
+<!-- ПРИЛОЖЕНИЕ -->
 <div id="app">
   <header class="top-header">
     <div class="user-info">
@@ -24,21 +39,18 @@
   <main>
     <!-- ЭДИТЫ -->
     <section class="screen active" id="screen-edits"></section>
-    
     <!-- НОВОСТИ -->
     <section class="screen" id="screen-news"></section>
-
     <!-- ПРОФИЛЬ -->
     <section class="screen" id="screen-profile">
       <div style="text-align:center; margin-top:50px;">
         <div class="detail-avatar" id="profAvatar" style="margin-bottom:15px;"></div>
         <h2 id="profName" style="font-family:Oswald; font-size:28px; color:#fff;">Игрок</h2>
-        <p style="color:#8b95a5; margin-bottom:20px;">Добро пожаловать в ШД Hub</p>
-        <button class="btn-buy-lot" style="width:80%; margin:0 auto;" onclick="alert('Оплата Stars скоро появится!')">Пополнить баланс ⭐</button>
       </div>
     </section>
   </main>
 
+  <!-- МЕНЮ -->
   <nav class="bottom-nav">
     <button class="nav-btn active" data-target="screen-edits">
       <div class="nav-icon" style="background:#ff1e3c;">▶️</div><span>Эдиты</span>
