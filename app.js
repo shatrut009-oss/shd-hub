@@ -16,16 +16,16 @@
     clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 1800);
   }
 
+  // Безопасная отправка данных через URL (не ломает сервер)
   async function api(path, opts = {}){
-    const res = await fetch(path, { 
+    const url = new URL(path, window.location.origin);
+    url.searchParams.append('id', me.id);
+    url.searchParams.append('username', me.username);
+    url.searchParams.append('name', me.name);
+
+    const res = await fetch(url.toString(), { 
       ...opts, 
-      headers: { 
-        'Content-Type': 'application/json', 
-        'X-User-Id': me.id, 
-        'X-Username': me.username,
-        'X-Firstname': me.name,
-        ...(opts.headers || {}) 
-      } 
+      headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) } 
     });
     if (!res.ok) throw new Error(`API ${res.status}`);
     return res.json();
@@ -90,14 +90,12 @@
     feed.querySelectorAll('.slide').forEach(s => io.observe(s));
   }
 
-  // Кнопка звука
   $('#soundBtn').addEventListener('click', e => {
     soundOn = !soundOn;
     e.currentTarget.textContent = soundOn ? '🔊 Звук вкл' : '🔇 Звук выкл';
     feed.querySelectorAll('video').forEach(v => v.muted = !soundOn);
   });
 
-  // Лайки
   feed.addEventListener('click', async e => {
     const likeBtn = e.target.closest('.like'); if (!likeBtn) return;
     const isLiked = likeBtn.classList.contains('on');
@@ -179,10 +177,10 @@
 
   // ===== ПРОФИЛЬ =====
   $('#whoLabel').textContent = me.name;
-$('#headerAvatar').textContent = me.name.trim().charAt(0).toUpperCase() || '?';
-$('#profName').textContent = me.name;
-$('#profHandle').textContent = '@' + me.username;
-$('#avatar').textContent = me.name.trim().charAt(0).toUpperCase() || '?';
+  $('#headerAvatar').textContent = me.name.trim().charAt(0).toUpperCase() || '?';
+  $('#profName').textContent = me.name;
+  $('#profHandle').textContent = '@' + me.username;
+  $('#avatar').textContent = me.name.trim().charAt(0).toUpperCase() || '?';
 
   async function loadProfile(){
     try {
@@ -199,7 +197,6 @@ $('#avatar').textContent = me.name.trim().charAt(0).toUpperCase() || '?';
     }
   }
 
-  // Модалка для просмотра медиа
   window.openMedia = (src, type) => {
     const modal = $('#mediaModal');
     const content = $('#mediaContent');
