@@ -11,7 +11,7 @@
 </head>
 <body>
 
-<div id="splash">
+<div id="splash" onclick="shdEnter()">
   <svg viewBox="900 310 770 815" aria-hidden="true">
     <g class="half l" fill="#fff" fill-rule="evenodd"><path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/></g>
     <g class="half r" fill="#fff" fill-rule="evenodd"><path d="M1660 322C1627 372 1606 420 1604 455L1602 670L1600 975C1602 1040 1624 1085 1659 1115L1318 970C1304 962 1301 940 1301 910L1301 530C1300 490 1316 462 1346 450Z M1495 510L1493 928L1417 896L1416 542Z"/></g>
@@ -47,6 +47,18 @@
 <div id="modal" class="modal hidden"><div class="sheet"><div class="grab"></div><div id="mBody"></div><button class="btn g w" data-a="close">Закрыть</button></div></div>
 <div id="toast"></div>
 
+<script>
+  function shdEnter(){
+    const s = document.getElementById('splash');
+    if (!s || s.dataset.go) return;
+    s.dataset.go = '1';
+    s.classList.add('open');
+    setTimeout(() => {
+      s.classList.add('gone');
+      document.getElementById('app').classList.add('on');
+    }, 900);
+  }
+</script>
 <script src="app.js"></script>
 </body>
 </html>
