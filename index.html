@@ -10,16 +10,11 @@
 </head>
 <body>
 
-<!-- ЗАГРУЗОЧНЫЙ ЭКРАН -->
 <div id="splash" role="button">
   <div class="splash-glow"></div>
   <svg viewBox="900 310 770 815" aria-hidden="true">
-    <g class="half l" fill="#fff" fill-rule="evenodd">
-      <path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/>
-    </g>
-    <g class="half r" fill="#fff" fill-rule="evenodd">
-      <path d="M1660 322C1627 372 1606 420 1604 455L1602 670L1600 975C1602 1040 1624 1085 1659 1115L1318 970C1304 962 1301 940 1301 910L1301 530C1300 490 1316 462 1346 450Z M1495 510L1493 928L1417 896L1416 542Z"/>
-    </g>
+    <g class="half l" fill="#fff" fill-rule="evenodd"><path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/></g>
+    <g class="half r" fill="#fff" fill-rule="evenodd"><path d="M1660 322C1627 372 1606 420 1604 455L1602 670L1600 975C1602 1040 1624 1085 1659 1115L1318 970C1304 962 1301 940 1301 910L1301 530C1300 490 1316 462 1346 450Z M1495 510L1493 928L1417 896L1416 542Z"/></g>
   </svg>
   <div class="hint">НАЖМИ, ЧТОБЫ ВОЙТИ</div>
 </div>
@@ -27,11 +22,7 @@
 <div id="app">
   <header>
     <div class="brand">ШД <span style="color:var(--acc)">HUB</span></div>
-    <div class="user-pill">
-      <span id="whoLabel">Гость</span>
-      <img id="headerAvatar" class="avatar-mini" src="" style="display:none;" />
-      <div id="headerAvatarText" class="avatar-mini">?</div>
-    </div>
+    <div class="user-pill"><span id="whoLabel">Гость</span><img id="headerAvatar" class="avatar-mini" src="" style="display:none;" /><div id="headerAvatarText" class="avatar-mini">?</div></div>
   </header>
 
   <main>
@@ -47,11 +38,14 @@
 
       <div class="profile-main">
         <div class="balance-card">
-          <div class="bal-left">
-            <div class="bal-title">Баланс звёзд</div>
-            <div class="bal-amount"><span class="star-icon">⭐</span> <span id="mainStars">0</span></div>
-          </div>
+          <div class="bal-left"><div class="bal-title">Баланс звёзд</div><div class="bal-amount"><span class="star-icon">⭐</span> <span id="mainStars">0</span></div></div>
           <button class="btn-topup" id="btnTopUp">+ Пополнить</button>
+        </div>
+
+        <!-- СТАТИСТИКА ТОП -->
+        <div class="earn-card" id="btnEarn" style="cursor:default;">
+          <div class="earn-title">Топ по монетам актива <span style="color:#5c9aff">Топ-5</span></div>
+          <div id="topList" style="margin-top:10px; font-size:13px; color:#aaa;">Загрузка...</div>
         </div>
 
         <div class="grid-3">
@@ -61,25 +55,19 @@
         </div>
 
         <h2 class="section-title">Кейсы</h2>
-        <div class="case-banner" id="btnCases">
-          <div class="case-title">Открыть кейсы</div>
-          <div class="case-img">🎁</div>
-        </div>
+        <div class="case-banner" id="btnCases"><div class="case-title">Открыть кейсы</div><div class="case-img">🎁</div></div>
 
-        <h2 class="section-title">Лотерея</h2>
+        <h2 class="section-title">Заработок</h2>
         <div class="promo-grid">
-          <div class="promo-item" id="btnLottery"><div class="p-icon">🎟️</div><h3>Лотерея</h3><p>Больше билетов — выше шанс</p></div>
-          <div class="promo-item" id="btnDrops"><div class="p-icon">💧</div><h3>Капельки</h3><p>Обмен на монеты</p></div>
+          <div class="promo-item" id="btnLottery"><div class="p-icon">🎟️</div><h3>Лотерея</h3><p>Купить билет за звезды</p></div>
+          <div class="promo-item" id="btnDaily"><div class="p-icon">💧</div><h3>Капельки</h3><p>Ежедневный бонус +0.5</p></div>
         </div>
       </div>
     </section>
   </main>
 
   <nav id="nav">
-    <button class="on" data-t="edits">Эдиты</button>
-    <button data-t="news">Новости</button>
-    <button data-t="backstage">Закулисье</button>
-    <button data-t="profile">Профиль</button>
+    <button class="on" data-t="edits">Эдиты</button><button data-t="news">Новости</button><button data-t="backstage">Закулисье</button><button data-t="profile">Профиль</button>
   </nav>
 </div>
 
@@ -118,13 +106,8 @@
 <div id="modalTopUp" class="modal-overlay">
   <div class="modal-content">
     <h3 style="font-family:Oswald; font-size:24px; margin-bottom:10px;">Пополнить звёзды</h3>
-    <div class="amount-box">
-      <div style="color:#888; font-size:12px; margin-bottom:5px;">СУММА</div>
-      <div class="amount-display">⭐ <input type="number" id="customAmount" value="250" min="1" style="background:none; border:none; color:#fff; font-size:40px; font-family:Oswald; width:120px; text-align:center; outline:none;"></div>
-    </div>
-    <div class="amount-grid">
-      <button class="amt-btn" data-amt="50">⭐ 50</button><button class="amt-btn" data-amt="100">⭐ 100</button><button class="amt-btn active" data-amt="250">⭐ 250</button><button class="amt-btn" data-amt="500">⭐ 500</button>
-    </div>
+    <div class="amount-box"><div style="color:#888; font-size:12px; margin-bottom:5px;">СУММА</div><div class="amount-display">⭐ <input type="number" id="customAmount" value="250" min="1" style="background:none; border:none; color:#fff; font-size:40px; font-family:Oswald; width:120px; text-align:center; outline:none;"></div></div>
+    <div class="amount-grid"><button class="amt-btn" data-amt="50">⭐ 50</button><button class="amt-btn" data-amt="100">⭐ 100</button><button class="amt-btn active" data-amt="250">⭐ 250</button><button class="amt-btn" data-amt="500">⭐ 500</button></div>
     <button class="btn-pay" id="btnPay">Оплатить ⭐ <span id="payAmount">250</span></button>
     <button class="btn-close" id="closeTopUp">Закрыть</button>
   </div>
