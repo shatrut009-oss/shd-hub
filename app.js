@@ -6,6 +6,7 @@
   if (TG) { TG.ready(); TG.expand(); }
   const TGU = (TG && TG.initDataUnsafe && TG.initDataUnsafe.user) || {};
   
+  // Данные профиля
   if (TGU.id) {
     $('#userName').textContent = [TGU.first_name, TGU.last_name].filter(Boolean).join(' ') || 'Гость';
     $('#userTag').textContent = TGU.username ? '@' + TGU.username : '';
@@ -15,6 +16,15 @@
       $('#profAvatar').style.backgroundImage = `url('${TGU.photo_url}')`;
     }
   }
+
+  // ЗАСТАВКА
+  $('#splash').addEventListener('click', () => {
+    $('#splash').classList.add('open');
+    setTimeout(() => { 
+      $('#splash').classList.add('gone'); 
+      $('#app').classList.add('on'); 
+    }, 800);
+  });
 
   // ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
   $$('.nav-btn').forEach(btn => {
@@ -29,7 +39,7 @@
     });
   });
 
-  // ЗАГРУЗКА ЭДИТОВ
+  // ЗАГРУЗКА ЭДИТОВ (видео)
   async function loadEdits() {
     const el = $('#screen-edits');
     el.innerHTML = '<div style="text-align:center; margin-top:50px; color:#8b95a5;">Загрузка видео...</div>';
@@ -86,6 +96,7 @@
     try {
       const res = await fetch('/api/posts?type=news');
       const items = await res.json();
+      
       el.innerHTML = `<h2 style="font-family:Oswald; font-size:28px; color:#fff; margin-bottom:15px;">Новости</h2>
       ${items.length ? items.map(n => `
         <article class="post">
