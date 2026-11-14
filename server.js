@@ -6,9 +6,9 @@ const { Pool } = require('pg');
 const BOT_TOKEN = process.env.BOT_TOKEN || '';
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || '';
 const WEBAPP_URL = process.env.WEBAPP_URL || '';
-const DEV_MODE = process.env.DEV_MODE === '1'; // только для проверки в браузере, на проде выключить
+const DEV_MODE = process.env.DEV_MODE === '1';
 const TG_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
-const MIN = 6e4, HOUR = 36e5, DAY = 864e5;
+const MIN = 6e4, DAY = 864e5, HOUR = 36e5;
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -17,30 +17,63 @@ const pool = new Pool({
 
 const app = express();
 app.use(express.json({ limit: '50kb' }));
+app.use('/characters', express.static(path.join(__dirname, 'characters')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ---------- ИГРОВЫЕ ДАННЫЕ (только на сервере) ----------
 const RAR = {
-  common:  { ru: 'Обычный',      pts: 1 },
-  rare:    { ru: 'Редкий',       pts: 2 },
-  epic:    { ru: 'Эпический',    pts: 4 },
-  legend:  { ru: 'Легендарный',  pts: 6 },
-  mythic:  { ru: 'Мифический',   pts: 10 }
+  common: { ru: 'Обычный',     pts: 1 },
+  rare:   { ru: 'Редкий',      pts: 2 },
+  epic:   { ru: 'Эпический',   pts: 4 },
+  legend: { ru: 'Легендарный', pts: 6 },
+  mythic: { ru: 'Мифический',  pts: 10 }
 };
 const CHARS = {
-  common: ['Дима (Балаклава)', 'Дима', 'Ксюша (Розовый)', 'Ксюша (Школа)', 'Ксюша (Куртка)'],
-  rare:   ['Рита (Коктейль)', 'Рита', 'Алёна (Ванная)', 'Алёна (Лента)', 'Алёна'],
-  epic:   ['Саламандра (Машина)', 'Саламандра', 'Наташа (Школа)', 'Наташа (Цветок)', 'Наташа', 'Наташа (Улыбка)'],
-  legend: ['Гладенко (Боксер)', 'Гладенко (Врач)', 'Гладенко (Строитель)', 'Гладенко (Костюм)', 'Гладенко', 'Гладенко (Портрет)'],
-  mythic: ['Миллкис (Чокер)', 'Миллкис (Зелёная маска)', 'Миллкис', 'Миллкис (Экшн)']
+  common: [
+    { name: 'Дима (Балаклава)', img: '/characters/01.jpg' },
+    { name: 'Дима',             img: '/characters/02.jpg' },
+    { name: 'Ксюша (Розовый)',  img: '/characters/03.jpg' },
+    { name: 'Ксюша (Школа)',    img: '/characters/04.jpg' },
+    { name: 'Ксюша (Куртка)',   img: '/characters/05.jpg' }
+  ],
+  rare: [
+    { name: 'Рита (Коктейль)', img: '/characters/06.jpg' },
+    { name: 'Рита',            img: '/characters/07.jpg' },
+    { name: 'Алёна (Ванная)',  img: '/characters/08.jpg' },
+    { name: 'Алёна (Лента)',   img: '/characters/09.jpg' },
+    { name: 'Алёна',           img: '/characters/10.jpg' }
+  ],
+  epic: [
+    { name: 'Саламандра (Машина)', img: '/characters/11.jpg' },
+    { name: 'Саламандра',          img: '/characters/12.jpg' },
+    { name: 'Наташа (Школа)',      img: '/characters/13.jpg' },
+    { name: 'Наташа (Цветок)',     img: '/characters/14.jpg' },
+    { name: 'Наташа',              img: '/characters/15.jpg' },
+    { name: 'Наташа (Улыбка)',     img: '/characters/16.jpg' }
+  ],
+  legend: [
+    { name: 'Гладенко (Боксер)',    img: '/characters/17.jpg' },
+    { name: 'Гладенко (Врач)',      img: '/characters/18.jpg' },
+    { name: 'Гладенко (Строитель)', img: '/characters/19.jpg' },
+    { name: 'Гладенко (Костюм)',    img: '/characters/20.jpg' },
+    { name: 'Гладенко',             img: '/characters/21.jpg' },
+    { name: 'Гладенко (Портрет)',   img: '/characters/22.jpg' }
+  ],
+  mythic: [
+    { name: 'Миллкис (Чокер)',         img: '/characters/23.jpg' },
+    { name: 'Миллкис (Зелёная маска)', img: '/characters/24.jpg' },
+    { name: 'Миллкис',                 img: '/characters/25.jpg' },
+    { name: 'Миллкис (Экшн)',          img: '/characters/26.jpg' }
+  ]
 };
+const IMG = Object.fromEntries(Object.values(CHARS).flat().map(c => [c.name, c.img]));
 const BG = { 'Без фона': 60, 'Дневник': 25, 'Школа ночью': 12, 'Неон': 3 };
 const CASES = {
-  free:  { free: true, odds: { common: 60, rare: 28, epic: 8, legend: 3, mythic: 0.5, coin: 0.5 } },
+  free:  { free: true, odds: { common: 60, rare: 28, epic: 8,   legend: 3,   mythic: 0.5, coin: 0.5 } },
   diary: { cost: 3,  cur: 'coins', odds: { common: 58, rare: 28, epic: 9,   legend: 2.5, mythic: 0.5, coin: 2 } },
   cheat: { cost: 10, cur: 'stars', odds: { common: 54, rare: 30, epic: 11,  legend: 3.5, mythic: 0.5, coin: 1 } },
   stick: { cost: 13, cur: 'stars', odds: { common: 45, rare: 35, epic: 14,  legend: 4.5, mythic: 0.5, coin: 1 } }
 };
-// Покупки, которые списываются на сервере (клан, замазки)
 const SPENDS = {
   clan_create: { cur: 'stars', cost: 8 },
   clan_member: { cur: 'stars', cost: 4 },
@@ -51,7 +84,7 @@ const SPENDS = {
   mazka_m3_s:  { cur: 'stars', cost: 40 }
 };
 
-// Лотереи пока в памяти сервера (сбрасываются при перезапуске)
+// Лотереи пока в памяти сервера
 const LOTS = [
   { id: 1, prize: 'Ксюша (Розовый)',   rar: 'common', ends: Date.now() + 2 * MIN,  pool: { 'Лена': 12, 'Вика': 30, 'Игорь': 7 }, tk: {}, draw: null },
   { id: 2, prize: 'Гладенко (Боксер)', rar: 'legend', ends: Date.now() + 5 * MIN,  pool: { 'Саша': 9, 'Марина': 4 },            tk: {}, draw: null },
@@ -78,7 +111,8 @@ async function initDb(){
       ADD COLUMN IF NOT EXISTS last_ruch TIMESTAMPTZ,
       ADD COLUMN IF NOT EXISTS last_kap TIMESTAMPTZ,
       ADD COLUMN IF NOT EXISTS lvl_tap INTEGER DEFAULT 1,
-      ADD COLUMN IF NOT EXISTS lvl_mem INTEGER DEFAULT 1;
+      ADD COLUMN IF NOT EXISTS best_drop INTEGER DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS last_drop TIMESTAMPTZ;
     ALTER TABLE inventory
       ADD COLUMN IF NOT EXISTS tirage INTEGER,
       ADD COLUMN IF NOT EXISTS bg TEXT;
@@ -132,11 +166,13 @@ const view = u => ({
   dailyAt: u.last_daily ? new Date(u.last_daily).getTime() : 0,
   ruchAt: u.last_ruch ? new Date(u.last_ruch).getTime() : 0,
   kapAt: u.last_kap ? new Date(u.last_kap).getTime() : 0,
+  dropAt: u.last_drop ? new Date(u.last_drop).getTime() : 0,
+  bestDrop: u.best_drop || 0,
   joined: new Date(u.created_at).getTime(),
-  lvl: { tap: u.lvl_tap || 1, mem: u.lvl_mem || 1 }
+  lvl: { tap: u.lvl_tap || 1 }
 });
 
-// Персонаж выдаётся внутри транзакции: номер тиража, фон и очки рейтинга
+// Персонаж выдаётся внутри транзакции: тираж, фон и очки рейтинга
 async function grantChar(db, uid, name, rar){
   const { rows: [t] } = await db.query('SELECT COALESCE(MAX(tirage), 0) + 1 AS n FROM inventory');
   const tir = t.n;
@@ -146,7 +182,7 @@ async function grantChar(db, uid, name, rar){
     'INSERT INTO inventory (user_id, character_name, rarity, tirage, bg) VALUES ($1,$2,$3,$4,$5)',
     [uid, name, rar, tir, bg]);
   await db.query('UPDATE users SET points = points + $2 WHERE id = $1', [uid, pts]);
-  return { name, rar, tir, bg };
+  return { name, rar, tir, bg, img: IMG[name] || null };
 }
 
 // ---------- AUTH (подпись initData от Telegram) ----------
@@ -187,7 +223,7 @@ app.get('/api/inventory', auth, wrap(async (req, res) => {
   const { rows } = await pool.query(
     `SELECT character_name AS name, rarity AS rar, tirage AS tir, bg
      FROM inventory WHERE user_id = $1 ORDER BY tirage ASC`, [req.uid]);
-  res.json(rows);
+  res.json(rows.map(r => ({ ...r, img: IMG[r.name] || null })));
 }));
 
 app.get('/api/leaderboard', auth, wrap(async (req, res) => {
@@ -218,13 +254,14 @@ app.post('/api/open-case', auth, wrap(async (req, res) => {
       return { coin: true };
     }
     const list = CHARS[r];
-    return grantChar(db, req.uid, list[rnd(list.length)], r);
+    const ch = list[rnd(list.length)];
+    return grantChar(db, req.uid, ch.name, r);
   });
 
   res.json({ result });
 }));
 
-// ---------- ЕЖЕЧАСНЫЕ РУЧКИ И КАПЕЛЬКИ ----------
+// ---------- РУЧКИ, КАПЕЛЬКИ, ПОДПИСКА ----------
 app.post('/api/ruch', auth, wrap(async (req, res) => {
   const gain = 5 + rnd(21);
   const r = await pool.query(
@@ -274,14 +311,14 @@ app.post('/api/subscribe', auth, wrap(async (req, res) => {
 
 // ---------- ТРАТЫ (клан, замазки, общак) ----------
 app.post('/api/spend', auth, wrap(async (req, res) => {
-  const { key } = req.body || {};
-  const amount = Number((req.body || {}).amount);
+  const body = req.body || {};
   let cur, cost;
-  if (key === 'treasury') {
+  if (body.key === 'treasury') {
+    const amount = Number(body.amount);
     if (!Number.isInteger(amount) || amount < 1) fail(400, 'Некорректное количество');
     cur = 'ruch'; cost = amount;
   } else {
-    const s = SPENDS[key];
+    const s = SPENDS[body.key];
     if (!s) fail(400, 'Неизвестная покупка');
     cur = s.cur; cost = s.cost;
   }
@@ -293,18 +330,31 @@ app.post('/api/spend', auth, wrap(async (req, res) => {
   res.json({ ok: true });
 }));
 
-// ---------- ИГРЫ ----------
-app.post('/api/game-win', auth, wrap(async (req, res) => {
-  const { game } = req.body || {};
-  const lvl = Number((req.body || {}).lvl);
-  const col = game === 'tap' ? 'lvl_tap' : game === 'mem' ? 'lvl_mem' : null;
-  if (!col) fail(400, 'Неизвестная игра');
-  // Засчитываем только текущий уровень пользователя, повторы не дают награду
+// ---------- БЕСКОНЕЧНЫЕ ИГРЫ ----------
+// Табаска: уровень засчитывается, только если совпадает с текущим уровнем пользователя
+app.post('/api/game/tap', auth, wrap(async (req, res) => {
+  const level = Number((req.body || {}).level);
   const r = await pool.query(
-    `UPDATE users SET ruch = ruch + 10, ${col} = LEAST(11, ${col} + 1)
-     WHERE id = $1 AND ${col} = $2 AND ${col} <= 10 RETURNING id`, [req.uid, lvl]);
+    `UPDATE users
+       SET ruch = ruch + LEAST(80, 10 + (FLOOR(lvl_tap / 3.0) * 2))::int,
+           lvl_tap = lvl_tap + 1
+     WHERE id = $1 AND lvl_tap = $2
+     RETURNING lvl_tap`, [req.uid, level]);
   if (!r.rowCount) fail(409, 'Уровень уже засчитан');
-  res.json({ ok: true });
+  res.json({ ok: true, level: r.rows[0].lvl_tap });
+}));
+
+// Ловля капелек: награда из счёта, не больше 100 ✎, один забег в минуту
+app.post('/api/game/drop', auth, wrap(async (req, res) => {
+  const score = Math.max(0, Math.min(500, Math.floor(Number((req.body || {}).score)) || 0));
+  const gain = Math.min(100, Math.floor(score / 5));
+  const r = await pool.query(
+    `UPDATE users
+       SET ruch = ruch + $2, best_drop = GREATEST(best_drop, $3), last_drop = NOW()
+     WHERE id = $1 AND (last_drop IS NULL OR last_drop <= NOW() - INTERVAL '60 seconds')
+     RETURNING id`, [req.uid, gain, score]);
+  if (!r.rowCount) fail(429, 'Новый забег будет доступен через минуту');
+  res.json({ ok: true, gain });
 }));
 
 // ---------- ЛОТЕРЕИ ----------
@@ -375,7 +425,6 @@ app.post('/api/create-invoice', auth, wrap(async (req, res) => {
   res.json({ url });
 }));
 
-// Вебхук бота: /start с кнопкой, подтверждение оплаты и зачисление звёзд
 app.post('/telegram-webhook', async (req, res) => {
   if (WEBHOOK_SECRET && req.get('x-telegram-bot-api-secret-token') !== WEBHOOK_SECRET) return res.sendStatus(403);
   res.sendStatus(200);
@@ -404,9 +453,7 @@ app.post('/telegram-webhook', async (req, res) => {
 });
 
 // ---------- СТАТИКА ----------
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-app.get('/style.css', (req, res) => res.sendFile(path.join(__dirname, 'style.css')));
-app.get('/app.js', (req, res) => res.sendFile(path.join(__dirname, 'app.js')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 const PORT = process.env.PORT || 3000;
 initDb()
