@@ -11,7 +11,7 @@
 <body>
 
 <div id="app">
-  <!-- ШАПКА (Фото 13) -->
+  <!-- ШАПКА -->
   <header class="top-header">
     <div class="user-info">
       <div class="avatar" id="userAvatar"></div>
@@ -21,108 +21,136 @@
       </div>
     </div>
     <div class="balances">
-      <div class="bal-item star"><span class="ico">⭐</span> <span id="balStars">0</span></div>
-      <div class="bal-item coin"><span class="ico">⚡</span> <span id="balCoins">0</span></div>
-      <div class="bal-item tg"><span class="ico">✈️</span> <span id="balTg">0</span></div>
+      <div class="bal-item star"><span class="ico">⭐</span> <span id="headerStars">0</span></div>
+      <div class="bal-item coin"><span class="ico">⚡</span> <span id="headerCoins">0</span></div>
+      <div class="bal-item tg"><span class="ico">✈️</span> <span id="headerTg">0</span></div>
     </div>
   </header>
 
   <main>
-    <!-- ГЛАВНЫЙ ЭКРАН (Фото 1) -->
+    <!-- ГЛАВНЫЙ ЭКРАН -->
     <section class="screen active" id="screen-home">
-      
-      <!-- Большой баннер -->
       <div class="promo-banner">
         <div class="promo-text">
           <h1>ИГРА ОТ ШГШ 🔥</h1>
           <p>Школа Романтики — решения за тобой.</p>
           <button class="btn-play">🔴 ИГРАТЬ <span>→</span></button>
         </div>
-        <div class="promo-dots">
-          <span></span><span class="active"></span><span></span><span></span><span></span>
-        </div>
+        <div class="promo-dots"><span></span><span class="active"></span><span></span></div>
       </div>
 
-      <!-- Маленький баннер (Школа Романтики) -->
       <div class="mini-banner" style="background: linear-gradient(90deg, #1a0b2e, #3b0e3e);">
-        <div class="mb-text">
-          <h2>ШКОЛА РОМАНТИКИ</h2>
-          <span class="badge red">ИГРА ОТ ШГШ</span>
-        </div>
+        <div class="mb-text"><h2>ШКОЛА РОМАНТИКИ</h2><span class="badge red">ИГРА ОТ ШГШ</span></div>
         <div class="mb-img">👩‍🎓👨‍🎓</div>
-        <span class="badge new">НОВОЕ</span>
       </div>
 
-      <!-- Магазин (Фото 5) -->
       <div class="action-card" style="background: linear-gradient(90deg, #b48520, #e0b33c);">
-        <div class="ac-text">
-          <h2>Магазин</h2>
-          <span class="badge white">НОВОЕ</span>
-        </div>
+        <div class="ac-text"><h2>Магазин</h2><span class="badge white">НОВОЕ</span></div>
         <div class="ac-img">🛒</div>
       </div>
 
-      <!-- NFT Актеры -->
       <div class="action-card" style="background: linear-gradient(90deg, #6a2c91, #9b51e0);">
-        <div class="ac-text">
-          <h2>НФТ актёры</h2>
-          <span class="badge dark">ПОПУЛЯРНОЕ</span>
-        </div>
+        <div class="ac-text"><h2>НФТ актёры</h2><span class="badge dark">ПОПУЛЯРНОЕ</span></div>
         <div class="ac-img">🖼️</div>
       </div>
+    </section>
 
-      <!-- Кейсы -->
-      <div class="action-card" style="background: linear-gradient(90deg, #a11f1f, #e63946);">
-        <div class="ac-text">
-          <h2>Кейсы</h2>
-          <span class="badge white">ОТКРОЙ БЕСПЛАТНО</span>
+    <!-- ЭКРАН ПРОФИЛЯ (Фото 14) -->
+    <section class="screen" id="screen-profile">
+      <!-- Кошелек -->
+      <div class="bal-card">
+        <div class="bc-top">
+          <div class="bc-label">Баланс звёзд</div>
+          <div class="bc-val"><span class="ico-star">⭐</span> <span id="profStars">0</span></div>
         </div>
-        <div class="ac-img">🎁</div>
+        <button class="btn-topup" data-a="topup">+ Пополнить</button>
+        <div class="bc-bottom">
+          <div class="bc-stat"><span class="ico-coin">⚡</span> <b id="profCoins">0</b> <span>актива</span></div>
+          <div class="bc-stat"><span class="ico-tg">✈️</span> <b>0</b> <span>предложки</span></div>
+          <div class="bc-stat"><span class="ico-nft">🖼️</span> <b>0</b> <span>НФТ</span></div>
+        </div>
       </div>
 
+      <!-- Сетка 6 кнопок -->
+      <div class="prof-grid">
+        <button class="prof-tile" data-a="detailed-profile">
+          <div class="pt-icon bg-blue">👤</div><span>Мой профиль</span>
+        </button>
+        <button class="prof-tile" data-a="history">
+          <div class="pt-icon bg-blue">🕒</div><span>История</span>
+        </button>
+        <button class="prof-tile" data-a="orders">
+          <div class="pt-icon bg-orange">📦</div><span>Мои заказы</span>
+        </button>
+        <button class="prof-tile" data-a="nft">
+          <div class="pt-icon bg-purple">🖼️</div><span>Мои НФТ</span>
+        </button>
+        <button class="prof-tile" data-a="clan">
+          <div class="pt-icon bg-green">🛡️</div><span>Мой клан</span>
+        </button>
+        <button class="prof-tile" data-a="earn">
+          <div class="pt-icon bg-red">⚡</div><span>Заработать</span>
+        </button>
+      </div>
+
+      <!-- Промо блоки -->
+      <div class="promo-grid-2">
+        <div class="p-card bg-brown">
+          <div class="pc-text"><h3>Кейсы</h3><p>Призы сразу на баланс</p></div>
+        </div>
+        <div class="p-card bg-dark-purple">
+          <div class="pc-text"><h3>Кружок актёра</h3><p>Видео-привет лично тебе</p></div>
+        </div>
+      </div>
     </section>
 
-    <!-- ЗАГЛУШКИ ДЛЯ ДРУГИХ ЭКРАНОВ -->
-    <section class="screen" id="screen-games">
-      <h2 style="color:#fff; margin-top:20px; text-align:center;">Игры скоро появятся...</h2>
-    </section>
-    <section class="screen" id="screen-rating">
-      <h2 style="color:#fff; margin-top:20px; text-align:center;">Рейтинг скоро появится...</h2>
-    </section>
-    <section class="screen" id="screen-lottery">
-      <h2 style="color:#fff; margin-top:20px; text-align:center;">Лотерея скоро появится...</h2>
-    </section>
-    <section class="screen" id="screen-nft">
-      <h2 style="color:#fff; margin-top:20px; text-align:center;">NFT скоро появятся...</h2>
-    </section>
-    <section class="screen" id="screen-profile">
-      <h2 style="color:#fff; margin-top:20px; text-align:center;">Профиль скоро появится...</h2>
-    </section>
+    <!-- ДРУГИЕ ЭКРАНЫ -->
+    <section class="screen" id="screen-games"><h2 style="color:#fff; margin-top:20px; text-align:center;">Игры...</h2></section>
+    <section class="screen" id="screen-rating"><h2 style="color:#fff; margin-top:20px; text-align:center;">Рейтинг...</h2></section>
+    <section class="screen" id="screen-lottery"><h2 style="color:#fff; margin-top:20px; text-align:center;">Лотерея...</h2></section>
+    <section class="screen" id="screen-nft"><h2 style="color:#fff; margin-top:20px; text-align:center;">НФТ...</h2></section>
   </main>
 
-  <!-- НИЖНЕЕ МЕНЮ (Фото 1) -->
+  <!-- НИЖНЕЕ МЕНЮ -->
   <nav class="bottom-nav">
-    <button class="nav-btn active" data-target="screen-games">
-      <div class="nav-icon" style="background:#ff1e3c;">🎮</div>
-      <span>Игры</span>
-    </button>
-    <button class="nav-btn" data-target="screen-rating">
-      <div class="nav-icon" style="background:transparent;">🏆</div>
-      <span>Рейтинг</span>
-    </button>
-    <button class="nav-btn" data-target="screen-lottery">
-      <div class="nav-icon" style="background:transparent;">🎟️</div>
-      <span>Лотерея</span>
-    </button>
-    <button class="nav-btn" data-target="screen-nft">
-      <div class="nav-icon" style="background:transparent;">✨</div>
-      <span>НФТ</span>
-    </button>
-    <button class="nav-btn" data-target="screen-profile">
-      <div class="nav-icon" style="background:transparent;">👤</div>
-      <span>Профиль</span>
-    </button>
+    <button class="nav-btn" data-target="screen-games"><div class="nav-icon" style="background:#ff1e3c;">🎮</div><span>Игры</span></button>
+    <button class="nav-btn" data-target="screen-rating"><div class="nav-icon">🏆</div><span>Рейтинг</span></button>
+    <button class="nav-btn" data-target="screen-lottery"><div class="nav-icon">🎟️</div><span>Лотерея</span></button>
+    <button class="nav-btn" data-target="screen-nft"><div class="nav-icon">✨</div><span>НФТ</span></button>
+    <button class="nav-btn active" data-target="screen-profile"><div class="nav-icon" style="background:transparent;">👤</div><span>Профиль</span></button>
   </nav>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО (ДЛЯ ВСЕГО) -->
+<div id="modal" class="modal-overlay hidden">
+  <div class="modal-sheet">
+    <div class="grab"></div>
+    <div id="modalContent"></div>
+    <button class="btn-close" data-a="close">Закрыть</button>
+  </div>
+</div>
+
+<!-- ДЕТАЛЬНЫЙ ПРОФИЛЬ (ФОТО 12) -->
+<div id="modal-detail" class="modal-overlay hidden">
+  <div class="modal-sheet" style="height: 90vh;">
+    <div class="grab"></div>
+    <div style="text-align:center; padding:20px 0;">
+      <div class="detail-avatar" id="detailAvatar"></div>
+      <h2 id="detailName" style="font-family:Oswald; font-size:28px; margin-top:10px;">Name</h2>
+      <div id="detailTag" style="color:#8b95a5; font-size:14px; margin-bottom:15px;">@tag</div>
+    </div>
+    <div class="detail-stats">
+      <div class="ds-item"><b>#140</b><span>место в НФТ</span></div>
+      <div class="ds-item"><b id="detailPoints">0</b><span>очков</span></div>
+      <div class="ds-item"><b id="detailItems">0</b><span>экземпляров</span></div>
+    </div>
+    <div class="detail-tabs">
+      <button class="dt-btn active">Коллекция</button>
+      <button class="dt-btn">Награды</button>
+    </div>
+    <div id="showcase" class="detail-showcase"></div>
+    <button class="btn-close" data-a="close" style="margin-top:20px;">Назад</button>
+  </div>
 </div>
 
 <script src="app.js"></script>
