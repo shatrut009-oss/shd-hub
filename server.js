@@ -23,34 +23,49 @@ async function fetchTelegramPosts(channels, type) {
       const $ = cheerio.load(html);
       
       $('.tgme_widget_message').each((i, el) => {
+        // 1. Пропускаем закрепленные сообщения
+        if ($(el).hasClass('tgme_widget_message_pinned')) return;
+
+        // 2. Сохраняем переносы строк в тексте
+        $(el).find('.tgme_widget_message_text').find('br').replaceWith('\n');
         const text = $(el).find('.tgme_widget_message_text').text().trim();
         
-        // Картинки
+        // 3. Ищем картинки
         const imgStyle = $(el).find('.tgme_widget_message_photo_wrap').attr('style');
         const image = imgStyle ? imgStyle.match(/url\('(.*)'\)/)?.[1] : null;
         
-        // Видео (только прямые mp4)
+        // 4. Ищем видео
         const videoTag = $(el).find('.tgme_widget_message_video_wrap video');
         const videoUrl = videoTag.length ? videoTag.attr('src') : null;
-        
-        // В Эдиты берем только если есть фото или видео
-        if (type === 'edits' && !image && !videoUrl) return;
+
+        // 5. ЖЕСТКИЙ ФИЛЬТР СПАМА
+        // Если нет картинки, нет видео и текст меньше 15 символов — это мусор
+        if (!image && !videoUrl && text.length < 15) return; 
+        // Если это просто ссылка без текста
+        if (!image && !videoUrl && text.startsWith('http') && text.split(' ').length === 1) return;
+
+        // 6. Получаем дату
+        const dateStr = $(el).find('time').attr('datetime') || new Date().toISOString();
+        const timestamp = new Date(dateStr).getTime();
 
         allPosts.push({ 
           id: $(el).attr('data-post') || `${channel}-${i}`, 
           type, 
           author: channel, 
-          text: text || '', 
+          text, 
           image, 
           videoUrl, 
-          date: new Date($(el).find('time').attr('datetime') || Date.now()).getTime() 
+          date: timestamp
         });
       });
     } catch (e) { console.error(`Ошибка парсинга ${channel}:`, e.message); }
   }
   
-  // Сортируем: самые новые сверху
-  return allPosts.sort((a, b) => b.date - a.date);
+  // Сортируем: новые сверху
+  allPosts.sort((a, b) => b.date - a.date);
+  
+  // Отдаем только 50 самых свежих постов, чтобы не грузить ленту бесконечно
+  return allPosts.slice(0, 50);
 }
 
 app.get('/api/posts', async (req, res) => {
