@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ШД Hub</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.ready();</script>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -12,76 +13,40 @@
 
 <div id="splash">
   <svg viewBox="900 310 770 815" aria-hidden="true">
-    <g class="half l" fill="#fff" fill-rule="evenodd">
-      <path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/>
-    </g>
-    <g class="half r" fill="#fff" fill-rule="evenodd">
-      <path d="M1660 322C1627 372 1606 420 1604 455L1602 670L1600 975C1602 1040 1624 1085 1659 1115L1318 970C1304 962 1301 940 1301 910L1301 530C1300 490 1316 462 1346 450Z M1495 510L1493 928L1417 896L1416 542Z"/>
-    </g>
+    <g class="half l" fill="#fff" fill-rule="evenodd"><path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/></g>
+    <g class="half r" fill="#fff" fill-rule="evenodd"><path d="M1660 322C1627 372 1606 420 1604 455L1602 670L1600 975C1602 1040 1624 1085 1659 1115L1318 970C1304 962 1301 940 1301 910L1301 530C1300 490 1316 462 1346 450Z M1495 510L1493 928L1417 896L1416 542Z"/></g>
   </svg>
   <div class="hint">НАЖМИ, ЧТОБЫ ВОЙТИ</div>
 </div>
 
 <div id="app">
-  <header class="topbar">
-    <div class="user">
-      <div class="avatar" id="avatar"></div>
-      <div>
-        <div class="nick" id="nick">Гость</div>
-        <div class="sub">профиль</div>
-      </div>
-    </div>
+  <header class="top">
+    <div class="user"><div class="av" id="av"></div><div class="nick" id="nick"></div></div>
     <div class="chips">
-      <span class="chip">★ <b id="chipStars">0</b></span>
-      <span class="chip coin">◆ <b id="chipCoins">0</b></span>
+      <span class="chip s">★<b id="cS">0</b></span>
+      <span class="chip c">◆<b id="cC">0</b></span>
+      <span class="chip r">✎<b id="cR">0</b></span>
     </div>
   </header>
-
   <main>
-    <section class="card balance">
-      <div>
-        <div class="label">Баланс звёзд</div>
-        <div class="big">★ <span id="bigStars">0</span></div>
-      </div>
-      <button class="btn-primary" data-open="topup">+ Пополнить</button>
-    </section>
-
-    <section class="menu">
-      <button class="tile" data-open="history"><span class="ico">🕘</span>История</button>
-      <button class="tile" data-open="inventory"><span class="ico">🎭</span>Мои персонажи</button>
-      <button class="tile" data-open="cases"><span class="ico">🎁</span>Кейсы</button>
-    </section>
-
-    <section class="card">
-      <div class="label">Заработать</div>
-      <button class="btn-primary wide" id="dailyBtn">Ежедневный бонус</button>
-      <div class="sub" id="dailyTxt">Серия: 0 дн.</div>
-      <button class="btn-ghost wide" disabled>Лотерея · скоро</button>
-    </section>
-
-    <section class="card">
-      <div class="label">Топ-5 по монетам</div>
-      <ol class="top" id="top"></ol>
-    </section>
+    <section class="screen on" id="sc-home"></section>
+    <section class="screen" id="sc-news"></section>
+    <section class="screen" id="sc-games"></section>
+    <section class="screen" id="sc-lot"></section>
+    <section class="screen" id="sc-clan"></section>
   </main>
-
-  <nav class="tabs">
-    <button class="on">Эдиты</button>
-    <button data-soon="1">Новости</button>
-    <button data-soon="1">Закулисье</button>
-    <button>Профиль</button>
+  <nav class="tabs" id="tabs">
+    <button class="tab on" data-tab="home">Профиль</button>
+    <button class="tab" data-tab="news">Новости</button>
+    <button class="tab" data-tab="games">Игры</button>
+    <button class="tab" data-tab="lot">Лотерея</button>
+    <button class="tab" data-tab="clan">Кланы</button>
   </nav>
 </div>
 
-<div id="modal" class="modal hidden">
-  <div class="sheet">
-    <div class="grab"></div>
-    <div id="modalBody"></div>
-    <button id="modalClose" class="btn-ghost wide">Закрыть</button>
-  </div>
-</div>
-
+<div id="modal" class="modal hidden"><div class="sheet"><div class="grab"></div><div id="mBody"></div><button class="btn g w" data-a="close">Закрыть</button></div></div>
 <div id="toast"></div>
+
 <script src="app.js"></script>
 </body>
 </html>
