@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ШД Hub</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
@@ -10,119 +10,77 @@
 </head>
 <body>
 
-<div id="splash" role="button">
-  <div class="splash-glow"></div>
+<div id="splash">
   <svg viewBox="900 310 770 815" aria-hidden="true">
-    <g class="half l" fill="#fff" fill-rule="evenodd"><path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/></g>
-    <g class="half r" fill="#fff" fill-rule="evenodd"><path d="M1660 322C1627 372 1606 420 1604 455L1602 670L1600 975C1602 1040 1624 1085 1659 1115L1318 970C1304 962 1301 940 1301 910L1301 530C1300 490 1316 462 1346 450Z M1495 510L1493 928L1417 896L1416 542Z"/></g>
+    <g class="half l" fill="#fff" fill-rule="evenodd">
+      <path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/>
+    </g>
+    <g class="half r" fill="#fff" fill-rule="evenodd">
+      <path d="M1660 322C1627 372 1606 420 1604 455L1602 670L1600 975C1602 1040 1624 1085 1659 1115L1318 970C1304 962 1301 940 1301 910L1301 530C1300 490 1316 462 1346 450Z M1495 510L1493 928L1417 896L1416 542Z"/>
+    </g>
   </svg>
   <div class="hint">НАЖМИ, ЧТОБЫ ВОЙТИ</div>
 </div>
 
 <div id="app">
-  <header>
-    <div class="brand">ШД <span style="color:var(--acc)">HUB</span></div>
-    <div class="user-pill"><span id="whoLabel">Гость</span><img id="headerAvatar" class="avatar-mini" src="" style="display:none;" /><div id="headerAvatarText" class="avatar-mini">?</div></div>
+  <header class="topbar">
+    <div class="user">
+      <div class="avatar" id="avatar"></div>
+      <div>
+        <div class="nick" id="nick">Гость</div>
+        <div class="sub">профиль</div>
+      </div>
+    </div>
+    <div class="chips">
+      <span class="chip">★ <b id="chipStars">0</b></span>
+      <span class="chip coin">◆ <b id="chipCoins">0</b></span>
+    </div>
   </header>
 
   <main>
-    <section class="screen active" data-s="edits"><button class="sound-btn" id="soundBtn">🔇 Звук выкл</button><div class="feed" id="feed"></div></section>
-    <section class="screen" data-s="news"><h2 class="page-title">Новости</h2><div id="newsList"></div></section>
-    <section class="screen" data-s="backstage"><h2 class="page-title">Закулисье</h2><p class="page-sub">Откроется при 50 лайках</p><div id="backList"></div></section>
-
-    <section class="screen" data-s="profile" style="padding:0; background:#07070a;">
-      <div class="top-bar">
-        <div class="top-item"><img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" class="ico-img"> <b id="topStars">0</b></div>
-        <div class="top-item"><img src="https://cdn-icons-png.flaticon.com/512/616/616494.png" class="ico-img" style="filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg);"> <b id="topCoins">0</b></div>
+    <section class="card balance">
+      <div>
+        <div class="label">Баланс звёзд</div>
+        <div class="big">★ <span id="bigStars">0</span></div>
       </div>
+      <button class="btn-primary" data-open="topup">+ Пополнить</button>
+    </section>
 
-      <div class="profile-main">
-        <div class="balance-card">
-          <div class="bal-left"><div class="bal-title">Баланс звёзд</div><div class="bal-amount"><span class="star-icon">⭐</span> <span id="mainStars">0</span></div></div>
-          <button class="btn-topup" id="btnTopUp">+ Пополнить</button>
-        </div>
+    <section class="menu">
+      <button class="tile" data-open="history"><span class="ico">🕘</span>История</button>
+      <button class="tile" data-open="inventory"><span class="ico">🎭</span>Мои персонажи</button>
+      <button class="tile" data-open="cases"><span class="ico">🎁</span>Кейсы</button>
+    </section>
 
-        <!-- СТАТИСТИКА ТОП -->
-        <div class="earn-card" id="btnEarn" style="cursor:default;">
-          <div class="earn-title">Топ по монетам актива <span style="color:#5c9aff">Топ-5</span></div>
-          <div id="topList" style="margin-top:10px; font-size:13px; color:#aaa;">Загрузка...</div>
-        </div>
+    <section class="card">
+      <div class="label">Заработать</div>
+      <button class="btn-primary wide" id="dailyBtn">Ежедневный бонус</button>
+      <div class="sub" id="dailyTxt">Серия: 0 дн.</div>
+      <button class="btn-ghost wide" disabled>Лотерея · скоро</button>
+    </section>
 
-        <div class="grid-3">
-          <div class="g-item" id="btnMyProfile"><img id="profAvatar" class="g-avatar" src="" style="display:none;"><div id="profAvatarText" class="g-avatar">?</div><span>Мой профиль</span></div>
-          <div class="g-item" id="btnHistory"><div class="g-icon" style="background:rgba(30,144,255,0.2);">🕒</div><span>История</span></div>
-          <div class="g-item" id="btnCharacters"><div class="g-icon" style="background:rgba(255,165,0,0.2);">📦</div><span>Мои персонажи</span></div>
-        </div>
-
-        <h2 class="section-title">Кейсы</h2>
-        <div class="case-banner" id="btnCases"><div class="case-title">Открыть кейсы</div><div class="case-img">🎁</div></div>
-
-        <h2 class="section-title">Заработок</h2>
-        <div class="promo-grid">
-          <div class="promo-item" id="btnLottery"><div class="p-icon">🎟️</div><h3>Лотерея</h3><p>Купить билет за звезды</p></div>
-          <div class="promo-item" id="btnDaily"><div class="p-icon">💧</div><h3>Капельки</h3><p>Ежедневный бонус +0.5</p></div>
-        </div>
-      </div>
+    <section class="card">
+      <div class="label">Топ-5 по монетам</div>
+      <ol class="top" id="top"></ol>
     </section>
   </main>
 
-  <nav id="nav">
-    <button class="on" data-t="edits">Эдиты</button><button data-t="news">Новости</button><button data-t="backstage">Закулисье</button><button data-t="profile">Профиль</button>
+  <nav class="tabs">
+    <button class="on">Эдиты</button>
+    <button data-soon="1">Новости</button>
+    <button data-soon="1">Закулисье</button>
+    <button>Профиль</button>
   </nav>
 </div>
 
-<!-- МОДАЛКА ВЫБОРА КЕЙСА -->
-<div id="modalCases" class="modal-overlay">
-  <div class="modal-content">
-    <h3 style="font-family:Oswald; font-size:24px; margin-bottom:15px; text-align:center;">Выбери кейс</h3>
-    <div class="case-list">
-      <div class="case-card case-dnevnik" onclick="openCase('dnevnik')"><div class="cc-left"><h4>Дневничок</h4><span>Обычные персонажи</span></div><div class="cc-price">⚡ 3</div></div>
-      <div class="case-card case-shpargalka" onclick="openCase('shpargalka')"><div class="cc-left"><h4>Шпаргалка</h4><span>Хорошие шансы</span></div><div class="cc-price">⭐ 10</div></div>
-      <div class="case-card case-palochka" onclick="openCase('palochka')"><div class="cc-left"><h4>Палочка</h4><span>Высокий шанс на редких</span></div><div class="cc-price">⭐ 13</div></div>
-    </div>
-    <button class="btn-close" id="closeCases">Закрыть</button>
+<div id="modal" class="modal hidden">
+  <div class="sheet">
+    <div class="grab"></div>
+    <div id="modalBody"></div>
+    <button id="modalClose" class="btn-ghost wide">Закрыть</button>
   </div>
 </div>
 
-<!-- АНИМАЦИЯ КЕЙСА -->
-<div id="modalCaseAnim" class="modal-overlay" style="z-index:1001; background:rgba(0,0,0,0.95);">
-  <div class="case-anim-content">
-    <h3 id="animStatus">Крутим...</h3>
-    <div class="roulette-box" id="rouletteBox">🎁</div>
-    <button class="btn-pay" id="btnCollect" style="display:none; margin-top:30px; width:100%;">Забрать</button>
-  </div>
-</div>
-
-<!-- МОИ ПЕРСОНАЖИ -->
-<div id="modalInventory" class="modal-overlay">
-  <div class="modal-content" style="height:80vh;">
-    <h3 style="font-family:Oswald; font-size:24px; margin-bottom:10px;">Мои персонажи</h3>
-    <div id="inventoryList" style="flex:1; overflow-y:auto; display:grid; grid-template-columns:repeat(2,1fr); gap:10px;"></div>
-    <button class="btn-close" id="closeInventory" style="margin-top:15px;">Закрыть</button>
-  </div>
-</div>
-
-<!-- ПОПОЛНЕНИЕ -->
-<div id="modalTopUp" class="modal-overlay">
-  <div class="modal-content">
-    <h3 style="font-family:Oswald; font-size:24px; margin-bottom:10px;">Пополнить звёзды</h3>
-    <div class="amount-box"><div style="color:#888; font-size:12px; margin-bottom:5px;">СУММА</div><div class="amount-display">⭐ <input type="number" id="customAmount" value="250" min="1" style="background:none; border:none; color:#fff; font-size:40px; font-family:Oswald; width:120px; text-align:center; outline:none;"></div></div>
-    <div class="amount-grid"><button class="amt-btn" data-amt="50">⭐ 50</button><button class="amt-btn" data-amt="100">⭐ 100</button><button class="amt-btn active" data-amt="250">⭐ 250</button><button class="amt-btn" data-amt="500">⭐ 500</button></div>
-    <button class="btn-pay" id="btnPay">Оплатить ⭐ <span id="payAmount">250</span></button>
-    <button class="btn-close" id="closeTopUp">Закрыть</button>
-  </div>
-</div>
-
-<!-- ИСТОРИЯ -->
-<div id="modalHistory" class="modal-overlay">
-  <div class="modal-content" style="height:80vh;">
-    <h3 style="font-family:Oswald; font-size:24px; margin-bottom:10px;">История</h3>
-    <div id="historyList" style="flex:1; overflow-y:auto;"></div>
-    <button class="btn-close" id="closeHistory" style="margin-top:15px;">Закрыть</button>
-  </div>
-</div>
-
-<div id="mediaModal" class="media-modal"><span class="close-modal" id="closeMedia">✕</span><div id="mediaContent"></div></div>
 <div id="toast"></div>
 <script src="app.js"></script>
 </body>
