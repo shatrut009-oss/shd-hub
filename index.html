@@ -5,64 +5,98 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ШД Hub</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- ЗАСТАВКА -->
 <div id="splash">
-  <div class="splash-glow"></div>
   <svg viewBox="900 310 770 815" aria-hidden="true">
-    <g class="half l" fill="#fff" fill-rule="evenodd">
-      <path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/>
-    </g>
-    <g class="half r" fill="#fff" fill-rule="evenodd">
-      <path d="M1660 322C1627 372 1606 420 1604 455L1602 670L1600 975C1602 1040 1624 1085 1659 1115L1318 970C1304 962 1301 940 1301 910L1301 530C1300 490 1316 462 1346 450Z M1495 510L1493 928L1417 896L1416 542Z"/>
-    </g>
+    <g class="half l" fill="#fff" fill-rule="evenodd"><path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/></g>
+    <g class="half r" fill="#fff" fill-rule="evenodd"><path d="M1660 322C1627 372 1606 420 1604 455L1602 670L1600 975C1602 1040 1624 1085 1659 1115L1318 970C1304 962 1301 940 1301 910L1301 530C1300 490 1316 462 1346 450Z M1495 510L1493 928L1417 896L1416 542Z"/></g>
   </svg>
   <div class="hint">НАЖМИ, ЧТОБЫ ВОЙТИ</div>
 </div>
 
-<!-- ПРИЛОЖЕНИЕ -->
 <div id="app">
-  <header class="top-header">
-    <div class="user-info">
-      <div class="avatar" id="userAvatar"></div>
-      <div class="user-text">
-        <div class="username" id="userName">Гость</div>
-        <div class="user-tag" id="userTag">@guest</div>
-      </div>
+  <header class="top">
+    <div class="who"><div class="av" id="av">Г</div><div class="nick" id="nick">Гость</div></div>
+    <div class="chips">
+      <span class="chip" style="border-color:rgba(255,200,61,.5)">★<b id="cS">0</b></span>
+      <span class="chip" style="border-color:rgba(77,163,255,.5)">◆<b id="cC">0</b></span>
     </div>
   </header>
-
   <main>
-    <!-- ЭДИТЫ -->
-    <section class="screen active" id="screen-edits"></section>
-    <!-- НОВОСТИ -->
-    <section class="screen" id="screen-news"></section>
-    <!-- ПРОФИЛЬ -->
-    <section class="screen" id="screen-profile">
-      <div style="text-align:center; margin-top:50px;">
-        <div class="detail-avatar" id="profAvatar" style="margin-bottom:15px;"></div>
-        <h2 id="profName" style="font-family:Oswald; font-size:28px; color:#fff;">Игрок</h2>
+    <section class="sc on" id="s-menu">
+      <h2>Главное меню</h2>
+      <p class="sub" style="margin-bottom:12px">Выбери раздел.</p>
+      <div class="menu">
+        <button class="tile hot" data-go="edit"><span class="i">🎬</span><b>Эдиты</b><span class="sub">Видео из ТГ</span></button>
+        <button class="tile" data-go="cases"><span class="i">🎁</span><b>Кейсы</b><span class="sub">3 кейса</span></button>
+        <button class="tile" data-go="roulette"><span class="i">🎡</span><b>Рулетка</b><span class="sub"><span class="dot"></span><span id="rlSub">раз в 2 часа</span></span></button>
+        <button class="tile" data-go="detective"><span class="i">🔎</span><b>Детектив</b><span class="sub">Расследование</span></button>
+        <button class="tile" data-go="awards"><span class="i">🏅</span><b>Награды</b><span class="sub" id="awSub">0 из 30</span></button>
+        <button class="tile" data-go="profile"><span class="i">👤</span><b>Профиль</b><span class="sub">Баланс</span></button>
       </div>
     </section>
-  </main>
 
-  <!-- МЕНЮ -->
-  <nav class="bottom-nav">
-    <button class="nav-btn active" data-target="screen-edits">
-      <div class="nav-icon" style="background:#ff1e3c;">▶️</div><span>Эдиты</span>
-    </button>
-    <button class="nav-btn" data-target="screen-news">
-      <div class="nav-icon">📰</div><span>Новости</span>
-    </button>
-    <button class="nav-btn" data-target="screen-profile">
-      <div class="nav-icon">👤</div><span>Профиль</span>
-    </button>
-  </nav>
+    <section class="sc" id="s-edit">
+      <h2>Эдиты</h2>
+      <p class="sub" style="margin-bottom:12px">Реальные видео от актёров и эдиторов.</p>
+      <div id="posts"></div>
+    </section>
+
+    <section class="sc" id="s-cases">
+      <h2>Кейсы</h2>
+      <p class="sub" style="margin-bottom:12px">У каждого кейса свой главный персонаж.</p>
+      <div id="caseList"></div>
+      <div id="caseStage"></div>
+    </section>
+
+    <section class="sc" id="s-roulette">
+      <h2>Рулетка</h2>
+      <p class="sub">Одна прокрутка в 2 часа.</p>
+      <div class="wheelbox"><div class="ptr"></div><div class="disc" id="disc"></div><div class="hub">ШД</div></div>
+      <button class="btn w" id="spinBtn">Крутить</button>
+      <div class="sub" id="spinTxt" style="margin-top:10px;text-align:center"></div>
+    </section>
+
+    <section class="sc" id="s-detective">
+      <div id="nvBody"></div>
+    </section>
+
+    <section class="sc" id="s-awards">
+      <h2>Награды</h2>
+      <div class="card">
+        <div class="row"><div><b>Ежедневный кейс</b><div class="sub">Бесплатно раз в сутки</div></div>
+          <button class="btn sm" id="dailyBtn">Открыть</button></div>
+      </div>
+      <div class="lab" style="margin:12px 0 6px">Достижения</div>
+      <div id="achList"></div>
+    </section>
+
+    <section class="sc" id="s-profile">
+      <div class="card row">
+        <div class="who"><div class="av" id="av2">Г</div><div><div class="nick" style="font-size:17px" id="nick2">Гость</div><div class="sub">Теоретик</div></div></div>
+        <div style="text-align:right"><div class="lab">В боте</div><b id="days">3 дн.</b></div>
+      </div>
+      <div class="card">
+        <div class="row"><div><div class="lab">Баланс звёзд</div><div class="o" style="font-size:30px">★ <span id="bS">0</span></div></div>
+          <button class="btn sm" id="topBtn">+ Пополнить</button></div>
+        <div class="sub" style="margin-top:8px">Монеты актива: <b id="bC">0</b> ◆</div>
+      </div>
+      <div class="card row"><div><div class="lab">Награды</div><b id="pAw">0 из 30</b></div><button class="btn sm g" data-go="awards">Все</button></div>
+      <div class="lab" style="margin:12px 0 6px">Коллекция</div>
+      <div class="grid" id="inv"></div>
+      <div class="lab" style="margin:12px 0 6px">История</div>
+      <div id="hist"></div>
+    </section>
+  </main>
+  <button class="back hidden" id="backBtn">← В меню</button>
 </div>
+
+<div id="modal" class="modal hidden"><div class="sheet" id="mSheet"></div></div>
+<div id="toast"></div>
 
 <script src="app.js"></script>
 </body>
