@@ -83,8 +83,6 @@
     const TG = window.Telegram && window.Telegram.WebApp; if (TG) { try { TG.ready(); TG.expand(); } catch(e) {} }
     const U = (TG && TG.initDataUnsafe && TG.initDataUnsafe.user) || {};
     const NAME = [U.first_name, U.last_name].filter(Boolean).join(' ') || 'Гость';
-    
-    // Твой ID в Telegram (или тестовый, если открыт в браузере)
     const TG_ID = (U && U.id) ? U.id : '999999';
 
     // ===== ДАННЫЕ =====
@@ -122,36 +120,35 @@
     };
     let S = { ...DEFAULT_S };
 
-    // Загрузка данных из БД при старте
     async function loadUserState() {
       try {
         const res = await fetch(`/api/user/${TG_ID}`);
         const data = await res.json();
-        if (data) {
+        
+        // Если пришла ошибка от сервера или пустой ответ, не ломаем приложение
+        if (data && !data.error) {
           S = { 
             ...DEFAULT_S, 
-            stars: data.stars !== null ? data.stars : DEFAULT_S.stars, 
-            coins: data.coins !== null ? data.coins : DEFAULT_S.coins, 
+            stars: data.stars != null ? data.stars : DEFAULT_S.stars, 
+            coins: data.coins != null ? data.coins : DEFAULT_S.coins, 
             inv: data.inv || [], 
             hist: data.hist || [], 
             choices: data.choices || [], 
             activeBadge: data.active_badge, 
             stat: data.stat || DEFAULT_S.stat 
           };
-          renderTop();
-          renderProfile();
         }
       } catch(e) { 
         console.error('Ошибка загрузки БД', e); 
-        // Фолбэк на локальное хранилище
         try {
           const saved = localStorage.getItem('shd_app_state');
           if (saved) S = { ...DEFAULT_S, ...JSON.parse(saved) };
         } catch(err) {}
       }
+      renderTop();
+      renderProfile();
     }
     
-    // Сохранение в БД
     let saveTimeout;
     function saveState() {
       try { localStorage.setItem('shd_app_state', JSON.stringify(S)); } catch(e) {}
@@ -178,6 +175,13 @@
         else if (c.r === 'mythic') p += 500;
       });
       return p;
+    }
+    
+    // Функция для форматирования времени (таймер рулетки)
+    function fmt(ms) { 
+      const h = Math.floor(ms / 3600000); 
+      const m = Math.floor((ms % 3600000) / 60000); 
+      return `${h}ч ${m}м`; 
     }
     
     const addH = (t, d, a) => { S.hist.unshift({ t, d, a, at: Date.now() }); saveState(); };
@@ -410,9 +414,11 @@
       if (!$('#disc2').children.length) buildWheel2();
       
       $('#disc').style.transform = `rotate(${RL.abs}deg)`;
-      const btn = $('#spinBtn');
-      if(btn) { btn.disabled = RL.spinning; btn.textContent = RL.spinning ? 'Крутим...' : 'Крутить'; }
-      
+      const left = S.spinAt + 2 * H - Date.now();
+      const btn = $('#spinBtn'); const txt = $('#spinTxt');
+      if(btn) { btn.disabled = left > 0 || RL.spinning; btn.textContent = left > 0 ? 'Подождите' : 'Крутить'; }
+      if(txt) txt.textContent = RL.spinning ? 'Крутим…' : (left > 0 ? 'Через ' + fmt(left) : 'Испытай удачу');
+
       $('#disc2').style.transform = `rotate(${RL2.abs}deg)`;
       const btn2 = $('#spinBtn2');
       if(btn2) { btn2.disabled = RL2.spinning; btn2.textContent = RL2.spinning ? 'Крутим...' : 'Крутить (★ 7)'; }
@@ -428,8 +434,8 @@
     });
 
     if ($('#spinBtn')) $('#spinBtn').addEventListener('click', () => {
-      if (RL.spinning) return;
-      RL.spinning = true;
+      if (RL.spinning || Date.now() < S.spinAt + 2 * H) return;
+      S.spinAt = Date.now(); RL.spinning = true; saveState();
       const win = rnd(SLICES); const center = win * 36 + 18; const delta = 360 * 6 + ((360 - ((center + RL.abs) % 360)) % 360);
       RL.abs += delta; $('#disc').style.transform = `rotate(${RL.abs}deg)`; renderRoulette();
       setTimeout(() => {
@@ -476,10 +482,7 @@
       }, 5100);
     });
 
-    // ==========================================
-    // ===== ДЕТЕКТИВ (ВОССТАНОВЛЕН) ============
-    // ==========================================
-    
+    // ===== ДЕТЕКТИВ =====
     const BG = {
       hall: 'https://i.postimg.cc/XqVLZjcx/AIRetouch-20261115-083654547-(1).png',
       gym: 'https://i.postimg.cc/WzCdBS39/AIRetouch-20261115-084408474-(1).png',
@@ -801,79 +804,3 @@
       $('#inv').innerHTML = sortedInv.length ? sortedInv.map(i => `
         <div class="pc" style="--c:${RAR[i.r][1]}">
           <div class="cav" style="width:50px;height:50px;overflow:hidden;padding:0;border-radius:50%;">
-            ${i.img ? `<img src="${i.img}" style="width:100%;height:100%;object-fit:cover;">` : ''}
-          </div>
-          <div style="font-size:11px; margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; text-align:center;">${esc(i.n)}</div>
-        </div>
-      `).join('') : '<div class="sub" style="grid-column:1/-1; text-align:center;">У тебя пока нет персонажей. Открой кейс!</div>';
-    }
-
-    if ($('#btn-open-rating')) {
-      $('#btn-open-rating').addEventListener('click', () => {
-        const list = $('#rating-list');
-        const pts = getPoints();
-        
-        const users = [
-          { name: 'Тимур', pts: 2100, me: false }, { name: 'Кирилл', pts: 1200, me: false },
-          { name: 'Анна', pts: 850, me: false }, { name: 'Мила', pts: 540, me: false },
-          { name: 'Соня', pts: 320, me: false }, { name: 'Артем', pts: 110, me: false },
-          { name: 'Даша', pts: 80, me: false }, { name: 'Егор', pts: 2500, me: false },
-          { name: 'Влад', pts: 400, me: false }, { name: 'Максим', pts: 50, me: false }
-        ];
-        users.push({ name: NAME, pts: pts, me: true });
-        users.sort((a, b) => b.pts - a.pts);
-
-        list.innerHTML = users.map((u, i) => `
-          <div class="rating-row ${u.me ? 'me' : ''}">
-            <div class="rating-pos">${i+1}</div>
-            <div class="rating-name">${esc(u.name)} ${u.me ? '(Ты)' : ''}</div>
-            <div class="rating-score">${u.pts} очков</div>
-          </div>
-        `).join('');
-        
-        $('#modal-rating').classList.remove('hidden');
-      });
-    }
-
-    function renderTop(){ if($('#cS')) $('#cS').textContent = S.stars; if($('#cC')) $('#cC').textContent = S.coins; }
-
-    // ===== ПОПОЛНЕНИЕ =====
-    if ($('#topBtn')) $('#topBtn').addEventListener('click', openTopup);
-    function openTopup(){
-      const modal = $('#modal'); const sheet = $('#mSheet'); if(!modal || !sheet) return;
-      modal.classList.remove('hidden');
-      sheet.innerHTML = `<h2>Пополнить звёзды</h2><p class="sub">Оплата проходит внутри Telegram.</p><div class="pre">${[50, 100, 250, 500, 1000].map(n => `<button data-n="${n}">★ ${n}</button>`).join('')}</div><input id="cu" type="number" min="1" max="10000" placeholder="Своя сумма"><button class="btn w" id="pay">Оплатить ★ 250</button><button class="btn g w" id="mClose">Закрыть</button>`;
-      let n = 250; const set = v => { n = v; if($('#pay')) $('#pay').textContent = `Оплатить ★ ${n}`; $$('[data-n]').forEach(b => b.classList.toggle('on', +b.dataset.n === n)); };
-      set(250);
-      sheet.addEventListener('click', e => { const b = e.target.closest('[data-n]'); if (b) { if($('#cu')) $('#cu').value = ''; set(+b.dataset.n); } });
-      if($('#cu')) $('#cu').addEventListener('input', e => { const v = Math.floor(+e.target.value); if (v >= 1 && v <= 10000) set(v); });
-      if($('#pay')) $('#pay').addEventListener('click', () => {
-        sheet.innerHTML = `<h2>Подтверждение</h2><p class="sub">Списать ★ ${n}?</p><button class="btn w" id="ok">Подтвердить ★ ${n}</button><button class="btn g w" id="mClose">Отмена</button>`;
-        if($('#ok')) $('#ok').addEventListener('click', () => { S.stars += n; S.stat.stars += n; addH('Пополнение', 'Оплата через Telegram', `+${n} ★`); toast(`+${n} ★`); closeModal(); renderTop(); });
-        if($('#mClose')) $('#mClose').addEventListener('click', closeModal);
-      });
-      if($('#mClose')) $('#mClose').addEventListener('click', closeModal);
-    }
-    function closeModal(){ const m = $('#modal'); if(m) m.classList.add('hidden'); }
-
-    // Закрытие модалок
-    document.addEventListener('click', (e) => {
-      if (e.target.closest('.close-modal')) e.target.closest('.modal').classList.add('hidden');
-      if (e.target.closest('.close-win')) {
-        e.target.closest('.modal').classList.add('hidden');
-        if ($('#s-cases').classList.contains('on')) renderCases();
-      }
-    });
-
-    // ===== СТАРТ =====
-    if($('#nick')) $('#nick').textContent = NAME; if($('#nick2')) $('#nick2').textContent = NAME;
-    if($('#av')) $('#av').textContent = NAME[0].toUpperCase(); if($('#av2')) $('#av2').textContent = NAME[0].toUpperCase();
-    
-    // Запускаем загрузку из БД
-    loadUserState().then(() => {
-        renderTop();
-        renderProfile();
-    });
-    
-  } catch (error) { console.error("Критическая ошибка:", error); }
-})();
