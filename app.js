@@ -483,9 +483,10 @@
     
     if ($('#vol-sfx')) $('#vol-sfx').addEventListener('input', (e) => { sfxVolume = e.target.value / 100; });
     if ($('#vol-music')) $('#vol-music').addEventListener('input', (e) => { 
-      bgmVolume = e.target.value / 100; 
-      musicPlayer.volume = bgmVolume; 
-    });
+  // Ограничиваем максимальную громкость: даже если ползунок на 100, 
+  // реальная громкость будет не больше 25% от системы
+  musicPlayer.volume = (e.target.value / 100) * 0.25; 
+});
 
     function openChoicesModal() {
       $('#choices-modal').classList.remove('hidden');
