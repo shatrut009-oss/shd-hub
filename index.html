@@ -97,18 +97,9 @@
 
 <!-- Экран Детектива (Визуальная новелла) -->
 <div id="vn-screen" class="hidden">
-  <!-- Фон сцены -->
   <div class="vn-bg" id="vn-bg"></div>
-  
-  <!-- Персонаж -->
-  <div class="vn-char-box" id="vn-char-box">
-     <div class="vn-char" id="vn-char"></div>
-  </div>
-
-  <!-- Кнопка паузы -->
+  <div class="vn-char-box" id="vn-char-box"><div class="vn-char" id="vn-char"></div></div>
   <button class="vn-pause-btn" id="vn-pause-btn">II</button>
-
-  <!-- Текстовое окно -->
   <div class="vn-dialog" id="vn-dialog">
     <div class="vn-speaker" id="vn-speaker">Дима</div>
     <div class="vn-text" id="vn-text">Текст...</div>
@@ -116,7 +107,7 @@
   </div>
 </div>
 
-<!-- Меню Паузы (как на фото 5) -->
+<!-- Меню Паузы -->
 <div id="pause-modal" class="modal hidden">
   <div class="modal-sheet" style="background:#121016; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; max-height: 85vh;">
     <div style="text-align:center; padding-bottom:20px;">
@@ -124,44 +115,28 @@
       <h2 style="font-family:'Oswald'; font-size:28px; color:#fff; margin:5px 0;">Раздевалка</h2>
       <div class="sub" style="color:#8b95a5;">Расследование начинается</div>
     </div>
-    
     <button class="btn w" id="pause-continue" style="background:#ffc83d; color:#000; font-family:'Oswald'; font-size:18px; padding:15px; margin-bottom:15px;">▶ Продолжить</button>
-    
     <div class="pause-list">
       <button class="pause-item" id="pause-choices"><span>♥ Твои выборы</span></button>
       <button class="pause-item" id="pause-album"><span>🖼 Фотоальбом</span></button>
-      
-      <div class="pause-item" style="flex-direction:column; align-items:flex-start; gap:10px; padding:15px;">
-        <span>🎵 Музыка</span>
-        <input type="range" min="0" max="100" value="100" class="vol-slider" id="vol-music">
-      </div>
-      
-      <div class="pause-item" style="flex-direction:column; align-items:flex-start; gap:10px; padding:15px;">
-        <span>🔊 Звуки</span>
-        <input type="range" min="0" max="100" value="100" class="vol-slider" id="vol-sfx">
-      </div>
-
-      <div class="pause-item">
-        <span>📳 Вибрация</span>
-        <label class="toggle"><input type="checkbox" id="vib-toggle" checked><span class="slider"></span></label>
-      </div>
-      
+      <div class="pause-item" style="flex-direction:column; align-items:flex-start; gap:10px; padding:15px;"><span>🎵 Музыка</span><input type="range" min="0" max="100" value="100" class="vol-slider" id="vol-music"></div>
+      <div class="pause-item" style="flex-direction:column; align-items:flex-start; gap:10px; padding:15px;"><span>🔊 Звуки</span><input type="range" min="0" max="100" value="100" class="vol-slider" id="vol-sfx"></div>
+      <div class="pause-item"><span>📳 Вибрация</span><label class="toggle"><input type="checkbox" id="vib-toggle" checked><span class="slider"></span></label></div>
       <button class="pause-item" id="pause-restart"><span>↺ Пройти заново</span></button>
       <button class="pause-item" id="pause-exit"><span>➔ К историям</span></button>
     </div>
   </div>
 </div>
 
-<!-- Фотоальбом (как на фото 6) -->
+<!-- Фотоальбом -->
 <div id="album-modal" class="modal hidden">
   <div class="modal-sheet" style="background:#0d0d11; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; height: 80vh;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
       <h2 style="font-family:'Oswald'; font-size:24px;">Фотоальбом</h2>
       <button id="album-close" style="color:#fff; font-size:24px;">✕</button>
     </div>
-    <p class="sub" style="margin-bottom:15px; line-height:1.5;">Здесь собираются особые сцены, открытые за алмазы. Открытая сцена остаётся в альбоме навсегда — даже если пройти эпизод заново.</p>
+    <p class="sub" style="margin-bottom:15px; line-height:1.5;">Здесь собираются особые сцены, открытые за алмазы. Открытая сцена остаётся в альбоме навсегда.</p>
     <div class="sub" style="color:#d4b872; margin-bottom:10px; text-transform:uppercase; letter-spacing:1px;">Открыто 0 из 8</div>
-    
     <div class="album-grid">
       <div class="album-item locked"><span class="lock-icon">🔒</span></div>
       <div class="album-item locked"><span class="lock-icon">🔒</span></div>
@@ -208,4 +183,4 @@
 
 <script src="app.js"></script>
 </body>
-</html>
+  </html>
