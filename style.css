@@ -117,14 +117,18 @@ main { flex: 1; position: relative; overflow: hidden; }
 .hist-sub { font-size: 11px; color: var(--mut); }
 .hist-price { font-weight: 700; font-size: 13px; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 8px; }
 
-/* АНИМАЦИЯ КЕЙСА */
-.strip { position: relative; height: 120px; overflow: hidden; border-radius: 14px; background: #050507; border: 1px solid var(--line); margin: 12px 0; }
-.strip::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--star); z-index: 2; }
+/* АНИМАЦИЯ КЕЙСА (ЦЕНТР) */
+.win-sheet { align-items: center; justify-content: center; text-align: center; min-height: 400px; background: transparent !important; border: none !important; box-shadow: none !important; padding: 20px; }
+.strip { position: relative; width: 100%; height: 120px; overflow: hidden; border-radius: 14px; background: #050507; border: 1px solid var(--line); margin: 12px 0; }
+.strip::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--star); z-index: 2; box-shadow: 0 0 10px var(--star); }
 .track { position: absolute; top: 10px; left: 0; display: flex; gap: 8px; transition: transform 3s cubic-bezier(.12, .7, .1, 1); }
 .it { flex: none; width: 92px; height: 96px; border-radius: 12px; background: var(--card2); border: 2px solid var(--c); display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
 .it img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
-.win { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px; animation: pop .5s cubic-bezier(.2, 1.4, .4, 1); }
+
+.win-result { display: flex; flex-direction: column; align-items: center; justify-content: center; animation: pop .6s cubic-bezier(.2, 1.4, .4, 1); width: 100%; }
+.win-result .cav { animation: float 3s ease-in-out infinite; }
 @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
 /* РУЛЕТКИ (ОБНОВЛЕННЫЕ) */
 .roulette-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
@@ -221,6 +225,7 @@ main { flex: 1; position: relative; overflow: hidden; }
 /* МОДАЛЬНЫЕ ОКНА */
 .modal { position: fixed; inset: 0; z-index: 200; background: rgba(0, 0, 0, .85); display: flex; align-items: flex-end; justify-content: center; }
 .modal-sheet { width: 100%; max-height: 90vh; overflow-y: auto; background: #101016; border-radius: 20px 20px 0 0; padding: 12px 16px calc(var(--sb) + 20px); border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 12px; }
+.modal-sheet.win-sheet { border-top: none; background: transparent; }
 .grab { width: 40px; height: 4px; background: #333; border-radius: 4px; margin: 0 auto 15px; }
 .pre { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .pre button { padding: 12px 0; border-radius: 12px; background: var(--card2); border: 1px solid var(--line); font-weight: 700; }
