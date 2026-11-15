@@ -189,6 +189,10 @@ main { flex: 1; position: relative; overflow: hidden; }
 .vn-dialog:active { transform: scale(0.98); }
 .vn-dialog.choice-mode { cursor: default; }
 .vn-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.vn-top-row { gap: 8px; }
+.vn-speaker { max-width: 72%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: none; }
+.vn-speaker.long { font-size: 11px; letter-spacing: .4px; padding: 3px 8px; }
+.vn-ep-info { white-space: nowrap; flex: none; }
 .vn-speaker { display: inline-block; background: rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 4px 12px; font-size: 14px; color: #d4b872; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
 .vn-ep-info { font-size: 11px; color: #8b95a5; text-transform: uppercase; }
 .vn-text { font-size: 16px; line-height: 1.55; color: #fff; }
