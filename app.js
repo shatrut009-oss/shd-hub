@@ -88,416 +88,70 @@
     const NAME = [U.first_name, U.last_name].filter(Boolean).join(' ') || 'Гость';
     const TG_ID = (U && U.id) ? U.id : '999999'; // Если открыто на ПК, ID будет 999999
     const authHeaders = () => ({ 'x-tg-init-data': (TG && TG.initData) || '' });
-
-    // ===== ДАННЫЕ =====
     const RAR = { common: ['Обычный', '#9aa0a6'], rare: ['Редкий', '#4da3ff'], epic: ['Эпический', '#b36bff'], legend: ['Легендарный', '#ffb020'], mythic: ['Мифический', '#ff3ea5'] };
-    
-    const C = { 
-      dima: 'https://i.postimg.cc/QNbfg9tC/1794726184077.png', derz: 'https://i.postimg.cc/Bn8NGmCs/1794726189222.png',
-      kamran: 'https://i.postimg.cc/rpxJDz3K/1794726194181.png', sofia: 'https://i.postimg.cc/yxYXpjdZ/1794726201907.png',
-      ruslan: 'https://i.postimg.cc/tR2zZKS5/1794726208162.png', ruslan_doc: 'https://i.postimg.cc/bvc0fpJF/1794726213335.png',
-      vachik: 'https://i.postimg.cc/0jQD0NWx/1794727136951.png', ksusha: 'https://i.postimg.cc/DwssgHg1/1794726228602.png',
-      mila: 'https://i.postimg.cc/FFBLQNCx/1794726290228.png', sala: 'https://i.postimg.cc/CxynzJgZ/1794726297100.png',
-      woman: 'https://i.postimg.cc/0ypMmm5g/1794726593166.png', babushka: 'https://i.postimg.cc/kMzBpwBP/1794726311325.png',
-      nikolay: 'https://i.postimg.cc/SKdn1hzM/1794726596195.png', director: 'https://i.postimg.cc/mrmrNy05/1794726601497.png'
+
+    // ===== ПЕРСОНАЖИ (ССЫЛКИ) =====
+    const C = {
+      dima: 'https://i.postimg.cc/QNbfg9tC/1794726184077.png',
+      dimaStreet: 'https://i.postimg.cc/y6hXYYvv/1794771254309.png',
+      dimaRest: 'https://i.postimg.cc/KvJPBpXz/1794771261495.png',
+      dimaHurt: 'https://i.postimg.cc/NjF148Yp/1794771268492.png',
+      derz: 'https://i.postimg.cc/Bn8NGmCs/1794726189222.png',
+      derzStreet: 'https://i.postimg.cc/DZkLntGt/1794771892176.png',
+      derzCrowbar: 'https://i.postimg.cc/J0RXBZPp/1794771898766.png',
+      derzEyes: 'https://i.postimg.cc/L4VLFQ8C/1794771908125.png',
+      kamran: 'https://i.postimg.cc/rpxJDz3K/1794726194181.png',
+      kamranSizo: 'https://i.postimg.cc/xTxmckHm/1794772098141.png',
+      kamranHosp: 'https://i.postimg.cc/3RT4P25M/1794772146282.png',
+      sofia: 'https://i.postimg.cc/yxYXpjdZ/1794726201907.png',
+      ruslan: 'https://i.postimg.cc/FzPYdqfF/1794726208162.png',
+      ruslanDoc: 'https://i.postimg.cc/fRSVy8MQ/1794726213335.png',
+      ruslanCasual: 'https://i.postimg.cc/qR4qm0yB/1794772433067.png',
+      ruslanArrested: 'https://i.postimg.cc/nrLzJk3W/1794772442578.png',
+      vachik: 'https://i.postimg.cc/0jQD0NWx/1794727136951.png',
+      ksusha: 'https://i.postimg.cc/DwssgHg1/1794726228602.png',
+      ksushaKidnapped: 'https://i.postimg.cc/XJjNfL6B/1794772880614.png',
+      ksushaDate: 'https://i.postimg.cc/kGDnZ54n/1794773002191.png',
+      mila: 'https://i.postimg.cc/FFBLQNCx/1794726290228.png',
+      sala: 'https://i.postimg.cc/CxynzJgZ/1794726297100.png',
+      salaAngry: 'https://i.postimg.cc/T2k1czPH/1794772521706.png',
+      salaSorry: 'https://i.postimg.cc/J4GnYpDR/1794772571288.png',
+      woman: 'https://i.postimg.cc/RFstfjt7/1794763986923.png',
+      babushka: 'https://i.postimg.cc/kMzBpwBP/1794726311325.png',
+      babushkaScared: 'https://i.postimg.cc/pdtLTx0d/1794772638437.png',
+      babushkaRemorse: 'https://i.postimg.cc/nLYc955S/1794772710129.png',
+      nikolay: 'https://i.postimg.cc/SKdn1hzM/1794726596195.png',
+      director: 'https://i.postimg.cc/mrmrNy05/1794726601497.png',
+      kozhan: 'https://i.postimg.cc/zGZgnwLf/1794763986634.png',
+      sto: 'https://i.postimg.cc/LsmgWHBw/1794763990745.png',
+      mikhail: 'https://i.postimg.cc/cHbK6fqV/1794763991498.png',
+      mikhailSkin: 'https://i.postimg.cc/mZ6Z97Xx/1794773076740.png',
+      mystery: 'https://i.postimg.cc/mkrg3k4Q/1794764979117.png',
+      mysterySkin: 'https://i.postimg.cc/XvV6mv1S/1794764979117.png',
+      doctor: 'https://i.postimg.cc/hvHRJtPC/1794726213335.png',
+      cop: 'https://i.postimg.cc/sDhRk7TD/1794764982627.png',
+      hooded: 'https://i.postimg.cc/hj5Hwtx0/1794764983561.png',
+      carMan: 'https://i.postimg.cc/52DgZQkW/Bez-nazvania1490-20261115210500.png'
     };
 
+    // story: true — персонаж не выпадает из кейсов, выдаётся только по сюжету
     const CHARS = [
       { n: 'Дима', r: 'common', img: C.dima }, { n: 'Дерзкий', r: 'common', img: C.derz }, { n: 'Вачик', r: 'common', img: C.vachik }, { n: 'Ксюша', r: 'common', img: C.ksusha },
-      { n: 'Камран', r: 'rare', img: C.kamran }, { n: 'Софья Андреевна', r: 'rare', img: C.sofia }, { n: 'Руслан', r: 'rare', img: C.ruslan }, { n: 'Николай Андреевич', r: 'rare', img: C.nikolay },
-      { n: 'Саламандра', r: 'epic', img: C.sala }, { n: 'Мила', r: 'epic', img: C.mila }, { n: 'Директор', r: 'epic', img: C.director },
-      { n: 'Наталья Олеговна', r: 'legend', img: C.babushka }, { n: 'Руслан (Врач)', r: 'legend', img: C.ruslan_doc },
-      { n: 'Женщина в чёрном', r: 'mythic', img: C.woman }
+      { n: 'Камран', r: 'rare', img: C.kamran }, { n: 'Софья Андреевна', r: 'rare', img: C.sofia }, { n: 'Руслан', r: 'rare', img: C.ruslan }, { n: 'Николай Андреевич', r: 'rare', img: C.nikolay }, { n: 'Мужчина из СТО', r: 'rare', img: C.sto },
+      { n: 'Саламандра', r: 'epic', img: C.sala }, { n: 'Мила', r: 'epic', img: C.mila }, { n: 'Директор', r: 'epic', img: C.director }, { n: 'Мужчина в кожанке', r: 'epic', img: C.kozhan },
+      { n: 'Наталья Олеговна', r: 'legend', img: C.babushka }, { n: 'Руслан (Врач)', r: 'legend', img: C.ruslanDoc }, { n: 'Михаил', r: 'legend', img: C.mikhail },
+      { n: 'Алиса', r: 'mythic', img: C.woman },
+      { n: 'Загадочный Мужчина', r: 'mythic', img: C.mystery, story: true }
     ];
 
-    const CASES = { 
-      diary: { name: 'Дневничок', cost: 3, cur: 'coins', bg: 'linear-gradient(135deg, #2b1055 0%, #7597de 100%)', icon: '🎒', odds: { common: 58, rare: 28, epic: 10, legend: 3, mythic: 1 } }, 
-      cheat: { name: 'Шпаргалка', cost: 10, cur: 'stars', bg: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)', icon: '📘', odds: { common: 50, rare: 30, epic: 13, legend: 5, mythic: 2 } }, 
-      stick: { name: 'Палочка', cost: 13, cur: 'stars', bg: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)', icon: '🪄', odds: { common: 40, rare: 33, epic: 16, legend: 7, mythic: 4 } }, 
-      free: { name: 'Ежедневный', cost: 0, bg: '#222', icon: '🎁', odds: { common: 60, rare: 28, epic: 8, legend: 3, mythic: 1 } } 
+    // ===== КЕЙСЫ: ИНТЕРВАЛ И ШАНСЫ (проценты в каждом кейсе = 100) =====
+    const CASES = {
+      diary: { name: 'Дневничок', period: 'Раз в сутки', cd: 24 * H, bg: 'linear-gradient(135deg, #2b1055 0%, #7597de 100%)', icon: '🎒', odds: { common: 55, rare: 28, epic: 12, legend: 4, mythic: 1 } },
+      cheat: { name: 'Шпаргалка', period: 'Раз в 10 часов', cd: 10 * H, bg: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)', icon: '📘', odds: { common: 48, rare: 30, epic: 15, legend: 5, mythic: 2 } },
+      stick: { name: 'Палочка', period: 'Раз в 2 часа', cd: 2 * H, bg: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)', icon: '🪄', odds: { common: 42, rare: 32, epic: 16, legend: 7, mythic: 3 } }
     };
 
-    // ===== СОХРАНЕНИЕ И БЕЗОПАСНАЯ ЗАГРУЗКА =====
-    const DEFAULT_S = {
-      stars: 20, coins: 0, inv: [], hist: [], liked: {}, choices: [], activeBadge: null,
-      spinAt: 0, dailyAt: 0, stat: { cases: 0, likes: 0, spins: 0, spinsChar: 0, stars: 0, daily: 0, chapters: 0, spinAt: 0 }
-    };
-    let S = JSON.parse(JSON.stringify(DEFAULT_S)); // Глубокая копия
-
-    async function loadUserState() {
-      try {
-        const res = await fetch(`/api/user/${TG_ID}`, { headers: authHeaders() });
-        const data = await res.json();
-        if (!res.ok || data.error) throw new Error(data.error || 'Ошибка загрузки');
-        
-        if (data) {
-          S = { 
-            ...DEFAULT_S, 
-            stars: (data.stars !== null && data.stars !== undefined) ? data.stars : DEFAULT_S.stars, 
-            coins: (data.coins !== null && data.coins !== undefined) ? data.coins : DEFAULT_S.coins, 
-            inv: Array.isArray(data.inv) ? data.inv : [], 
-            hist: Array.isArray(data.hist) ? data.hist : [], 
-            choices: Array.isArray(data.choices) ? data.choices : [], 
-            activeBadge: data.active_badge || null, 
-            stat: { ...DEFAULT_S.stat, ...(data.stat || {}) } // Защита от пустого stat
-          };
-        }
-      } catch(e) { 
-        console.error('Ошибка загрузки БД', e); 
-        try {
-          const saved = localStorage.getItem('shd_app_state');
-          if (saved) {
-            const parsed = JSON.parse(saved);
-            S = { ...DEFAULT_S, ...parsed, stat: { ...DEFAULT_S.stat, ...(parsed.stat || {}) } };
-          }
-        } catch(err) {}
-      }
-      stateLoaded = true;
-      renderTop();
-      renderProfile();
-    }
-    
-    let stateLoaded = false;
-    let saveTimeout;
-    function saveState() {
-      try { localStorage.setItem('shd_app_state', JSON.stringify(S)); } catch(e) {}
-      
-      clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(async () => {
-        if (!stateLoaded) return;
-        try {
-          await fetch(`/api/user/${TG_ID}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...authHeaders() },
-            body: JSON.stringify(S)
-          });
-        } catch(e) { console.error('Ошибка сохранения БД', e); }
-      }, 1000);
-    }
-
-    function getPoints() {
-      let p = 0;
-      if (!Array.isArray(S.inv)) return 0;
-      S.inv.forEach(c => {
-        if (c.r === 'common') p += 1;
-        else if (c.r === 'rare') p += 5;
-        else if (c.r === 'epic') p += 20;
-        else if (c.r === 'legend') p += 100;
-        else if (c.r === 'mythic') p += 500;
-      });
-      return p;
-    }
-    
-    function fmt(ms) { 
-      const h = Math.floor(ms / 3600000); 
-      const m = Math.floor((ms % 3600000) / 60000); 
-      return `${h}ч ${m}м`; 
-    }
-    
-    const addH = (t, d, a) => { S.hist.unshift({ t, d, a, at: Date.now() }); saveState(); };
-    function toast(msg){ const t = $('#toast'); if(!t) return; t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2200); }
-
-    // ===== НАВИГАЦИЯ =====
-    const SCREENS = ['menu', 'edit', 'cases', 'roulette', 'detective', 'awards', 'profile'];
-    function go(name){
-      SCREENS.forEach(s => { const el = $('#s-' + s); if(el) el.classList.toggle('on', s === name); });
-      const backBtn = $('#backBtn'); if (backBtn) backBtn.classList.toggle('hidden', name === 'menu');
-      try { 
-        if (name === 'edit') loadRealEdits(); 
-        if (name === 'cases') renderCases(); 
-        if (name === 'roulette') renderRoulette(); 
-        if (name === 'detective') renderDetective(); 
-        if (name === 'awards') renderAwards(); 
-        if (name === 'profile') renderProfile(); 
-      } catch(e) { console.error(e); }
-    }
-    
-    // Делегирование событий для меню
-    document.addEventListener('click', e => { 
-      const g = e.target.closest('[data-go]'); 
-      if (g) go(g.dataset.go); 
-    });
-    if ($('#backBtn')) $('#backBtn').addEventListener('click', () => go('menu'));
-
-    function roll(o){ const t = Object.values(o).reduce((a, b) => a + b, 0); let r = Math.random() * t; for (const k in o) { r -= o[k]; if (r < 0) return k; } return Object.keys(o)[0]; }
-    function giveChar(rar){ const pool = CHARS.filter(c => c.r === rar); const c = pool[rnd(pool.length)]; S.inv.unshift({ n: c.n, r: rar, img: c.img, id: Date.now()+rnd(9999) }); saveState(); return c; }
-
-    // ===== ЭДИТЫ =====
-    async function loadRealEdits() {
-      const container = $('#posts'); if (!container) return; container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px;">Загрузка...</div>';
-      try { const res = await fetch('/api/posts?type=edits'); const posts = await res.json(); if (!posts || !posts.length) { container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px;">Пусто</div>'; return; }
-        container.innerHTML = posts.map(p => { let mediaHtml = ''; if (p.videoUrl) mediaHtml = `<video src="${p.videoUrl}" controls controlsList="nodownload" playsinline style="width:100%; height:auto; max-height:400px; object-fit:cover; border-radius: 16px 16px 0 0;"></video>`; else if (p.image) mediaHtml = `<img src="${p.image}" style="width:100%; height:auto; max-height:400px; object-fit:cover; border-radius: 16px 16px 0 0;">`; const d = new Date(p.date); const dateStr = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }); return `<article class="post" style="padding: 0; overflow: hidden; margin-bottom: 20px;">${mediaHtml}<div class="b"><div class="row" style="margin-bottom: 6px;"><div class="au" style="margin:0;">@${esc(p.author)}</div><div class="sub" style="font-size: 11px;">${dateStr}</div></div><p class="sub" style="margin-bottom: 10px; color: #fff; font-size: 14px; white-space: pre-wrap;">${esc(p.text.substring(0, 120))}...</p><div class="row"><a href="https://t.me/${p.author}" target="_blank" class="btn sm g" style="text-decoration:none;">В канал</a><button class="like" data-like="${p.id}">♥ Нравится</button></div></div></article>`; }).join('');
-      } catch (err) { container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px; color: #ff1e3c;">Ошибка</div>'; }
-    }
-    if ($('#posts')) $('#posts').addEventListener('click', e => { const b = e.target.closest('[data-like]'); if (!b) return; b.classList.toggle('on'); b.textContent = b.classList.contains('on') ? '♥ В избранном' : '♥ Нравится'; S.stat.likes++; saveState(); });
-
-    // ===== КЕЙСЫ =====
-    function renderCases(){
-      const list = $('#caseList'); if (!list) return;
-      const onlineCount = 4517 + rnd(1500);
-      let html = `
-        <div class="cases-header">
-          <button class="history-btn" id="btn-history">⏱ История выигрышей</button>
-          <div class="online-badge"><div class="online-dot"></div>${onlineCount.toLocaleString('ru-RU')} играют</div>
-        </div>
-        <div class="case-cards-list">
-      `;
-      ['diary', 'cheat', 'stick'].forEach(k => {
-        const c = CASES[k];
-        html += `
-          <div class="case-card" data-case="${k}" style="background: ${c.bg}">
-            <div class="case-icon">${c.icon}</div>
-            <div class="case-info">
-              <div class="case-sub">${k === 'cheat' ? 'Рисковый' : 'Стандартный'}</div>
-              <div class="case-title">${c.name}</div>
-              <div class="case-price"><span>${c.cur === 'stars' ? '★' : '◆'} ${c.cost}</span></div>
-            </div>
-            <div class="case-chevron">›</div>
-          </div>
-        `;
-      });
-      html += `</div>`;
-      list.innerHTML = html;
-
-      if ($('#btn-history')) {
-        $('#btn-history').addEventListener('click', () => {
-          renderHistory();
-          $('#modal-history').classList.remove('hidden');
-        });
-      }
-    }
-
-    if ($('#caseList')) $('#caseList').addEventListener('click', e => { 
-      const b = e.target.closest('[data-case]'); 
-      if (b) openCaseDetails(b.dataset.case); 
-    });
-
-    function openCaseDetails(k) {
-      const c = CASES[k];
-      const modal = $('#modal-case-details');
-      const content = $('#case-modal-content');
-      
-      let previewItems = '';
-      for(let i=0; i<15; i++) {
-        const r = i === 7 ? 'epic' : 'common';
-        const img = CHARS[rnd(CHARS.length)].img;
-        previewItems += `<div class="preview-item" style="border-color:${RAR[r][1]}"><img src="${img}"></div>`;
-      }
-
-      const oddsList = [
-        { type: 'common', label: 'Обычный', color: RAR.common[1], chance: c.odds.common, icon: '🎒' },
-        { type: 'rare', label: 'Редкий', color: RAR.rare[1], chance: c.odds.rare, icon: '📘' },
-        { type: 'epic', label: 'Эпический', color: RAR.epic[1], chance: c.odds.epic, icon: '🪄' },
-        { type: 'legend', label: 'Легендарный', color: RAR.legend[1], chance: c.odds.legend, icon: '🏆' },
-        { type: 'mythic', label: 'Мифический', color: RAR.mythic[1], chance: c.odds.mythic, icon: '💎' }
-      ].filter(o => o.chance > 0);
-
-      content.innerHTML = `
-        <div style="text-align:center; margin-bottom:20px;">
-          <h2 style="font-family:'Oswald'; font-size:28px; color:#fff;">${c.name}</h2>
-          <div class="sub">${c.cur === 'stars' ? 'Стоимость: ★ ' + c.cost : 'Стоимость: ◆ ' + c.cost}</div>
-        </div>
-
-        <div class="preview-strip">
-          <div class="preview-track">${previewItems}</div>
-          <div class="preview-ptr"></div>
-        </div>
-
-        <div class="row" style="margin:20px 0 10px;">
-          <div style="font-family:'Oswald'; font-size:18px; color:#fff;">Что может выпасть</div>
-          <div class="sub">шансы</div>
-        </div>
-        
-        <div class="odds-list">
-          ${oddsList.map(o => `
-            <div class="odds-item">
-              <div class="odds-icon" style="background:${o.color}22; color:${o.color}; border:1px solid ${o.color}44;">${o.icon}</div>
-              <div class="odds-info">
-                <div style="font-weight:600; color:#fff; font-size:15px;">${o.label}</div>
-                <div class="sub" style="font-size:12px;">Персонаж</div>
-              </div>
-              <div class="odds-chance" style="background:${o.color}22; color:${o.color};">${o.chance}%</div>
-            </div>
-          `).join('')}
-        </div>
-
-        <button class="btn w" id="confirm-open-case" style="margin-top:20px; font-size:16px; padding:15px;">Открыть за ${c.cur === 'stars' ? '★' : '◆'} ${c.cost}</button>
-        <button class="btn g w close-modal" style="margin-top:10px;">Отмена</button>
-      `;
-
-      modal.classList.remove('hidden');
-      
-      const track = content.querySelector('.preview-track');
-      if(track) setTimeout(() => { track.style.transform = 'translateX(-140px)'; track.style.transition = 'transform 2s ease-out'; }, 100);
-
-      $('#confirm-open-case').addEventListener('click', () => {
-        modal.classList.add('hidden');
-        executeOpenCase(k);
-      });
-    }
-
-    function executeOpenCase(k){
-      const c = CASES[k]; if (c.cost) { if (S[c.cur] < c.cost) return toast('Недостаточно средств'); S[c.cur] -= c.cost; saveState(); }
-      const r = roll(c.odds); const items = []; const WIN = 28;
-      
-      for (let i = 0; i < 36; i++) { 
-        const cc = i === WIN ? null : CHARS[rnd(CHARS.length)]; 
-        const rar = i === WIN ? r : cc.r; 
-        const img = i === WIN ? '' : cc.img; 
-        items.push(`<div class="it" style="--c:${RAR[rar] ? RAR[rar][1] : '#ffb020'}">${img ? `<img src="${img}">` : '?'}</div>`); 
-      }
-      
-      const modalWin = $('#modal-win'); 
-      const winContent = $('#win-content');
-      
-      winContent.innerHTML = `<div class="strip"><div class="track" id="track">${items.join('')}</div></div>`;
-      modalWin.classList.remove('hidden');
-      
-      const stepW = 100; const offset = winContent.clientWidth / 2 - 46 - WIN * stepW;
-      requestAnimationFrame(() => requestAnimationFrame(() => { const track = $('#track'); if(track) track.style.transform = `translateX(${offset}px)`; }));
-      
-      setTimeout(() => {
-        const ch = giveChar(r); playSFX('win');
-        winContent.innerHTML = `
-          <div class="win-result" style="--c:${RAR[r][1]}">
-            <div class="cav" style="width:140px; height:140px; overflow:hidden; padding:0; margin-bottom:20px; box-shadow:0 0 40px ${RAR[r][1]}88;">
-              ${ch.img ? `<img src="${ch.img}" style="width:100%; height:100%; object-fit:cover;">` : ''}
-            </div>
-            <div class="sub" style="color:${RAR[r][1]}; font-weight:bold; font-size:14px; text-transform:uppercase; letter-spacing:2px;">${RAR[r][0]}</div>
-            <h2 style="font-family:'Oswald'; font-size:28px; color:#fff; margin:5px 0 20px;">${esc(ch.n)}</h2>
-            <button class="btn w close-win" style="padding:15px;">Забрать</button>
-          </div>
-        `;
-        S.stat.cases++;
-        addH(`Кейс «${c.name}»`, `Выпал: ${ch.n} (${RAR[r][0]})`, c.cost ? `-${c.cost} ${c.cur === 'stars' ? '★' : '◆'}` : 'Бесплатно'); 
-        renderTop();
-      }, 3300);
-      renderTop();
-    }
-
-    // ===== ИСТОРИЯ =====
-    function renderHistory() {
-      const list = $('#history-list');
-      if (!S.hist.length) {
-        list.innerHTML = '<div class="sub" style="text-align:center; padding:20px;">Тут пока пусто</div>';
-        return;
-      }
-      
-      list.innerHTML = S.hist.map(h => {
-        const d = new Date(h.at);
-        const dateStr = `${d.getDate()}.${d.getMonth()+1}, ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-        let icon = '🎁'; let iconBg = 'rgba(255,255,255,0.1)';
-        if (h.t.includes('Дневничок')) { icon = '🎒'; iconBg = 'rgba(157, 77, 255, 0.2)'; }
-        else if (h.t.includes('Шпаргалка')) { icon = '📘'; iconBg = 'rgba(77, 163, 255, 0.2)'; }
-        else if (h.t.includes('Палочка')) { icon = '🪄'; iconBg = 'rgba(74, 222, 128, 0.2)'; }
-
-        return `
-          <div class="hist-card">
-            <div class="hist-icon" style="background:${iconBg}">${icon}</div>
-            <div class="hist-info">
-              <div class="hist-title">${esc(h.d)}</div>
-              <div class="hist-sub">${esc(h.t)} · ${dateStr}</div>
-            </div>
-            <div class="hist-price" style="color:${h.a === 'Бесплатно' ? '#4ade80' : 'var(--star)'}">${esc(h.a)}</div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // ===== РУЛЕТКИ =====
-    const SLICES = 10, FREE = [3, 7];
-    const RL = { abs: 0, spinning: false };
-    const RL2 = { abs: 0, spinning: false };
-    
-    function buildWheel(){
-      const disc = $('#disc'); if(!disc) return;
-      const parts = []; for (let i = 0; i < SLICES; i++) { const f = FREE.includes(i); const c = f ? '#ffb020' : (i % 2 ? '#1a1a24' : '#101018'); parts.push(`${c} ${i * 36}deg ${(i + 1) * 36}deg`); }
-      disc.style.background = `conic-gradient(${parts.join(',')})`;
-      disc.innerHTML = Array.from({ length: SLICES }, (_, i) => { const f = FREE.includes(i); return `<span class="lbl" style="transform:rotate(${i * 36 + 18}deg)"><b>${f ? '🎁' : '✖'}</b><i>${f ? 'кейс' : 'пусто'}</i></span>`; }).join('');
-    }
-    
-    function buildWheel2(){
-      const disc = $('#disc2'); if(!disc) return;
-      const parts = []; for (let i = 0; i < SLICES; i++) { const isChar = i % 3 === 0; const c = isChar ? '#4da3ff' : (i % 2 ? '#1a1a24' : '#101018'); parts.push(`${c} ${i * 36}deg ${(i + 1) * 36}deg`); }
-      disc.style.background = `conic-gradient(${parts.join(',')})`;
-      disc.innerHTML = Array.from({ length: SLICES }, (_, i) => { const isChar = i % 3 === 0; return `<span class="lbl" style="transform:rotate(${i * 36 + 18}deg)"><b>${isChar ? '👤' : '✖'}</b><i>${isChar ? 'герой' : 'пусто'}</i></span>`; }).join('');
-    }
-
-    function renderRoulette(){
-      if (!$('#disc')) return;
-      if (!$('#disc').children.length) buildWheel();
-      if (!$('#disc2').children.length) buildWheel2();
-      
-      $('#disc').style.transform = `rotate(${RL.abs}deg)`;
-      const left = S.stat.spinAt + 2 * H - Date.now();
-      const btn = $('#spinBtn'); const txt = $('#spinTxt');
-      if(btn) { btn.disabled = left > 0 || RL.spinning; btn.textContent = left > 0 ? 'Подождите' : 'Крутить'; }
-      if(txt) txt.textContent = RL.spinning ? 'Крутим…' : (left > 0 ? 'Через ' + fmt(left) : 'Испытай удачу');
-
-      $('#disc2').style.transform = `rotate(${RL2.abs}deg)`;
-      const btn2 = $('#spinBtn2');
-      if(btn2) { btn2.disabled = RL2.spinning; btn2.textContent = RL2.spinning ? 'Крутим...' : 'Крутить (★ 7)'; }
-    }
-
-    document.querySelectorAll('.rt-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        document.querySelectorAll('.rt-btn').forEach(b => b.classList.remove('active'));
-        e.currentTarget.classList.add('active');
-        if(e.currentTarget.dataset.rt === 'daily') { $('#roulette-daily').classList.remove('hidden'); $('#roulette-char').classList.add('hidden'); }
-        else { $('#roulette-daily').classList.add('hidden'); $('#roulette-char').classList.remove('hidden'); }
-      });
-    });
-
-    if ($('#spinBtn')) $('#spinBtn').addEventListener('click', () => {
-      if (RL.spinning || Date.now() < S.stat.spinAt + 2 * H) return;
-      S.stat.spinAt = Date.now(); S.stat.spins++; RL.spinning = true; saveState();
-      const win = rnd(SLICES); const center = win * 36 + 18; const delta = 360 * 6 + ((360 - ((center + RL.abs) % 360)) % 360);
-      RL.abs += delta; $('#disc').style.transform = `rotate(${RL.abs}deg)`; renderRoulette();
-      setTimeout(() => {
-        RL.spinning = false; const hit = FREE.includes(win); renderRoulette();
-        if (hit) { playSFX('win'); toast('Бесплатный кейс!'); setTimeout(() => { go('cases'); openCaseDetails('free'); }, 400); }
-        else toast('Пусто');
-      }, 5100);
-    });
-
-    if ($('#spinBtn2')) $('#spinBtn2').addEventListener('click', () => {
-      if (RL2.spinning) return;
-      if (S.stars < 7) return toast('Нужно ★ 7 для прокрутки');
-      S.stars -= 7; S.stat.spinsChar++; RL2.spinning = true; saveState(); renderTop();
-      
-      const win = rnd(SLICES); const center = win * 36 + 18; const delta = 360 * 6 + ((360 - ((center + RL2.abs) % 360)) % 360);
-      RL2.abs += delta; $('#disc2').style.transform = `rotate(${RL2.abs}deg)`; renderRoulette();
-      
-      setTimeout(() => {
-        RL2.spinning = false; renderRoulette();
-        const isChar = win % 3 === 0;
-        if (isChar) {
-          playSFX('win');
-          const rar = roll({ epic: 70, legend: 25, mythic: 5 });
-          const ch = giveChar(rar);
-          addH('Рулетка (Персонажи)', `Выпал: ${ch.n} (${RAR[rar][0]})`, '-7 ★');
-          
-          const modalWin = $('#modal-win'); 
-          const winContent = $('#win-content');
-          winContent.innerHTML = `
-            <div class="win-result" style="--c:${RAR[rar][1]}">
-              <div class="cav" style="width:140px; height:140px; overflow:hidden; padding:0; margin-bottom:20px; box-shadow:0 0 40px ${RAR[rar][1]}88;">
-                ${ch.img ? `<img src="${ch.img}" style="width:100%; height:100%; object-fit:cover;">` : ''}
-              </div>
-              <div class="sub" style="color:${RAR[rar][1]}; font-weight:bold; font-size:14px; text-transform:uppercase; letter-spacing:2px;">${RAR[rar][0]}</div>
-              <h2 style="font-family:'Oswald'; font-size:28px; color:#fff; margin:5px 0 20px;">${esc(ch.n)}</h2>
-              <button class="btn w close-win" style="padding:15px;">Забрать</button>
-            </div>
-          `;
-          modalWin.classList.remove('hidden');
-        } else {
-          addH('Рулетка (Персонажи)', 'Пусто', '-7 ★');
-          toast('Пусто. Попробуй еще!');
-        }
-      }, 5100);
-    });
-
-    // ===== БЛОК ЭПИЗОДОВ (СЮЖЕТ) =====
+    // ===== ФОНЫ =====
     const BG = {
       hall: 'https://i.postimg.cc/XqVLZjcx/AIRetouch-20261115-083654547-(1).png',
       gym: 'https://i.postimg.cc/WzCdBS39/AIRetouch-20261115-084408474-(1).png',
@@ -505,18 +159,37 @@
       aud: 'https://i.postimg.cc/VNBPwsYp/IMG-20261115-094052-969.jpg',
       kitchen: 'https://i.postimg.cc/NGPqBzcg/IMG-20261115-094058-247.jpg',
       street: 'https://i.postimg.cc/52LZ59FL/IMG-20261115-094100-132.jpg',
-      office: 'https://i.postimg.cc/D0SNS7TV/IMG-20261115-094102-192.jpg'
+      office: 'https://i.postimg.cc/D0SNS7TV/IMG-20261115-094102-192.jpg',
+      sizo: 'https://i.postimg.cc/52z8T4YL/2f6d826e13411f188b2da9a777c83ab-1.jpg',
+      stairs: 'https://i.postimg.cc/nhWwYh8K/2aef488e13311f1a5f33a6ca34e81cf-1.jpg',
+      directorCorridor: 'https://i.postimg.cc/mgPmDWch/913af61e13311f1a0c53e3ecddc87a2-1.jpg',
+      boiler: 'https://i.postimg.cc/2jwDrCDM/AIRetouch-20261115-211355404-(1).png',
+      guard: 'https://i.postimg.cc/CxWym1GG/AIRetouch-20261115-211556507-(1).png',
+      music: 'https://i.postimg.cc/3NLVpJrw/AIRetouch-20261115-211759934-(1).png',
+      assembly: 'https://i.postimg.cc/c1nNtff0/AIRetouch-20261115-213118475-(1).png',
+      police: 'https://i.postimg.cc/PJG9QFYy/AIRetouch-20261115-213322456-(1).png',
+      home: 'https://i.postimg.cc/zXF6T7BP/AIRetouch-20261115-213507468-(1).png',
+      car: 'https://i.postimg.cc/KzTsjrwV/AIRetouch-20261115-213720816-(1).png',
+      yard: 'https://i.postimg.cc/zvCWPpPF/AIRetouch-20261115-215725480-(1).png',
+      basement: 'https://i.postimg.cc/VN2Cf2xk/AIRetouch-20261115-220216946-(1).png',
+      sto: 'https://i.postimg.cc/RhL6ThN0/AIRetouch-20261115-220531140-(1).png',
+      hospital: 'https://i.postimg.cc/9FcqQdnS/AIRetouch-20261115-220750011-(1).png',
+      archive: 'https://i.postimg.cc/tTRLgmFy/792431ae12911f1872ca2d9c9abc235-1.jpg',
+      theatre: 'https://i.postimg.cc/Hs5HRR23/377abf4e12911f1b6feb2ef94b5359b-1.jpg',
+      roof: 'https://i.postimg.cc/HnMDG8Qp/480aabbe12911f1b6feb2ef94b5359b-1.jpg',
+      restaurant: 'https://i.postimg.cc/jScVrbJB/91161f9e12911f1afdeb6d6614830bc-1.jpg',
+      city: 'https://i.postimg.cc/jd6mzbvK/8d48931e12a11f18f7382cf82552570-1.jpg',
+      interrogation: 'https://i.postimg.cc/FHWPZsLC/bee7b63e12a11f1ba345279096def6d-1.jpg'
     };
 
     const EP_NAMES = [
-      'Тот, кто дергает за ниточки', 'Праведные сёстры', 'Скелет в шкафу', 
-      'Лицо Кукольника', 'Правила игры', 'Разбитые маски', 
+      'Тот, кто дергает за ниточки', 'Праведные сёстры', 'Скелет в шкафу',
+      'Лицо Кукольника', 'Правила игры', 'Разбитые маски',
       'Исцеление болью', 'В ловушке котельной', 'Новый Кукольник'
     ];
 
-    const RELEASED_EPISODES = 1; 
-
-    const STORY = [
+    // ===== СТОРИ: СЕЗОН 1 (эпизод 1 — готовый, 2–9 — заглушки) =====
+    const S1_EPISODES = [
       [ /* ЭПИЗОД 1 */
         { bg: BG.hall, char: C.dima, name: '', music: 'calm', text: 'Коридор школы, второй этаж. Утро. Яркий солнечный свет бьет в окна, отражается от начищенного линолеума. Ряды металлических шкафчиков. У одного из них стоит Дима в школьной форме с расслабленным галстуком, рядом висит его джинсовка.' },
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'calm', text: 'Я стою у своего открытого шкафчика, нервно теребя в руках учебник по геометрии. В коридоре шумно, старшеклассники толкаются, кто-то смеется, но я не обращаю внимания. Мысли крутятся вокруг предстоящей контрольной.' },
@@ -610,182 +283,458 @@
       [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 9 в разработке.' } ]
     ];
 
-    let vnState = { active: false, ep: 0, scene: 0 };
+    // ===== СЕЗОНЫ ДЕТЕКТИВА =====
+    // released — сколько эпизодов открыто для игроков.
+    // Меняй цифру: 1 → открыт 1 эпизод, 2 → открыто 2, и так далее до total.
+    // Сезон 2: released: 0 → показывается «СКОРО». Поставь 1 — откроется первый эпизод второго сезона.
+    const SEASONS = [
+      { title: 'Сезон 1', total: 9, released: 1, names: EP_NAMES, story: S1_EPISODES },
+      { title: 'Сезон 2', total: 7, released: 0, names: ['Скоро', 'Скоро', 'Скоро', 'Скоро', 'Скоро', 'Скоро', 'Скоро'], story: [] }
+    ];
 
-    function renderDetective() {
-      const body = $('#nvBody'); if (!body) return;
-      if ($('#vn-screen')) $('#vn-screen').classList.add('hidden');
-      
-      const chapters = S.stat?.chapters || 0;
-      let activeEpIndex = Math.min(chapters, RELEASED_EPISODES - 1);
-      if (activeEpIndex < 0) activeEpIndex = 0;
-      
-      const activeBg = STORY[activeEpIndex][0].bg || BG.hall;
-      const isFinishedAll = chapters >= RELEASED_EPISODES;
+    // Награда за прохождение эпизода. Ключ: 'номер сезона-номер эпизода'
+    const EPISODE_REWARDS = { '1-8': 'Загадочный Мужчина' };
+    // ===== ЭДИТЫ =====
+    async function loadRealEdits() {
+      const container = $('#posts'); if (!container) return; container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px;">Загрузка...</div>';
+      try { const res = await fetch('/api/posts?type=edits'); const posts = await res.json(); if (!posts || !posts.length) { container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px;">Пусто</div>'; return; }
+        container.innerHTML = posts.map(p => { let mediaHtml = ''; if (p.videoUrl) mediaHtml = `<video src="${p.videoUrl}" controls controlsList="nodownload" playsinline style="width:100%; height:auto; max-height:400px; object-fit:cover; border-radius: 16px 16px 0 0;"></video>`; else if (p.image) mediaHtml = `<img src="${p.image}" style="width:100%; height:auto; max-height:400px; object-fit:cover; border-radius: 16px 16px 0 0;">`; const d = new Date(p.date); const dateStr = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }); return `<article class="post" style="padding: 0; overflow: hidden; margin-bottom: 20px;">${mediaHtml}<div class="b"><div class="row" style="margin-bottom: 6px;"><div class="au" style="margin:0;">@${esc(p.author)}</div><div class="sub" style="font-size: 11px;">${dateStr}</div></div><p class="sub" style="margin-bottom: 10px; color: #fff; font-size: 14px; white-space: pre-wrap;">${esc(p.text.substring(0, 120))}...</p><div class="row"><a href="https://t.me/${p.author}" target="_blank" class="btn sm g" style="text-decoration:none;">В канал</a><button class="like" data-like="${p.id}">♥ Нравится</button></div></div></article>`; }).join('');
+      } catch (err) { container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px; color: #ff1e3c;">Ошибка</div>'; }
+    }
+    if ($('#posts')) $('#posts').addEventListener('click', e => { const b = e.target.closest('[data-like]'); if (!b) return; b.classList.toggle('on'); b.textContent = b.classList.contains('on') ? '♥ В избранном' : '♥ Нравится'; S.stat.likes++; saveState(); });
 
-      let html = `
-        <div class="ep-header">
-          <h1 class="ep-title-main">Эпизоды</h1>
-          <div class="ep-progress">пройдено ${Math.min(chapters, RELEASED_EPISODES)} из ${STORY.length}</div>
-        </div>
-        
-        <div class="ep-card-active" id="btn-play-active">
-          <div class="ep-card-bg" style="background-image:url('${activeBg}')"></div>
-          <div class="ep-card-content">
-            <div class="ep-card-sub">${isFinishedAll ? 'Все доступные эпизоды пройдены' : `Эпизод ${activeEpIndex + 1} · ты здесь`}</div>
-            <div class="ep-card-title">${EP_NAMES[activeEpIndex]}</div>
-            <button class="btn ep-btn-play w">${isFinishedAll ? '▶ Пройти заново' : '▶ Продолжить'}</button>
-          </div>
-        </div>
-        
-        <div class="ep-list">
-      `;
 
-      EP_NAMES.forEach((name, i) => {
-        if (i === activeEpIndex && !isFinishedAll) return; 
-        
-        const isReleased = i < RELEASED_EPISODES;
-        const isUnlocked = i < chapters;
-        
-        if (isUnlocked && isReleased) {
-          html += `<div class="ep-item" data-ep="${i}"><div class="ep-num">0${i+1}</div><div class="ep-info"><div class="ep-name">${name}</div></div><div class="ep-lock" style="color:var(--ok); font-size:14px;">✓</div></div>`;
-        } else if (!isUnlocked && isReleased) {
-          html += `<div class="ep-item future"><div class="ep-header-row">⏳ Эпизод ${i+1} · скоро</div><div class="ep-name">${name}</div><div class="ep-wait-badge">в разработке</div></div>`;
-        } else {
-          html += `<div class="ep-item locked"><div class="ep-num">0${i+1}</div><div class="ep-info"><div class="ep-name">${name}</div></div><div class="ep-lock">🔒</div></div>`;
-        }
+    // ===== СОХРАНЕНИЕ И ЗАГРУЗКА =====
+    const DEFAULT_S = {
+      stars: 0, coins: 0, inv: [], hist: [], liked: {}, choices: [], activeBadge: null,
+      stat: { cases: 0, likes: 0, progress: {}, caseAt: {}, rewards: {} }
+    };
+    let S = JSON.parse(JSON.stringify(DEFAULT_S));
+    let stateLoaded = false;
+    let saveTimeout;
+
+    // Приводит stat к нужному виду (и переносит старое поле chapters)
+    function normalizeStat(st) {
+      const s = { ...DEFAULT_S.stat, ...(st || {}) };
+      s.progress = { ...((st && st.progress) || {}) };
+      if (!s.progress[1] && st && st.chapters) s.progress[1] = st.chapters;
+      s.caseAt = { ...((st && st.caseAt) || {}) };
+      s.rewards = { ...((st && st.rewards) || {}) };
+      return s;
+    }
+
+    async function loadUserState() {
+      try {
+        const res = await fetch(`/api/user/${TG_ID}`, { headers: authHeaders() });
+        const data = await res.json();
+        if (!res.ok || data.error) throw new Error(data.error || 'Ошибка загрузки');
+        S = {
+          ...DEFAULT_S,
+          inv: Array.isArray(data.inv) ? data.inv : [],
+          hist: Array.isArray(data.hist) ? data.hist : [],
+          choices: Array.isArray(data.choices) ? data.choices : [],
+          activeBadge: data.active_badge || null,
+          stat: normalizeStat(data.stat)
+        };
+      } catch (e) {
+        console.error('Ошибка загрузки БД', e);
+        try {
+          const saved = localStorage.getItem('shd_app_state');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            S = { ...DEFAULT_S, ...parsed, stat: normalizeStat(parsed.stat) };
+          }
+        } catch (err) {}
+      }
+      stateLoaded = true;
+      renderProfile();
+    }
+
+    function saveState() {
+      try { localStorage.setItem('shd_app_state', JSON.stringify(S)); } catch (e) {}
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(async () => {
+        if (!stateLoaded) return;
+        try {
+          await fetch(`/api/user/${TG_ID}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...authHeaders() },
+            body: JSON.stringify(S)
+          });
+        } catch (e) { console.error('Ошибка сохранения БД', e); }
+      }, 1000);
+    }
+
+    const addH = (t, d, a) => { S.hist.unshift({ t, d, a, at: Date.now() }); saveState(); };
+    function toast(msg) {
+      const t = $('#toast'); if (!t) return;
+      t.textContent = msg; t.classList.add('show');
+      clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2200);
+    }
+    const fmtLeft = ms => {
+      const h = Math.floor(ms / H), m = Math.floor((ms % H) / 6e4);
+      return h > 0 ? `${h} ч ${m} мин` : `${m} мин`;
+    };
+
+    // ===== НАВИГАЦИЯ =====
+    const SCREENS = ['menu', 'edit', 'cases', 'detective', 'awards', 'profile'];
+    function go(name) {
+      SCREENS.forEach(s => { const el = $('#s-' + s); if (el) el.classList.toggle('on', s === name); });
+      const backBtn = $('#backBtn'); if (backBtn) backBtn.classList.toggle('hidden', name === 'menu');
+      try {
+        if (name === 'edit') loadRealEdits();
+        if (name === 'cases') renderCases();
+        if (name === 'detective') renderDetective();
+        if (name === 'awards') renderAwards();
+        if (name === 'profile') renderProfile();
+      } catch (e) { console.error(e); }
+    }
+    if ($('#backBtn')) $('#backBtn').addEventListener('click', () => go('menu'));
+
+    // ===== ОБЩИЕ СЛУЖЕБНЫЕ =====
+    function roll(o) {
+      const t = Object.values(o).reduce((a, b) => a + b, 0);
+      let r = Math.random() * t;
+      for (const k in o) { r -= o[k]; if (r < 0) return k; }
+      return Object.keys(o)[0];
+    }
+    function giveChar(rar) {
+      let pool = CHARS.filter(c => c.r === rar && !c.story);
+      if (!pool.length) pool = CHARS.filter(c => c.r === 'common');
+      const c = pool[rnd(pool.length)];
+      S.inv.unshift({ n: c.n, r: c.r, img: c.img, id: Date.now() + rnd(9999) });
+      return c;
+    }
+    function giveNamed(name) {
+      const c = CHARS.find(x => x.n === name); if (!c) return null;
+      S.inv.unshift({ n: c.n, r: c.r, img: c.img, id: Date.now() + rnd(9999) });
+      return c;
+    }
+
+    // ===== КЕЙСЫ =====
+    let pendingCase = null;
+    const caseLeft = k => Math.max(0, ((S.stat.caseAt || {})[k] || 0) + CASES[k].cd - Date.now());
+
+    function renderCases() {
+      const list = $('#caseList'); if (!list) return;
+      let html = `<div class="cases-header"><button class="history-btn" id="btn-history">⏱ История выигрышей</button></div><div class="case-cards-list">`;
+      Object.keys(CASES).forEach(k => {
+        const c = CASES[k], left = caseLeft(k);
+        const status = left > 0 ? `⏳ Через ${fmtLeft(left)}` : '✅ Готово к открытию';
+        html += `
+          <div class="case-card" data-case="${k}" style="background:${c.bg}">
+            <div class="case-icon">${c.icon}</div>
+            <div class="case-info">
+              <div class="case-sub">${c.period}</div>
+              <div class="case-title">${c.name}</div>
+              <div class="case-price"><span>${status}</span></div>
+            </div>
+            <div class="case-chevron">›</div>
+          </div>`;
       });
+      html += `</div>`;
+      list.innerHTML = html;
+    }
 
-      html += `
+    if ($('#caseList')) $('#caseList').addEventListener('click', e => {
+      const b = e.target.closest('[data-case]');
+      if (b) openCaseDetails(b.dataset.case);
+    });
+
+    function openCaseDetails(k) {
+      const c = CASES[k], left = caseLeft(k);
+      pendingCase = k;
+      const rows = Object.keys(c.odds).map(r => `
+        <div class="odds-item">
+          <div class="odds-icon" style="background:${RAR[r][1]}33;">●</div>
+          <div class="odds-info"><b style="color:${RAR[r][1]}">${RAR[r][0]}</b></div>
+          <div class="odds-chance" style="background:${RAR[r][1]}22; color:${RAR[r][1]}">${c.odds[r]}%</div>
+        </div>`).join('');
+      $('#case-modal-content').innerHTML = `
+        <div class="row" style="justify-content:flex-end"><button class="close-modal" style="color:#fff; font-size:22px">✕</button></div>
+        <div style="text-align:center; margin-bottom:16px">
+          <h2 style="font-size:28px">${c.name}</h2>
+          <div class="sub">${c.period}</div>
         </div>
-        <div style="display:flex; justify-content:center; gap:10px; margin-top:24px; flex-wrap:wrap;">
-          <button class="btn sm g" id="btn-my-choices">♥ Твои выборы</button>
-          <button class="btn sm g" id="btn-album">🖼 Фотоальбом</button>
-        </div>
+        <div class="odds-list">${rows}</div>
+        <button class="btn w" id="confirm-open-case" style="margin-top:16px" ${left > 0 ? 'disabled' : ''}>${left > 0 ? 'Через ' + fmtLeft(left) : 'Открыть'}</button>
       `;
-
-      body.innerHTML = html;
-
-      if ($('#btn-play-active')) $('#btn-play-active').addEventListener('click', () => startVN(activeEpIndex));
-      $$('.ep-item[data-ep]').forEach(el => el.addEventListener('click', () => startVN(+el.dataset.ep)));
-      if ($('#btn-my-choices')) $('#btn-my-choices').addEventListener('click', () => openChoicesModal());
-      if ($('#btn-album')) $('#btn-album').addEventListener('click', () => $('#album-modal').classList.remove('hidden'));
+      $('#modal-case-details').classList.remove('hidden');
     }
 
-    function startVN(epIndex) { 
-      vnState = { active: true, ep: epIndex, scene: 0 }; 
-      $('#vn-screen').classList.remove('hidden'); 
-      playMusic(STORY[epIndex][0].music || 'calm');
-      showScene(); 
+    function openCase(k) {
+      if (!k || caseLeft(k) > 0) return;
+      const rar = roll(CASES[k].odds);
+      const c = giveChar(rar);
+      S.stat.cases = (S.stat.cases || 0) + 1;
+      S.stat.caseAt = { ...(S.stat.caseAt || {}), [k]: Date.now() };
+      addH('Кейс', `${CASES[k].name}: ${c.n}`, RAR[rar][0]);
+      playSFX('win');
+      $('#modal-case-details').classList.add('hidden');
+      showWin(c, rar);
     }
 
-    function showScene() {
-      if (!vnState.active) return;
-      const scene = STORY[vnState.ep][vnState.scene];
-      if (!scene) return endVN();
-      
-      const bgEl = $('#vn-bg'), charEl = $('#vn-char'), dialogEl = $('#vn-dialog'), textEl = $('#vn-text');
-      dialogEl.style.display = 'block';
-      
-      if (scene.music) playMusic(scene.music);
-      if (scene.sfx) playSFX(scene.sfx);
+    function showWin(c, rar) {
+      $('#win-content').innerHTML = `
+        <div class="win-result">
+          <div class="cav" style="width:180px; height:180px; border-radius:50%; overflow:hidden; border:3px solid ${RAR[rar][1]}; box-shadow:0 0 30px ${RAR[rar][1]}">
+            <img src="${c.img}" style="width:100%; height:100%; object-fit:cover">
+          </div>
+          <div class="lab" style="margin-top:14px; color:${RAR[rar][1]}">${RAR[rar][0]}</div>
+          <div class="o" style="font-size:28px; margin-top:4px">${esc(c.n)}</div>
+          <button class="btn close-win" style="margin-top:18px">Забрать</button>
+        </div>`;
+      $('#modal-win').classList.remove('hidden');
+    }
 
-      if (scene.choice) {
-        textEl.textContent = scene.text;
-        dialogEl.classList.add('choice-mode');
-        document.querySelector('.vn-next-btn').style.display = 'none';
-        
-        let choiceHtml = `<div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">`;
-        scene.options.forEach((opt, i) => { choiceHtml += `<button class="btn w" onclick="window.makeChoice(${i})">${opt.text}</button>`; });
-        choiceHtml += `</div>`;
-        dialogEl.innerHTML = `<div class="vn-top-row"><div class="vn-speaker">${esc(scene.name)}</div></div><div class="vn-text">${esc(scene.text)}</div>${choiceHtml}`;
+    // ===== ИСТОРИЯ =====
+    function renderHistory() {
+      const list = $('#history-list');
+      if (!S.hist.length) {
+        list.innerHTML = '<div class="sub" style="text-align:center; padding:20px;">Тут пока пусто</div>';
         return;
       }
       
-      window.makeChoice = (idx) => {
-        const opt = STORY[vnState.ep][vnState.scene].options[idx];
-        S.choices.unshift({ ep: `Эпизод ${vnState.ep + 1}`, choice: opt.text });
-        saveState();
-        dialogEl.classList.remove('choice-mode');
-        dialogEl.innerHTML = `<div class="vn-top-row"><div class="vn-speaker" id="vn-speaker"></div><div class="vn-ep-info">Эпизод ${vnState.ep + 1}</div></div><div class="vn-text" id="vn-text"></div><div class="vn-next-btn" id="vn-next-btn" style="display:block">➔</div>`;
-        if (opt.next !== undefined) vnState.scene = opt.next; else vnState.scene++;
-        showScene();
-      };
+      list.innerHTML = S.hist.map(h => {
+        const d = new Date(h.at);
+        const dateStr = `${d.getDate()}.${d.getMonth()+1}, ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        let icon = '🎁'; let iconBg = 'rgba(255,255,255,0.1)';
+        if (h.t.includes('Дневничок')) { icon = '🎒'; iconBg = 'rgba(157, 77, 255, 0.2)'; }
+        else if (h.t.includes('Шпаргалка')) { icon = '📘'; iconBg = 'rgba(77, 163, 255, 0.2)'; }
+        else if (h.t.includes('Палочка')) { icon = '🪄'; iconBg = 'rgba(74, 222, 128, 0.2)'; }
 
-      bgEl.style.backgroundImage = `url('${scene.bg}')`; bgEl.className = 'vn-bg active';
-      if (scene.char) { charEl.style.backgroundImage = `url('${scene.char}')`; charEl.classList.add('active'); } else { charEl.classList.remove('active'); }
-      if($('#vn-speaker')) $('#vn-speaker').textContent = scene.name;
-      if($('#vn-text')) $('#vn-text').textContent = scene.text;
-      if($('#vn-ep-info')) $('#vn-ep-info').textContent = `Эпизод ${vnState.ep + 1}`;
-    }
-
-    if ($('#vn-dialog')) $('#vn-dialog').addEventListener('click', () => { 
-      if (!vnState.active || $('#vn-dialog').classList.contains('choice-mode')) return; 
-      const currentScene = STORY[vnState.ep][vnState.scene];
-      if (currentScene.next !== undefined) vnState.scene = currentScene.next; else vnState.scene++;
-      showScene(); 
-    });
-
-    function endVN() { 
-      vnState.active = false; $('#vn-screen').classList.add('hidden'); stopMusic(); 
-      if (S.stat.chapters <= vnState.ep) {
-        S.stat.chapters = vnState.ep + 1; 
-        addH('Детектив', `Пройден Эпизод ${vnState.ep + 1}`, 'Сюжет'); 
-      }
-      toast(`Эпизод ${vnState.ep + 1} пройден!`); renderDetective(); saveState(); 
-    }
-
-    if ($('#vn-pause-btn')) $('#vn-pause-btn').addEventListener('click', (e) => { e.stopPropagation(); $('#pause-modal').classList.remove('hidden'); });
-    if ($('#pause-continue')) $('#pause-continue').addEventListener('click', () => $('#pause-modal').classList.add('hidden'));
-    if ($('#pause-exit')) $('#pause-exit').addEventListener('click', () => { $('#pause-modal').classList.add('hidden'); $('#vn-screen').classList.add('hidden'); stopMusic(); vnState.active = false; go('menu'); });
-    if ($('#pause-restart')) $('#pause-restart').addEventListener('click', () => { $('#pause-modal').classList.add('hidden'); vnState.scene = 0; showScene(); });
-    
-    if ($('#vol-sfx')) $('#vol-sfx').addEventListener('input', (e) => { sfxVolume = e.target.value / 100; });
-    if ($('#vol-music')) $('#vol-music').addEventListener('input', (e) => { musicPlayer.volume = (e.target.value / 100) * 0.20; });
-
-    function openChoicesModal() {
-      $('#choices-modal').classList.remove('hidden');
-      const container = $('#choices-content');
-      if (!S.choices.length) container.innerHTML = '<div class="sub" style="text-align:center; margin-top:20px;">Ты пока не сделал ни одного выбора.</div>';
-      else container.innerHTML = S.choices.map(c => `<div class="card" style="padding:12px; margin-bottom:8px; border-left: 3px solid var(--star);"><div class="sub" style="font-size:10px; margin-bottom:4px; text-transform:uppercase;">${esc(c.ep)}</div><b style="font-size:14px; color:#fff;">${esc(c.choice)}</b></div>`).join('');
-    }
-    if ($('#pause-choices')) $('#pause-choices').addEventListener('click', () => openChoicesModal());
-    if ($('#pause-album')) $('#pause-album').addEventListener('click', () => $('#album-modal').classList.remove('hidden'));
-
-    // ===== НАГРАДЫ =====
-    const ACHIEVEMENTS = [
-      { id: 'start', icon: '👋', name: 'Новичок', desc: 'Зашел в бота', reward: 1, check: () => true },
-      { id: 'case1', icon: '📦', name: 'Первак', desc: 'Открыл 1 кейс', reward: 1, check: () => S.stat.cases >= 1 },
-      { id: 'case10', icon: '🎁', name: 'Лудоман', desc: 'Открыл 10 кейсов', reward: 3, check: () => S.stat.cases >= 10 },
-      { id: 'ep1', icon: '🕵️', name: 'Сыщик', desc: 'Прошел Эпизод 1', reward: 2, check: () => S.stat.chapters >= 1 },
-      { id: 'ep3', icon: '🔎', name: 'Детектив', desc: 'Прошел Эпизод 3', reward: 5, check: () => S.stat.chapters >= 3 },
-      { id: 'spin1', icon: '🎡', name: 'Удачливый', desc: 'Крутил рулетку', reward: 1, check: () => S.stat.spins >= 1 },
-      { id: 'hero1', icon: '🦸', name: 'Коллекционер', desc: 'Собрал 1 героя', reward: 1, check: () => S.inv.length >= 1 },
-      { id: 'hero5', icon: '🎭', name: 'Фанат', desc: 'Собрал 5 героев', reward: 3, check: () => S.inv.length >= 5 },
-      { id: 'hero10', icon: '💎', name: 'Геймер', desc: 'Собрал 10 героев', reward: 5, check: () => S.inv.length >= 10 }
-    ];
-
-    function renderAwards() {
-      const grid = $('#achGrid'); const sub = $('#awSub'); if (!grid) return;
-      const unlocked = ACHIEVEMENTS.filter(a => a.check());
-      if (sub) sub.textContent = `${unlocked.length} из ${ACHIEVEMENTS.length}`;
-      
-      grid.innerHTML = ACHIEVEMENTS.map(a => {
-        const isDone = a.check();
-        const isEquipped = S.activeBadge === a.id;
         return `
-          <div class="ach-card ${isDone ? 'done' : 'locked'} ${isEquipped ? 'equipped' : ''}" data-ach="${a.id}">
-            <div class="ach-card-icon">${isDone ? a.icon : '🔒'}</div>
-            <div class="ach-card-title">${esc(a.name)}</div>
-            <div class="ach-card-desc">${esc(a.desc)}</div>
-            <div class="ach-card-reward">⭐ +${a.reward}</div>
-            ${isDone ? `<button class="ach-card-btn">${isEquipped ? '✓ На аватарке' : 'Надеть'}</button>` : `<div class="ach-card-locked-text">Не получено</div>`}
+          <div class="hist-card">
+            <div class="hist-icon" style="background:${iconBg}">${icon}</div>
+            <div class="hist-info">
+              <div class="hist-title">${esc(h.d)}</div>
+              <div class="hist-sub">${esc(h.t)} · ${dateStr}</div>
+            </div>
+            <div class="hist-price" style="color:${h.a === 'Бесплатно' ? '#4ade80' : 'var(--star)'}">${esc(h.a)}</div>
           </div>
         `;
       }).join('');
     }
 
-    if ($('#achGrid')) $('#achGrid').addEventListener('click', (e) => {
+
+
+    // ===== ДЕТЕКТИВ =====
+    let vnState = { active: false, season: 1, ep: 0, scene: 0 };
+    const seasonDone = n => Math.min(((S.stat.progress || {})[n]) || 0, SEASONS[n - 1].total);
+    const curList = () => SEASONS[vnState.season - 1].story[vnState.ep];
+
+    function renderDetective() {
+      const body = $('#nvBody'); if (!body) return;
+      if ($('#vn-screen')) $('#vn-screen').classList.add('hidden');
+
+      let html = '';
+      SEASONS.forEach((season, si) => {
+        const n = si + 1, done = seasonDone(n), rel = season.released;
+        html += `
+          <div class="ep-header">
+            <h1 class="ep-title-main">${season.title}</h1>
+            <div class="ep-progress">пройдено ${done} из ${season.total}</div>
+          </div>`;
+
+        if (rel <= 0) {
+          html += `
+            <div class="card" style="text-align:center; padding:28px 16px;">
+              <div class="o" style="font-size:34px; color:var(--star)">Скоро</div>
+              <div class="sub" style="margin-top:8px">Второй сезон уже в разработке. Следи за обновлениями.</div>
+            </div>`;
+          return;
+        }
+
+        const cur = Math.min(done, rel - 1);
+        const bg = (season.story[cur] && season.story[cur][0] && season.story[cur][0].bg) || BG.hall;
+        const passed = done > cur;
+        html += `
+          <div class="ep-card-active" data-season="${n}" data-ep="${cur}">
+            <div class="ep-card-bg" style="background-image:url('${bg}')"></div>
+            <div class="ep-card-content">
+              <div class="ep-card-sub">${passed ? 'Пройден' : 'Эпизод ' + (cur + 1) + ' · ты здесь'}</div>
+              <div class="ep-card-title">${esc(season.names[cur])}</div>
+              <button class="btn ep-btn-play w">${passed ? '▶ Пройти заново' : '▶ Продолжить'}</button>
+            </div>
+          </div>
+          <div class="ep-list">`;
+
+        for (let i = 0; i < season.total; i++) {
+          if (i === cur) continue;
+          const name = esc(season.names[i] || 'Скоро');
+          if (i < done) {
+            html += `<div class="ep-item" data-season="${n}" data-ep="${i}"><div class="ep-num">0${i + 1}</div><div class="ep-info"><div class="ep-name">${name}</div></div><div class="ep-lock" style="color:var(--ok); font-size:14px">✓</div></div>`;
+          } else if (i < rel) {
+            html += `<div class="ep-item locked"><div class="ep-num">0${i + 1}</div><div class="ep-info"><div class="ep-name">${name}</div></div><div class="ep-lock">🔒</div></div>`;
+          } else {
+            html += `<div class="ep-item future"><div class="ep-header-row">⏳ Эпизод ${i + 1} · скоро</div><div class="ep-name">${name}</div></div>`;
+          }
+        }
+        html += `</div>`;
+      });
+
+      html += `
+        <div style="display:flex; justify-content:center; gap:10px; margin-top:24px; flex-wrap:wrap;">
+          <button class="btn sm g" id="btn-my-choices">♥ Твои выборы</button>
+          <button class="btn sm g" id="btn-album">🖼 Фотоальбом</button>
+        </div>`;
+      body.innerHTML = html;
+
+      body.querySelectorAll('[data-season][data-ep]').forEach(el => {
+        el.addEventListener('click', () => startVN(+el.dataset.season, +el.dataset.ep));
+      });
+    }
+
+    function startVN(season, ep) {
+      const s = SEASONS[season - 1];
+      if (!s || ep >= s.released || ep > seasonDone(season)) return toast('Этот эпизод пока закрыт');
+      const list = s.story[ep];
+      if (!list || !list.length) return toast('Эпизод скоро');
+      vnState = { active: true, season, ep, scene: 0 };
+      $('#vn-screen').classList.remove('hidden');
+      playMusic(list[0].music || 'calm');
+      showScene();
+    }
+
+    function showScene() {
+      if (!vnState.active) return;
+      const list = curList();
+      const scene = list && list[vnState.scene];
+      if (!scene) return endVN();
+
+      const bgEl = $('#vn-bg'), charEl = $('#vn-char'), dialogEl = $('#vn-dialog');
+      dialogEl.style.display = 'block';
+      if (scene.music) playMusic(scene.music);
+      if (scene.sfx) playSFX(scene.sfx);
+
+      if (scene.choice) {
+        dialogEl.classList.add('choice-mode');
+        const choiceHtml = scene.options.map((opt, i) =>
+          `<button class="btn w" onclick="window.makeChoice(${i})">${esc(opt.text)}</button>`).join('');
+        dialogEl.innerHTML = `
+          <div class="vn-top-row"><div class="vn-speaker">${esc(scene.name)}</div></div>
+          <div class="vn-text">${esc(scene.text)}</div>
+          <div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">${choiceHtml}</div>`;
+        return;
+      }
+
+      dialogEl.classList.remove('choice-mode');
+      bgEl.style.backgroundImage = `url('${scene.bg}')`;
+      bgEl.className = 'vn-bg active';
+      if (scene.char) { charEl.style.backgroundImage = `url('${scene.char}')`; charEl.classList.add('active'); }
+      else charEl.classList.remove('active');
+      if ($('#vn-speaker')) $('#vn-speaker').textContent = scene.name;
+      if ($('#vn-text')) $('#vn-text').textContent = scene.text;
+      if ($('#vn-ep-info')) $('#vn-ep-info').textContent = `Сезон ${vnState.season}, эпизод ${vnState.ep + 1}`;
+    }
+
+    window.makeChoice = (idx) => {
+      const list = curList();
+      const scene = list && list[vnState.scene];
+      if (!scene || !scene.options || !scene.options[idx]) return;
+      const opt = scene.options[idx];
+      S.choices.unshift({ ep: `Сезон ${vnState.season}, эпизод ${vnState.ep + 1}`, choice: opt.text });
+      saveState();
+      const dialogEl = $('#vn-dialog');
+      dialogEl.classList.remove('choice-mode');
+      dialogEl.innerHTML = `
+        <div class="vn-top-row"><div class="vn-speaker" id="vn-speaker"></div><div class="vn-ep-info" id="vn-ep-info"></div></div>
+        <div class="vn-text" id="vn-text"></div>
+        <div class="vn-next-btn" id="vn-next-btn">➔</div>`;
+      vnState.scene = opt.next !== undefined ? opt.next : vnState.scene + 1;
+      showScene();
+    };
+
+    if ($('#vn-dialog')) $('#vn-dialog').addEventListener('click', (e) => {
+      // Клик по кнопке выбора не должен листать сцену
+      if (e.target.closest && e.target.closest('button')) return;
+      if (!vnState.active || $('#vn-dialog').classList.contains('choice-mode')) return;
+      const cur = curList()[vnState.scene];
+      vnState.scene = (cur && cur.next !== undefined) ? cur.next : vnState.scene + 1;
+      showScene();
+    });
+
+    function endVN() {
+      const { season, ep } = vnState;
+      vnState.active = false;
+      $('#vn-screen').classList.add('hidden');
+      stopMusic();
+      if (seasonDone(season) <= ep) {
+        S.stat.progress = { ...(S.stat.progress || {}), [season]: ep + 1 };
+        addH('Детектив', `${SEASONS[season - 1].title}, эпизод ${ep + 1}`, 'Сюжет');
+      }
+      const key = `${season}-${ep + 1}`;
+      if (EPISODE_REWARDS[key] && !S.stat.rewards[key]) {
+        const c = giveNamed(EPISODE_REWARDS[key]);
+        S.stat.rewards = { ...S.stat.rewards, [key]: true };
+        if (c) {
+          addH('Награда', `Новый персонаж: ${c.n}`, RAR[c.r][0]);
+          toast(`Новый персонаж: ${c.n}!`);
+        }
+      } else {
+        toast(`Эпизод ${ep + 1} пройден!`);
+      }
+      renderDetective();
+      saveState();
+    }
+
+    if ($('#vn-pause-btn')) $('#vn-pause-btn').addEventListener('click', e => { e.stopPropagation(); $('#pause-modal').classList.remove('hidden'); });
+    if ($('#pause-continue')) $('#pause-continue').addEventListener('click', () => $('#pause-modal').classList.add('hidden'));
+    if ($('#pause-exit')) $('#pause-exit').addEventListener('click', () => {
+      $('#pause-modal').classList.add('hidden'); $('#vn-screen').classList.add('hidden');
+      stopMusic(); vnState.active = false; go('detective');
+    });
+    if ($('#pause-restart')) $('#pause-restart').addEventListener('click', () => {
+      $('#pause-modal').classList.add('hidden'); vnState.scene = 0; showScene();
+    });
+    if ($('#vol-sfx')) $('#vol-sfx').addEventListener('input', e => { sfxVolume = e.target.value / 100; });
+    if ($('#vol-music')) $('#vol-music').addEventListener('input', e => { musicPlayer.volume = (e.target.value / 100) * 0.20; });
+
+    function openChoicesModal() {
+      $('#choices-modal').classList.remove('hidden');
+      const box = $('#choices-content');
+      box.innerHTML = S.choices.length
+        ? S.choices.map(c => `
+            <div class="card" style="padding:12px; margin-bottom:8px; border-left:3px solid var(--star);">
+              <div class="sub" style="font-size:10px; margin-bottom:4px; text-transform:uppercase">${esc(c.ep)}</div>
+              <div style="font-size:14px">${esc(c.choice)}</div>
+            </div>`).join('')
+        : '<div class="sub" style="text-align:center; margin-top:20px">Ты пока не сделал ни одного выбора.</div>';
+    }
+    if ($('#pause-choices')) $('#pause-choices').addEventListener('click', openChoicesModal);
+    if ($('#pause-album')) $('#pause-album').addEventListener('click', () => $('#album-modal').classList.remove('hidden'));
+
+    // ===== НАГРАДЫ =====
+    const ACHIEVEMENTS = [
+      { id: 'start', icon: '👋', name: 'Новичок', desc: 'Зашёл в приложение', check: () => true },
+      { id: 'case1', icon: '📦', name: 'Первак', desc: 'Открыл 1 кейс', check: () => S.stat.cases >= 1 },
+      { id: 'case10', icon: '🎁', name: 'Лудоман', desc: 'Открыл 10 кейсов', check: () => S.stat.cases >= 10 },
+      { id: 'ep1', icon: '🕵️', name: 'Сыщик', desc: 'Прошёл эпизод 1', check: () => seasonDone(1) >= 1 },
+      { id: 'ep5', icon: '🔎', name: 'Детектив', desc: 'Прошёл 5 эпизодов', check: () => seasonDone(1) >= 5 },
+      { id: 'season1', icon: '🏆', name: 'Финал', desc: 'Прошёл весь 1 сезон', check: () => seasonDone(1) >= SEASONS[0].total },
+      { id: 'legend', icon: '🌟', name: 'Везунчик', desc: 'Выбил легендарного персонажа', check: () => S.inv.some(c => c.r === 'legend' || c.r === 'mythic') },
+      { id: 'hero1', icon: '🦸', name: 'Коллекционер', desc: 'Собрал 1 персонажа', check: () => S.inv.length >= 1 },
+      { id: 'hero5', icon: '🎭', name: 'Фанат', desc: 'Собрал 5 персонажей', check: () => S.inv.length >= 5 },
+      { id: 'hero10', icon: '💎', name: 'Геймер', desc: 'Собрал 10 персонажей', check: () => S.inv.length >= 10 }
+    ];
+
+    function renderAwards() {
+      const grid = $('#achGrid'), sub = $('#awSub'); if (!grid) return;
+      const done = ACHIEVEMENTS.filter(a => a.check()).length;
+      if (sub) sub.textContent = `${done} из ${ACHIEVEMENTS.length}`;
+      grid.innerHTML = ACHIEVEMENTS.map(a => {
+        const isDone = a.check(), isEquipped = S.activeBadge === a.id;
+        return `
+          <div class="ach-card ${isDone ? 'done' : 'locked'} ${isEquipped ? 'equipped' : ''}" data-ach="${a.id}">
+            <div class="ach-card-icon">${isDone ? a.icon : '🔒'}</div>
+            <div class="ach-card-title">${esc(a.name)}</div>
+            <div class="ach-card-desc">${esc(a.desc)}</div>
+            ${isDone ? `<button class="ach-card-btn">${isEquipped ? '✓ На аватарке' : 'Надеть'}</button>` : `<div class="ach-card-locked-text">Не получено</div>`}
+          </div>`;
+      }).join('');
+    }
+
+    if ($('#achGrid')) $('#achGrid').addEventListener('click', e => {
       const card = e.target.closest('.ach-card');
       if (!card || card.classList.contains('locked')) return;
       const achId = card.dataset.ach;
@@ -794,150 +743,53 @@
       toast(S.activeBadge ? 'Награда надета!' : 'Награда снята');
     });
 
-    // ===== ПРОФИЛЬ И РЕЙТИНГ =====
-    function renderProfile(){
-      if (!$('#bS')) return;
-      $('#bS').textContent = S.stars; 
+    // ===== ПРОФИЛЬ =====
+    function renderProfile() {
+      if (!$('#bC')) return;
       $('#bC').textContent = Array.isArray(S.inv) ? S.inv.length : 0;
-      
-      const activeAch = ACHIEVEMENTS.find(a => a.id === S.activeBadge);
-      const badgeHtml = activeAch ? activeAch.icon : '';
-      if ($('#activeBadge')) { $('#activeBadge').textContent = badgeHtml; $('#activeBadge').classList.toggle('hidden', !activeAch); }
-      if ($('#activeBadge2')) { $('#activeBadge2').textContent = badgeHtml; $('#activeBadge2').classList.toggle('hidden', !activeAch); }
-
-      const pts = getPoints();
-      $('#prof-points').textContent = `${pts} очков`;
-      $('#my-points-text').textContent = `${pts} очков`;
-
-      const mockUsers = [
-        { name: 'Мила', pts: 540, me: false }, { name: 'Кирилл', pts: 1200, me: false },
-        { name: 'Анна', pts: 850, me: false }, { name: 'Тимур', pts: 2100, me: false },
-        { name: 'Соня', pts: 320, me: false }, { name: 'Артем', pts: 110, me: false },
-        { name: 'Даша', pts: 80, me: false }, { name: 'Егор', pts: 2500, me: false }
-      ];
-      mockUsers.push({ name: NAME, pts: pts, me: true });
-      mockUsers.sort((a, b) => b.pts - a.pts);
-      const myRank = mockUsers.findIndex(u => u.me) + 1;
-      
-      $('#my-rank').textContent = myRank;
-      $('#total-users').textContent = mockUsers.length + 42; 
-
-      const sortedInv = Array.isArray(S.inv) ? [...S.inv].sort((a,b) => {
-        const ranks = { mythic: 5, legend: 4, epic: 3, rare: 2, common: 1 };
-        return ranks[b.r] - ranks[a.r];
-      }) : [];
-
-      $('#inv').innerHTML = sortedInv.length ? sortedInv.map(i => `
+      const act = ACHIEVEMENTS.find(a => a.id === S.activeBadge);
+      ['#activeBadge', '#activeBadge2'].forEach(sel => {
+        const el = $(sel); if (!el) return;
+        el.textContent = act ? act.icon : '';
+        el.classList.toggle('hidden', !act);
+      });
+      const ranks = { mythic: 5, legend: 4, epic: 3, rare: 2, common: 1 };
+      const sorted = [...S.inv].sort((a, b) => (ranks[b.r] || 0) - (ranks[a.r] || 0));
+      $('#inv').innerHTML = sorted.length ? sorted.map(i => `
         <div class="pc" style="--c:${RAR[i.r][1]}">
-          <div class="cav" style="width:50px;height:50px;overflow:hidden;padding:0;border-radius:50%;">
-            ${i.img ? `<img src="${i.img}" style="width:100%;height:100%;object-fit:cover;">` : ''}
+          <div class="cav" style="width:50px; height:50px; overflow:hidden; padding:0; border-radius:50%;">
+            ${i.img ? `<img src="${i.img}" style="width:100%; height:100%; object-fit:cover;">` : ''}
           </div>
           <div style="font-size:11px; margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; text-align:center;">${esc(i.n)}</div>
-        </div>
-      `).join('') : '<div class="sub" style="grid-column:1/-1; text-align:center;">У тебя пока нет персонажей. Открой кейс!</div>';
+        </div>`).join('')
+        : '<div class="sub" style="grid-column:1/-1; text-align:center;">У тебя пока нет персонажей. Открой кейс!</div>';
     }
 
-    if ($('#btn-open-rating')) {
-      $('#btn-open-rating').addEventListener('click', () => {
-        const list = $('#rating-list');
-        const pts = getPoints();
-        
-        const users = [
-          { name: 'Тимур', pts: 2100, me: false }, { name: 'Кирилл', pts: 1200, me: false },
-          { name: 'Анна', pts: 850, me: false }, { name: 'Мила', pts: 540, me: false },
-          { name: 'Соня', pts: 320, me: false }, { name: 'Артем', pts: 110, me: false },
-          { name: 'Даша', pts: 80, me: false }, { name: 'Егор', pts: 2500, me: false },
-          { name: 'Влад', pts: 400, me: false }, { name: 'Максим', pts: 50, me: false }
-        ];
-        users.push({ name: NAME, pts: pts, me: true });
-        users.sort((a, b) => b.pts - a.pts);
-
-        list.innerHTML = users.map((u, i) => `
-          <div class="rating-row ${u.me ? 'me' : ''}">
-            <div class="rating-pos">${i+1}</div>
-            <div class="rating-name">${esc(u.name)} ${u.me ? '(Ты)' : ''}</div>
-            <div class="rating-score">${u.pts} очков</div>
-          </div>
-        `).join('');
-        
-        $('#modal-rating').classList.remove('hidden');
-      });
-    }
-
-    function renderTop(){ if($('#cS')) $('#cS').textContent = S.stars; if($('#cC')) $('#cC').textContent = S.coins; }
-
-    // ===== ПОПОЛНЕНИЕ =====
-    if ($('#topBtn')) $('#topBtn').addEventListener('click', openTopup);
-    function openTopup(){
-      const modal = $('#modal'); const sheet = $('#mSheet'); if(!modal || !sheet) return;
-      modal.classList.remove('hidden');
-      sheet.innerHTML = `<h2>Пополнить звёзды</h2><p class="sub">Оплата проходит внутри Telegram.</p><div class="pre">${[50, 100, 250, 500, 1000].map(n => `<button data-n="${n}">★ ${n}</button>`).join('')}</div><input id="cu" type="number" min="1" max="10000" placeholder="Своя сумма"><button class="btn w" id="pay">Оплатить ★ 250</button><button class="btn g w" id="mClose">Закрыть</button>`;
-      let n = 250; const set = v => { n = v; if($('#pay')) $('#pay').textContent = `Оплатить ★ ${n}`; $$('[data-n]').forEach(b => b.classList.toggle('on', +b.dataset.n === n)); };
-      set(250);
-      sheet.addEventListener('click', e => { const b = e.target.closest('[data-n]'); if (b) { if($('#cu')) $('#cu').value = ''; set(+b.dataset.n); } });
-      if($('#cu')) $('#cu').addEventListener('input', e => { const v = Math.floor(+e.target.value); if (v >= 1 && v <= 10000) set(v); });
-      if($('#pay')) $('#pay').addEventListener('click', () => {
-        sheet.innerHTML = `<h2>Подтверждение</h2><p class="sub">Списать ★ ${n}?</p><button class="btn w" id="ok">Подтвердить ★ ${n}</button><button class="btn g w" id="mClose">Отмена</button>`;
-        if($('#ok')) $('#ok').addEventListener('click', () => buyStars(n));
-        if($('#mClose')) $('#mClose').addEventListener('click', closeModal);
-      });
-      if($('#mClose')) $('#mClose').addEventListener('click', closeModal);
-    }
-    function closeModal(){ const m = $('#modal'); if(m) m.classList.add('hidden'); }
-
-    async function buyStars(n) {
-      if (!TG || typeof TG.openInvoice !== 'function') { toast('Пополнение работает внутри Telegram'); return; }
-      const before = S.stars;
-      try {
-        const res = await fetch('/api/invoice', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...authHeaders() },
-          body: JSON.stringify({ amount: n })
-        });
-        const data = await res.json();
-        if (!res.ok || !data.url) throw new Error(data.error || 'Не удалось создать счёт');
-        closeModal();
-        TG.openInvoice(data.url, async (status) => {
-          if (status === 'failed') { toast('Оплата не прошла'); return; }
-          if (status !== 'paid') return;
-          toast('Оплата получена, зачисляем…');
-          // Звёзды зачисляет сервер (вебхук Telegram), поэтому ждем обновления баланса
-          for (let i = 0; i < 10; i++) {
-            await new Promise(r => setTimeout(r, 1500));
-            await loadUserState();
-            if (S.stars >= before + n) {
-              S.stat.stars += n;
-              addH('Пополнение', 'Оплата через Telegram', `+${n} ★`);
-              toast(`+${n} ★`);
-              renderTop();
-              return;
-            }
-          }
-          toast('Звёзды зачислятся в ближайшие минуты');
-        });
-      } catch (e) {
-        console.error('Ошибка оплаты', e);
-        toast('Ошибка: ' + e.message);
-      }
-    }
-
-    document.addEventListener('click', (e) => {
-      if (e.target.closest('.close-modal')) e.target.closest('.modal').classList.add('hidden');
+    // ===== ОБРАБОТКА КЛИКОВ ПО ДОКУМЕНТУ =====
+    document.addEventListener('click', e => {
+      const g = e.target.closest('[data-go]'); if (g) return go(g.dataset.go);
+      if (e.target.closest('#confirm-open-case')) return openCase(pendingCase);
+      if (e.target.closest('#btn-my-choices')) return openChoicesModal();
+      if (e.target.closest('#btn-album')) return $('#album-modal').classList.remove('hidden');
+      if (e.target.closest('#btn-history')) { renderHistory(); return $('#modal-history').classList.remove('hidden'); }
+      if (e.target.closest('.close-modal')) return e.target.closest('.modal').classList.add('hidden');
       if (e.target.closest('.close-win')) {
         e.target.closest('.modal').classList.add('hidden');
         if ($('#s-cases').classList.contains('on')) renderCases();
       }
     });
 
+    // Обновляем таймеры кейсов раз в 30 секунд
+    setInterval(() => { if ($('#s-cases') && $('#s-cases').classList.contains('on')) renderCases(); }, 30000);
+
     // ===== СТАРТ =====
-    if($('#nick')) $('#nick').textContent = NAME; if($('#nick2')) $('#nick2').textContent = NAME;
-    if($('#av')) $('#av').textContent = NAME[0].toUpperCase(); if($('#av2')) $('#av2').textContent = NAME[0].toUpperCase();
-    
-    // Инициализация после загрузки
-    loadUserState().then(() => {
-        renderTop();
-        renderProfile();
-    });
-    
-  } catch (error) { console.error("Критическая ошибка:", error); }
+    if ($('#nick')) $('#nick').textContent = NAME;
+    if ($('#nick2')) $('#nick2').textContent = NAME;
+    if ($('#av')) $('#av').textContent = NAME[0].toUpperCase();
+    if ($('#av2')) $('#av2').textContent = NAME[0].toUpperCase();
+
+    // После загрузки данных сразу открываем детектив (заставка уходит на него)
+    loadUserState().then(() => go('detective'));
+
+  } catch (error) { console.error('Критическая ошибка:', error); }
 })();
