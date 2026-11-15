@@ -143,7 +143,7 @@ main { flex: 1; position: relative; overflow: hidden; }
 .lbl i { position: absolute; left: -40px; top: -86px; width: 80px; text-align: center; font-style: normal; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #fff; text-shadow: 0 1px 3px #000; }
 .hub { position: absolute; left: 50%; top: 50%; width: 76px; height: 76px; margin: -38px 0 0 -38px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #444, #050507); border: 3px solid var(--star); box-shadow: 0 0 20px rgba(255, 200, 61, 0.4); display: grid; place-items: center; font-family: 'Oswald', sans-serif; font-size: 20px; z-index: 2; color: var(--star); text-shadow: 0 0 10px var(--star); }
 
-/* НАГРАДЫ (НОВЫЙ ДИЗАЙН) */
+/* НАГРАДЫ */
 .ach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .ach-card { background: #1a1a22; border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; align-items: center; text-align: center; transition: 0.2s; position: relative; }
 .ach-card.done { border-color: rgba(255, 200, 61, 0.3); background: linear-gradient(180deg, rgba(255,200,61,0.05) 0%, transparent 100%); }
