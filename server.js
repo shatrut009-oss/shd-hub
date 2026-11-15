@@ -6,9 +6,8 @@ const { createClient } = require('@supabase/supabase-js');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// ТВОИ ДАННЫЕ ИЗ SUPABASE (Добавь их в настройках Environment на Render!)
-const supabaseUrl = process.env.SUPABASE_URL || 'https://твой-проект.supabase.co';
-const supabaseKey = process.env.SUPABASE_KEY || 'твой-anon-ключ';
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 app.use(express.json());
@@ -23,14 +22,14 @@ const CHANNELS = {
 // ===== API ДЛЯ БАЗЫ ДАННЫХ (SUPABASE) =====
 // ==========================================
 
-// Получить данные пользователя по Telegram ID
 app.get('/api/user/:id', async (req, res) => {
   const { id } = req.params;
   try {
+    // Ищем по колонке `id`
     const { data, error } = await supabase
       .from('users')
       .select('*')
-      .eq('telegram_id', id)
+      .eq('id', id)
       .single();
       
     if (error && error.code !== 'PGRST116') { 
@@ -38,10 +37,10 @@ app.get('/api/user/:id', async (req, res) => {
     }
     
     if (!data) {
-      // Если пользователя нет в базе, создаем нового
+      // Если пользователя нет, создаем (используя id)
       const { data: newUser, error: createError } = await supabase
         .from('users')
-        .insert([{ telegram_id: id }])
+        .insert([{ id: id }])
         .select()
         .single();
         
@@ -55,15 +54,14 @@ app.get('/api/user/:id', async (req, res) => {
   }
 });
 
-// Сохранить/обновить данные пользователя (ТЕПЕРЬ ИСПОЛЬЗУЕТ RPC ФУНКЦИЮ!)
 app.post('/api/user/:id', async (req, res) => {
   const { id } = req.params;
   const state = req.body;
   
   try {
-    // Вызываем нашу функцию из Supabase
+    // Вызываем функцию, передавая p_id
     const { error } = await supabase.rpc('update_user_state', {
-      p_telegram_id: id,
+      p_id: id,
       p_stars: state.stars,
       p_coins: state.coins,
       p_inv: state.inv,
