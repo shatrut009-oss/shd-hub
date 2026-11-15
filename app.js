@@ -23,7 +23,6 @@
     // ===== ДАННЫЕ =====
     const RAR = { common: ['Обычный', '#9aa0a6'], rare: ['Редкий', '#4da3ff'], epic: ['Эпический', '#b36bff'], legend: ['Легендарный', '#ffb020'], mythic: ['Мифический', '#ff3ea5'] };
     
-    // ТВОИ ПЕРСОНАЖИ (ПЕРЕНЕСЕНЫ СЮДА)
     const C = { 
       dima: 'https://i.postimg.cc/QNbfg9tC/1794726184077.png',
       derz: 'https://i.postimg.cc/Bn8NGmCs/1794726189222.png',
@@ -49,12 +48,18 @@
       { n: 'Женщина в чёрном', r: 'mythic', img: C.woman }
     ];
 
-    const CASES = { diary: { name: 'Дневничок', cost: 3, cur: 'coins', head: 'Дима', odds: { common: 58, rare: 28, epic: 10, legend: 3, mythic: 0.5, coin: 0.5 } }, cheat: { name: 'Шпаргалка', cost: 10, cur: 'stars', head: 'Саламандра', odds: { common: 50, rare: 30, epic: 13, legend: 5, mythic: 1, coin: 1 } }, stick: { name: 'Палочка', cost: 13, cur: 'stars', head: 'Женщина в чёрном', odds: { common: 40, rare: 33, epic: 16, legend: 7.5, mythic: 2.5, coin: 1 } }, free: { name: 'Ежедневный', cost: 0, head: 'Бесплатно', odds: { common: 60, rare: 28, epic: 8, legend: 3, mythic: 0.5, coin: 0.5 } } };
+    const CASES = { 
+      diary: { name: 'Дневничок', cost: 3, cur: 'coins', head: 'Дима', odds: { common: 58, rare: 28, epic: 10, legend: 3, mythic: 1 } }, 
+      cheat: { name: 'Шпаргалка', cost: 10, cur: 'stars', head: 'Саламандра', odds: { common: 50, rare: 30, epic: 13, legend: 5, mythic: 2 } }, 
+      stick: { name: 'Палочка', cost: 13, cur: 'stars', head: 'Женщина в чёрном', odds: { common: 40, rare: 33, epic: 16, legend: 7, mythic: 4 } }, 
+      free: { name: 'Ежедневный', cost: 0, head: 'Бесплатно', odds: { common: 60, rare: 28, epic: 8, legend: 3, mythic: 1 } } 
+    };
 
     const S = {
       stars: 20, coins: 0, inv: [], hist: [], liked: {}, choices: [], activeBadge: null,
-      spinAt: 0, dailyAt: 0, stat: { cases: 0, likes: 0, spins: 0, stars: 0, daily: 0, chapters: 0 }
+      spinAt: 0, dailyAt: 0, stat: { cases: 0, likes: 0, spins: 0, spinsChar: 0, stars: 0, daily: 0, chapters: 0 }
     };
+    
     const addH = (t, d, a) => S.hist.unshift({ t, d, a, at: Date.now() });
     function toast(msg){ const t = $('#toast'); if(!t) return; t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2200); }
 
@@ -78,7 +83,7 @@
       try { const res = await fetch('/api/posts?type=edits'); const posts = await res.json(); if (!posts || !posts.length) { container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px;">Пусто</div>'; return; }
         container.innerHTML = posts.map(p => { let mediaHtml = ''; if (p.videoUrl) mediaHtml = `<video src="${p.videoUrl}" controls controlsList="nodownload" playsinline style="width:100%; height:auto; max-height:400px; object-fit:cover; border-radius: 16px 16px 0 0;"></video>`; else if (p.image) mediaHtml = `<img src="${p.image}" style="width:100%; height:auto; max-height:400px; object-fit:cover; border-radius: 16px 16px 0 0;">`; const d = new Date(p.date); const dateStr = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }); return `<article class="post" style="padding: 0; overflow: hidden; margin-bottom: 20px;">${mediaHtml}<div class="b"><div class="row" style="margin-bottom: 6px;"><div class="au" style="margin:0;">@${esc(p.author)}</div><div class="sub" style="font-size: 11px;">${dateStr}</div></div><p class="sub" style="margin-bottom: 10px; color: #fff; font-size: 14px; white-space: pre-wrap;">${esc(p.text.substring(0, 120))}...</p><div class="row"><a href="https://t.me/${p.author}" target="_blank" class="btn sm g" style="text-decoration:none;">В канал</a><button class="like" data-like="${p.id}">♥ Нравится</button></div></div></article>`; }).join('');
       } catch (err) { container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px; color: #ff1e3c;">Ошибка</div>'; } }
-    if ($('#posts')) $('#posts').addEventListener('click', e => { const b = e.target.closest('[data-like]'); if (!b) return; b.classList.toggle('on'); b.textContent = b.classList.contains('on') ? '♥ В избранном' : '♥ Нравится'; });
+    if ($('#posts')) $('#posts').addEventListener('click', e => { const b = e.target.closest('[data-like]'); if (!b) return; b.classList.toggle('on'); b.textContent = b.classList.contains('on') ? '♥ В избранном' : '♥ Нравится'; S.stat.likes++; });
 
     // ===== КЕЙСЫ =====
     function renderCases(){
@@ -90,16 +95,25 @@
     function openCase(k){
       const c = CASES[k]; if (c.cost) { if (S[c.cur] < c.cost) return toast('Недостаточно средств'); S[c.cur] -= c.cost; }
       const r = roll(c.odds); const items = []; const WIN = 28;
-      for (let i = 0; i < 36; i++) { const cc = i === WIN ? null : CHARS[rnd(CHARS.length)]; const rar = i === WIN ? r : cc.r; const name = i === WIN ? (r === 'coin' ? '+1 ◆' : '?') : cc.n; items.push(`<div class="it" style="--c:${RAR[rar] ? RAR[rar][1] : '#ffb020'}">${esc(name)}</div>`); }
+      
+      for (let i = 0; i < 36; i++) { 
+        const cc = i === WIN ? null : CHARS[rnd(CHARS.length)]; 
+        const rar = i === WIN ? r : cc.r; 
+        const img = i === WIN ? '' : cc.img; 
+        items.push(`<div class="it" style="--c:${RAR[rar] ? RAR[rar][1] : '#ffb020'}">${img ? `<img src="${img}">` : '?'}</div>`); 
+      }
+      
       const stage = $('#caseStage'); if(!stage) return; stage.innerHTML = `<div class="strip"><div class="track" id="track">${items.join('')}</div></div><div id="res"></div>`;
       const stepW = 100; const offset = stage.clientWidth / 2 - 46 - WIN * stepW;
       requestAnimationFrame(() => requestAnimationFrame(() => { const track = $('#track'); if(track) track.style.transform = `translateX(${offset}px)`; }));
       $$('[data-case]').forEach(b => b.disabled = true);
+      
       setTimeout(() => {
-        let text;
-        if (r === 'coin') { S.coins += 1; text = `<div class="win"><div class="o" style="font-size:24px;color:var(--coin)">+1 ◆</div></div>`; }
-        else { const ch = giveChar(r); text = `<div class="win" style="--c:${RAR[r][1]}">${cavHtml(ch.n, r, ch.img)}<b class="o" style="font-size:20px">${esc(ch.n)}</b><span class="tag" style="color:${RAR[r][1]}">${RAR[r][0]}</span></div>`; }
-        const res = $('#res'); if(res) res.innerHTML = text; $$('[data-case]').forEach(b => b.disabled = false); renderTop();
+        const ch = giveChar(r); 
+        const text = `<div class="win" style="--c:${RAR[r][1]}">${cavHtml(ch.n, r, ch.img)}<b class="o" style="font-size:20px">${esc(ch.n)}</b><span class="tag" style="color:${RAR[r][1]}">${RAR[r][0]}</span></div>`; 
+        addH(`Кейс «${c.name}»`, `Выпал: ${ch.n} (${RAR[r][0]})`, c.cost ? `-${c.cost} ${c.cur === 'stars' ? '★' : '◆'}` : 'Бесплатно'); 
+        const res = $('#res'); if(res) res.innerHTML = text; 
+        $$('[data-case]').forEach(b => b.disabled = false); renderTop();
       }, 3300);
       renderTop();
     }
@@ -139,7 +153,6 @@
       if(btn2) { btn2.disabled = RL2.spinning; btn2.textContent = RL2.spinning ? 'Крутим...' : 'Крутить (★ 7)'; }
     }
 
-    // Переключение вкладок рулетки
     document.querySelectorAll('.rt-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         document.querySelectorAll('.rt-btn').forEach(b => b.classList.remove('active'));
@@ -149,7 +162,6 @@
       });
     });
 
-    // Логика первой рулетки
     if ($('#spinBtn')) $('#spinBtn').addEventListener('click', () => {
       if (RL.spinning || Date.now() < S.spinAt + 2 * H) return;
       S.spinAt = Date.now(); RL.spinning = true;
@@ -162,11 +174,10 @@
       }, 5100);
     });
 
-    // Логика второй рулетки (Персонажи)
     if ($('#spinBtn2')) $('#spinBtn2').addEventListener('click', () => {
       if (RL2.spinning) return;
       if (S.stars < 7) return toast('Нужно ★ 7 для прокрутки');
-      S.stars -= 7; RL2.spinning = true; renderTop();
+      S.stars -= 7; S.stat.spinsChar++; RL2.spinning = true; renderTop();
       
       const win = rnd(SLICES); const center = win * 36 + 18; const delta = 360 * 6 + ((360 - ((center + RL2.abs) % 360)) % 360);
       RL2.abs += delta; $('#disc2').style.transform = `rotate(${RL2.abs}deg)`; renderRoulette();
@@ -177,8 +188,10 @@
         if (isChar) {
           const rar = roll({ epic: 70, legend: 25, mythic: 5 });
           const ch = giveChar(rar);
+          addH('Рулетка (Персонажи)', `Выпал: ${ch.n} (${RAR[rar][0]})`, '-7 ★');
           toast(`Выпал: ${ch.n} (${RAR[rar][0]})!`);
         } else {
+          addH('Рулетка (Персонажи)', 'Пусто', '-7 ★');
           toast('Пусто. Попробуй еще!');
         }
       }, 5100);
@@ -186,8 +199,12 @@
 
 
     // ==========================================
-    // ===== ДЕТЕКТИВ ===========================
+    // ===== БЛОК ЭПИЗОДОВ (СЮЖЕТ) ==============
     // ==========================================
+    // ВСТАВЛЯЙ НОВЫЕ ЭПИЗОДЫ СЮДА!
+    // Каждый эпизод - это отдельный массив в квадратных скобках [ ... ]
+    // Не забудь поставить запятую после закрывающей скобки предыдущего эпизода!
+    
     const BG = {
       hall: 'https://i.postimg.cc/XqVLZjcx/AIRetouch-20261115-083654547-(1).png',
       gym: 'https://i.postimg.cc/WzCdBS39/AIRetouch-20261115-084408474-(1).png',
@@ -199,52 +216,19 @@
     };
 
     const STORY = [
-      // ЭПИЗОД 1
+      // ТЕСТОВЫЙ ЭПИЗОД 1 (ЗАМЕНИ ЕГО НА СВОЙ ТЕКСТ)
       [
         { bg: BG.hall, char: null, name: '', text: 'ЭПИЗОД 1. «Первая записка». Утро. Яркий солнечный свет бьет в окна, отражается от начищенного линолеума. Ряды металлических шкафчиков.' },
         { bg: BG.hall, char: C.dima, name: 'Дима', text: 'Я стою у своего открытого шкафчика, нервно теребя в руках учебник по геометрии. В коридоре шумно, но я не обращаю внимания.' },
-        { bg: BG.hall, char: C.derz, name: 'Дерзкий', text: '— Здорово, чемпион! (сказал Дерзкий, широко ухмыляясь). — Ты сегодня на спаррингах в зале будешь?' },
-        { bg: BG.hall, char: C.kamran, name: 'Камран', text: 'Камран тяжело врезается плечом в распахнутую створку. Металл с резким лязгом бьёт меня по предплечью.' },
-        { bg: BG.hall, char: C.dima, name: 'Дима', text: '— По коридору ровно ходи, пока ноги целы, (хмуро выдал я).' },
         { choice: true, name: 'Дима', text: 'Что делать?', options: [
-          { text: 'Промолчать и отойти', next: 1 },
-          { text: 'Нагрубить в ответ', next: 2 }
+          { text: 'Открыть шкафчик', next: 1 },
+          { text: 'Уйти в класс', next: 2 }
         ]},
         { bg: BG.hall, char: null, name: 'Дима', text: 'Внутри конверта — фотография директора с пачкой денег. Записка: «Ты следующий. Игра началась».' },
         { bg: BG.gym, char: C.ruslan, name: 'Руслан', text: 'В спортзале меня встречает Руслан. — Ты что здесь забыл, парень? Здесь опасно.' },
         { bg: BG.gym, char: null, name: 'Дима', text: 'В стене я нахожу тетрадь и диктофон. Дверь с грохотом захлопывается. В замке поворачивается ключ.' }
-      ],
-      // ЭПИЗОД 2
-      [
-        { bg: BG.hall, char: null, name: 'Дима', text: 'ЭПИЗОД 2. «Праведные сёстры». Возле доски объявлений стоит Ксюша.' },
-        { bg: BG.hall, char: C.ksusha, name: 'Ксюша', text: '— О, это круто, Дим. Там реально помогают. Слушают, советуют.' },
-        { bg: BG.hall, char: C.dima, name: 'Дима', text: '— Ксюша, ты знаешь, кто такой Андрей Андреев?' },
-        { bg: BG.hall, char: C.ksusha, name: 'Ксюша', text: 'Листовки выпадают из ее рук. — Откуда ты знаешь это имя? Приходи на собрание в актовый зал в шесть.' },
-        { bg: BG.math, char: C.sofia, name: 'Софья Андреевна', text: '— Ты лезешь не в свое дело, Дима. Забудь это имя. Садись. Палочка.' },
-        { bg: BG.aud, char: C.woman, name: 'Женщина', text: '— Расскажи нам, Дима. Ты когда-нибудь чувствовал, что тебя предали? Ищи Андрея в архиве.' },
-        { bg: BG.aud, char: C.mila, name: 'Мила', text: '— Дима, я знаю, кто запер тебя в спортзале. Это был директор. Вот, (Мила протянула мне флешку). — Здесь видео.' }
-      ],
-      // ЭПИЗОД 3
-      [
-        { bg: BG.kitchen, char: C.dima, name: 'Дима', text: 'ЭПИЗОД 3. «Тайны семьи». — Наталья Олеговна, мне нужно с тобой поговорить.' },
-        { bg: BG.kitchen, char: C.babushka, name: 'Наталья Олеговна', text: '— Андрей был сыном моей лучшей подруги. Его затравили. И... я знала об этом. Я проигнорировала его письмо.' },
-        { bg: BG.kitchen, char: C.nikolay, name: 'Николай Андреевич', text: 'В дверь звонят. — Дима, добрый вечер. Мила рассказала мне про флешку. Отдай её мне.' },
-        { bg: BG.street, char: C.vachik, name: 'Вачик', text: '— Дерзкий пропал. Он у Саламандры. Она похитила его и Ксюшу. Они в старом спортзале.' }
-      ],
-      // ЭПИЗОД 4
-      [
-        { bg: BG.gym, char: C.sala, name: 'Саламандра', text: 'ЭПИЗОД 4. «Мотив». — Кукольник — это я. Я шантажирую всю школу.' },
-        { bg: BG.gym, char: C.dima, name: 'Дима', text: '— Андрей был твоим братом?' },
-        { bg: BG.gym, char: C.sala, name: 'Саламандра', text: '— Да. И Наталья Олеговна убила его. Я просто восстанавливаю справедливость.' },
-        { bg: BG.gym, char: C.derz, name: 'Дерзкий', text: '— Юля… ты не права. Я люблю тебя. Но это не выход.' },
-        { bg: BG.gym, char: C.nikolay, name: 'Николай Андреевич', text: 'Двери распахиваются. — Всем стоять! Юля, ты арестована.' }
-      ],
-      // ЭПИЗОД 5-9 (Сокращены для размера, но логика работает)
-      [ { bg: BG.office, char: C.director, name: 'Директор', text: 'ЭПИЗОД 5. «Подстава». — Дима, прошу тебя, не надо. Я заплачу.' }, { choice: true, name: 'Дима', text: 'Что ответить?', options: [{ text: 'Мне не нужны деньги', next: 1 }, { text: 'Сколько предложишь?', next: 1 }] } ],
-      [ { bg: BG.office, char: C.sala, name: 'Саламандра', text: 'ЭПИЗОД 6. «Разоблачение». — Я не хотела, чтобы он сел. Я просто хотела, чтобы кто-то ответил.' } ],
-      [ { bg: BG.street, char: C.kamran, name: 'Камран', text: 'ЭПИЗОД 7. «Последствия». — Спасибо, пацаны. Я думал, что сяду надолго.' } ],
-      [ { bg: BG.kitchen, char: C.babushka, name: 'Наталья Олеговна', text: 'ЭПИЗОД 8. «Семья». — Я хочу отдать это тебе. Письмо Андрея. Я готова понести наказание.' } ],
-      [ { bg: BG.street, char: C.ruslan_doc, name: 'Руслан', text: 'ЭПИЗОД 9. «Новый Кукольник». — Игра только начинается, Дима. Будь осторожен.' } ]
+      ]
+      // СЮДА ВСТАВЛЯЙ ЭПИЗОД 2 ЧЕРЕЗ ЗАПЯТУЮ
     ];
 
     let vnState = { active: false, ep: 0, scene: 0 };
@@ -299,7 +283,14 @@
 
     if ($('#vn-dialog')) $('#vn-dialog').addEventListener('click', () => { if (!vnState.active || $('#vn-dialog').classList.contains('choice-mode')) return; vnState.scene++; showScene(); });
 
-    function endVN() { vnState.active = false; $('#vn-screen').classList.add('hidden'); stopBGM(); if (S.stat.chapters <= vnState.ep) S.stat.chapters = vnState.ep + 1; toast(`Эпизод ${vnState.ep + 1} пройден!`); renderDetective(); }
+    function endVN() { 
+      vnState.active = false; $('#vn-screen').classList.add('hidden'); stopBGM(); 
+      if (S.stat.chapters <= vnState.ep) {
+        S.stat.chapters = vnState.ep + 1; 
+        addH('Детектив', `Пройден Эпизод ${vnState.ep + 1}`, 'Сюжет'); 
+      }
+      toast(`Эпизод ${vnState.ep + 1} пройден!`); renderDetective(); 
+    }
 
     // --- Пауза и настройки ---
     if ($('#vn-pause-btn')) $('#vn-pause-btn').addEventListener('click', (e) => { e.stopPropagation(); $('#pause-modal').classList.remove('hidden'); });
@@ -325,11 +316,18 @@
       { id: 'start', icon: '👋', name: 'Новичок', desc: 'Зашел в бота', check: () => true },
       { id: 'case1', icon: '📦', name: 'Первак', desc: 'Открыл 1 кейс', check: () => S.stat.cases >= 1 },
       { id: 'case10', icon: '🎁', name: 'Лудоман', desc: 'Открыл 10 кейсов', check: () => S.stat.cases >= 10 },
+      { id: 'case50', icon: '🎰', name: 'Кейс-мастер', desc: 'Открыл 50 кейсов', check: () => S.stat.cases >= 50 },
       { id: 'ep1', icon: '🕵️', name: 'Сыщик', desc: 'Прошел Эпизод 1', check: () => S.stat.chapters >= 1 },
-      { id: 'ep5', icon: '🔎', name: 'Детектив', desc: 'Прошел Эпизод 5', check: () => S.stat.chapters >= 5 },
-      { id: 'ep9', icon: '🏆', name: 'Легенда', desc: 'Прошел 1 сезон', check: () => S.stat.chapters >= 9 },
+      { id: 'ep3', icon: '🔎', name: 'Детектив', desc: 'Прошел Эпизод 3', check: () => S.stat.chapters >= 3 },
+      { id: 'ep5', icon: '🏆', name: 'Легенда', desc: 'Прошел Эпизод 5', check: () => S.stat.chapters >= 5 },
       { id: 'spin1', icon: '🎡', name: 'Удачливый', desc: 'Крутил рулетку', check: () => S.stat.spins >= 1 },
-      { id: 'hero', icon: '🦸', name: 'Коллекционер', desc: 'Собрал 5 героев', check: () => S.inv.length >= 5 }
+      { id: 'spin10', icon: '🍀', name: 'Фартовый', desc: 'Крутил рулетку 10 раз', check: () => S.stat.spins >= 10 },
+      { id: 'charSpin', icon: '👤', name: 'Охотник', desc: 'Крутил рулетку героев', check: () => S.stat.spinsChar >= 1 },
+      { id: 'hero1', icon: '🦸', name: 'Коллекционер', desc: 'Собрал 1 героя', check: () => S.inv.length >= 1 },
+      { id: 'hero5', icon: '🎭', name: 'Фанат', desc: 'Собрал 5 героев', check: () => S.inv.length >= 5 },
+      { id: 'hero10', icon: '💎', name: 'Геймер', desc: 'Собрал 10 героев', check: () => S.inv.length >= 10 },
+      { id: 'like10', icon: '❤️', name: 'Лайкер', desc: 'Поставил 10 лайков', check: () => S.stat.likes >= 10 },
+      { id: 'rich', icon: '💰', name: 'Богач', desc: 'Накопил 100 звезд', check: () => S.stars >= 100 }
     ];
 
     function renderAwards() {
@@ -342,7 +340,6 @@
       }).join('');
     }
 
-    // Выбор ачивки для аватарки
     if ($('#btn-open-awards')) $('#btn-open-awards').addEventListener('click', () => {
       $('#modal-badges').classList.remove('hidden');
       const list = $('#badges-list');
@@ -354,6 +351,8 @@
 
     window.equipBadge = (id) => {
       S.activeBadge = id;
+      const ach = ACHIEVEMENTS.find(a => a.id === id);
+      if (ach) addH('Награда', `Выбрана ачивка: ${ach.name}`, 'Ачивка');
       renderProfile();
       $('#modal-badges').classList.add('hidden');
       toast('Ачивка обновлена!');
@@ -363,14 +362,13 @@
       if (!$('#bS')) return;
       $('#bS').textContent = S.stars; $('#bC').textContent = S.coins;
       
-      // Отображение активной ачивки
       const activeAch = ACHIEVEMENTS.find(a => a.id === S.activeBadge);
       const badgeHtml = activeAch ? activeAch.icon : '';
       if ($('#activeBadge')) { $('#activeBadge').textContent = badgeHtml; $('#activeBadge').classList.toggle('hidden', !activeAch); }
       if ($('#activeBadge2')) { $('#activeBadge2').textContent = badgeHtml; $('#activeBadge2').classList.toggle('hidden', !activeAch); }
 
       $('#inv').innerHTML = S.inv.length ? S.inv.slice(0, 18).map(i => `<div class="pc" style="--c:${RAR[i.r][1]}"><div class="cav" style="width:40px;height:40px;overflow:hidden;padding:0;">${i.img ? `<img src="${i.img}" style="width:100%;height:100%;object-fit:cover;">` : ''}</div>${esc(i.n)}<i>${RAR[i.r][0]}</i></div>`).join('') : '<div class="sub" style="grid-column:1/-1">Пусто. Открой кейс!</div>';
-      $('#hist').innerHTML = S.hist.length ? S.hist.slice(0, 12).map(h => `<div class="card row" style="padding:10px 12px;margin-bottom:8px"><div><b style="font-size:13px">${esc(h.t)}</b><div class="sub">${esc(h.d)}</div></div><b style="font-size:13px">${esc(h.a)}</b></div>`).join('') : '<div class="sub">История пуста</div>';
+      $('#hist').innerHTML = S.hist.length ? S.hist.slice(0, 15).map(h => `<div class="card row" style="padding:10px 12px;margin-bottom:8px"><div><b style="font-size:13px">${esc(h.t)}</b><div class="sub">${esc(h.d)}</div></div><b style="font-size:13px">${esc(h.a)}</b></div>`).join('') : '<div class="sub">История пуста</div>';
       renderTop();
       
       const unlockedCount = ACHIEVEMENTS.filter(a => a.check()).length;
