@@ -35,6 +35,7 @@
         <button class="tile" data-go="cases"><span class="i">🎁</span><b>Кейсы</b><span class="sub">3 кейса</span></button>
         <button class="tile" data-go="roulette"><span class="i">🎡</span><b>Рулетка</b><span class="sub"><span class="dot"></span><span id="rlSub">раз в 2 часа</span></span></button>
         <button class="tile" data-go="detective"><span class="i">🔎</span><b>Детектив</b><span class="sub">Расследование</span></button>
+        <button class="tile" data-go="choices"><span class="i">📜</span><b>Мои выборы</b><span class="sub">История решений</span></button> <!-- НОВАЯ КНОПКА -->
         <button class="tile" data-go="awards"><span class="i">🏅</span><b>Награды</b><span class="sub" id="awSub">0 из 30</span></button>
         <button class="tile" data-go="profile"><span class="i">👤</span><b>Профиль</b><span class="sub">Баланс</span></button>
       </div>
@@ -42,13 +43,13 @@
 
     <section class="sc" id="s-edit">
       <h2>Эдиты</h2>
-      <p class="sub" style="margin-bottom:12px">Реальные видео от актёров и эдиторов.</p>
+      <p class="sub" style="margin-bottom:12px">Реальные видео.</p>
       <div id="posts"></div>
     </section>
 
     <section class="sc" id="s-cases">
       <h2>Кейсы</h2>
-      <p class="sub" style="margin-bottom:12px">У каждого кейса свой главный персонаж.</p>
+      <p class="sub" style="margin-bottom:12px">Открой кейс.</p>
       <div id="caseList"></div>
       <div id="caseStage"></div>
     </section>
@@ -65,6 +66,13 @@
       <div id="nvBody"></div>
     </section>
 
+    <!-- НОВЫЙ ЭКРАН: МОИ ВЫБОРЫ -->
+    <section class="sc" id="s-choices">
+      <h2>Мои выборы</h2>
+      <p class="sub" style="margin-bottom:12px">История твоих решений в расследованиях.</p>
+      <div id="choicesList"></div>
+    </section>
+
     <section class="sc" id="s-awards">
       <h2>Награды</h2>
       <div class="card">
@@ -78,7 +86,6 @@
     <section class="sc" id="s-profile">
       <div class="card row">
         <div class="who"><div class="av" id="av2">Г</div><div><div class="nick" style="font-size:17px" id="nick2">Гость</div><div class="sub">Теоретик</div></div></div>
-        <div style="text-align:right"><div class="lab">В боте</div><b id="days">3 дн.</b></div>
       </div>
       <div class="card">
         <div class="row"><div><div class="lab">Баланс звёзд</div><div class="o" style="font-size:30px">★ <span id="bS">0</span></div></div>
@@ -97,6 +104,25 @@
 
 <div id="modal" class="modal hidden"><div class="sheet" id="mSheet"></div></div>
 <div id="toast"></div>
+
+<!-- ЗАЩИТА ЗАСТАВКИ -->
+<script>
+  (function() {
+    var splash = document.getElementById('splash');
+    var app = document.getElementById('app');
+    if (splash && app) {
+      var enter = function() {
+        splash.classList.add('open');
+        setTimeout(function() {
+          splash.classList.add('gone');
+          app.classList.add('on');
+        }, 800);
+      };
+      splash.addEventListener('click', enter);
+      splash.addEventListener('touchstart', enter, { passive: true });
+    }
+  })();
+</script>
 
 <script src="app.js"></script>
 </body>
