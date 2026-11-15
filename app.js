@@ -80,10 +80,13 @@
       if (e.target.closest('button') || e.target.closest('.tile') || e.target.closest('.vn-dialog') || e.target.closest('.case-card')) playSFX('click'); 
     });
 
-    const TG = window.Telegram && window.Telegram.WebApp; if (TG) { try { TG.ready(); TG.expand(); } catch(e) {} }
+    // ===== ИНИЦИАЛИЗАЦИЯ TELEGRAM =====
+    const TG = window.Telegram && window.Telegram.WebApp; 
+    if (TG) { try { TG.ready(); TG.expand(); } catch(e) {} }
+    
     const U = (TG && TG.initDataUnsafe && TG.initDataUnsafe.user) || {};
     const NAME = [U.first_name, U.last_name].filter(Boolean).join(' ') || 'Гость';
-    const TG_ID = (U && U.id) ? U.id : '999999';
+    const TG_ID = (U && U.id) ? U.id : '999999'; // Если открыто на ПК, ID будет 999999
 
     // ===== ДАННЫЕ =====
     const RAR = { common: ['Обычный', '#9aa0a6'], rare: ['Редкий', '#4da3ff'], epic: ['Эпический', '#b36bff'], legend: ['Легендарный', '#ffb020'], mythic: ['Мифический', '#ff3ea5'] };
@@ -113,12 +116,12 @@
       free: { name: 'Ежедневный', cost: 0, bg: '#222', icon: '🎁', odds: { common: 60, rare: 28, epic: 8, legend: 3, mythic: 1 } } 
     };
 
-    // ===== СОХРАНЕНИЕ В SUPABASE =====
+    // ===== СОХРАНЕНИЕ И БЕЗОПАСНАЯ ЗАГРУЗКА =====
     const DEFAULT_S = {
       stars: 20, coins: 0, inv: [], hist: [], liked: {}, choices: [], activeBadge: null,
       spinAt: 0, dailyAt: 0, stat: { cases: 0, likes: 0, spins: 0, spinsChar: 0, stars: 0, daily: 0, chapters: 0 }
     };
-    let S = { ...DEFAULT_S };
+    let S = JSON.parse(JSON.stringify(DEFAULT_S)); // Глубокая копия
 
     async function loadUserState() {
       try {
@@ -134,7 +137,7 @@
             hist: Array.isArray(data.hist) ? data.hist : [], 
             choices: Array.isArray(data.choices) ? data.choices : [], 
             activeBadge: data.active_badge || null, 
-            stat: { ...DEFAULT_S.stat, ...(data.stat || {}) } // Защита от неполных данных!
+            stat: { ...DEFAULT_S.stat, ...(data.stat || {}) } // Защита от пустого stat
           };
         }
       } catch(e) { 
@@ -203,7 +206,12 @@
         if (name === 'profile') renderProfile(); 
       } catch(e) { console.error(e); }
     }
-    document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) go(g.dataset.go); });
+    
+    // Делегирование событий для меню
+    document.addEventListener('click', e => { 
+      const g = e.target.closest('[data-go]'); 
+      if (g) go(g.dataset.go); 
+    });
     if ($('#backBtn')) $('#backBtn').addEventListener('click', () => go('menu'));
 
     function roll(o){ const t = Object.values(o).reduce((a, b) => a + b, 0); let r = Math.random() * t; for (const k in o) { r -= o[k]; if (r < 0) return k; } return Object.keys(o)[0]; }
@@ -483,7 +491,6 @@
         }
       }, 5100);
     });
-
 
     // ===== БЛОК ЭПИЗОДОВ (СЮЖЕТ) =====
     const BG = {
@@ -885,6 +892,7 @@
     if($('#nick')) $('#nick').textContent = NAME; if($('#nick2')) $('#nick2').textContent = NAME;
     if($('#av')) $('#av').textContent = NAME[0].toUpperCase(); if($('#av2')) $('#av2').textContent = NAME[0].toUpperCase();
     
+    // Инициализация после загрузки
     loadUserState().then(() => {
         renderTop();
         renderProfile();
