@@ -87,6 +87,7 @@
     const U = (TG && TG.initDataUnsafe && TG.initDataUnsafe.user) || {};
     const NAME = [U.first_name, U.last_name].filter(Boolean).join(' ') || 'Гость';
     const TG_ID = (U && U.id) ? U.id : '999999'; // Если открыто на ПК, ID будет 999999
+    const authHeaders = () => ({ 'x-tg-init-data': (TG && TG.initData) || '' });
 
     // ===== ДАННЫЕ =====
     const RAR = { common: ['Обычный', '#9aa0a6'], rare: ['Редкий', '#4da3ff'], epic: ['Эпический', '#b36bff'], legend: ['Легендарный', '#ffb020'], mythic: ['Мифический', '#ff3ea5'] };
@@ -119,16 +120,17 @@
     // ===== СОХРАНЕНИЕ И БЕЗОПАСНАЯ ЗАГРУЗКА =====
     const DEFAULT_S = {
       stars: 20, coins: 0, inv: [], hist: [], liked: {}, choices: [], activeBadge: null,
-      spinAt: 0, dailyAt: 0, stat: { cases: 0, likes: 0, spins: 0, spinsChar: 0, stars: 0, daily: 0, chapters: 0 }
+      spinAt: 0, dailyAt: 0, stat: { cases: 0, likes: 0, spins: 0, spinsChar: 0, stars: 0, daily: 0, chapters: 0, spinAt: 0 }
     };
     let S = JSON.parse(JSON.stringify(DEFAULT_S)); // Глубокая копия
 
     async function loadUserState() {
       try {
-        const res = await fetch(`/api/user/${TG_ID}`);
+        const res = await fetch(`/api/user/${TG_ID}`, { headers: authHeaders() });
         const data = await res.json();
+        if (!res.ok || data.error) throw new Error(data.error || 'Ошибка загрузки');
         
-        if (data && !data.error) {
+        if (data) {
           S = { 
             ...DEFAULT_S, 
             stars: (data.stars !== null && data.stars !== undefined) ? data.stars : DEFAULT_S.stars, 
@@ -150,20 +152,23 @@
           }
         } catch(err) {}
       }
+      stateLoaded = true;
       renderTop();
       renderProfile();
     }
     
+    let stateLoaded = false;
     let saveTimeout;
     function saveState() {
       try { localStorage.setItem('shd_app_state', JSON.stringify(S)); } catch(e) {}
       
       clearTimeout(saveTimeout);
       saveTimeout = setTimeout(async () => {
+        if (!stateLoaded) return;
         try {
           await fetch(`/api/user/${TG_ID}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...authHeaders() },
             body: JSON.stringify(S)
           });
         } catch(e) { console.error('Ошибка сохранения БД', e); }
@@ -222,7 +227,7 @@
       const container = $('#posts'); if (!container) return; container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px;">Загрузка...</div>';
       try { const res = await fetch('/api/posts?type=edits'); const posts = await res.json(); if (!posts || !posts.length) { container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px;">Пусто</div>'; return; }
         container.innerHTML = posts.map(p => { let mediaHtml = ''; if (p.videoUrl) mediaHtml = `<video src="${p.videoUrl}" controls controlsList="nodownload" playsinline style="width:100%; height:auto; max-height:400px; object-fit:cover; border-radius: 16px 16px 0 0;"></video>`; else if (p.image) mediaHtml = `<img src="${p.image}" style="width:100%; height:auto; max-height:400px; object-fit:cover; border-radius: 16px 16px 0 0;">`; const d = new Date(p.date); const dateStr = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }); return `<article class="post" style="padding: 0; overflow: hidden; margin-bottom: 20px;">${mediaHtml}<div class="b"><div class="row" style="margin-bottom: 6px;"><div class="au" style="margin:0;">@${esc(p.author)}</div><div class="sub" style="font-size: 11px;">${dateStr}</div></div><p class="sub" style="margin-bottom: 10px; color: #fff; font-size: 14px; white-space: pre-wrap;">${esc(p.text.substring(0, 120))}...</p><div class="row"><a href="https://t.me/${p.author}" target="_blank" class="btn sm g" style="text-decoration:none;">В канал</a><button class="like" data-like="${p.id}">♥ Нравится</button></div></div></article>`; }).join('');
-      } catch (err) { container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px; color: #ff1e3c;">Ошибка</div>'; } }
+      } catch (err) { container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px; color: #ff1e3c;">Ошибка</div>'; }
     }
     if ($('#posts')) $('#posts').addEventListener('click', e => { const b = e.target.closest('[data-like]'); if (!b) return; b.classList.toggle('on'); b.textContent = b.classList.contains('on') ? '♥ В избранном' : '♥ Нравится'; S.stat.likes++; saveState(); });
 
@@ -424,7 +429,7 @@
       if (!$('#disc2').children.length) buildWheel2();
       
       $('#disc').style.transform = `rotate(${RL.abs}deg)`;
-      const left = S.spinAt + 2 * H - Date.now();
+      const left = S.stat.spinAt + 2 * H - Date.now();
       const btn = $('#spinBtn'); const txt = $('#spinTxt');
       if(btn) { btn.disabled = left > 0 || RL.spinning; btn.textContent = left > 0 ? 'Подождите' : 'Крутить'; }
       if(txt) txt.textContent = RL.spinning ? 'Крутим…' : (left > 0 ? 'Через ' + fmt(left) : 'Испытай удачу');
@@ -444,8 +449,8 @@
     });
 
     if ($('#spinBtn')) $('#spinBtn').addEventListener('click', () => {
-      if (RL.spinning || Date.now() < S.spinAt + 2 * H) return;
-      S.spinAt = Date.now(); RL.spinning = true; saveState();
+      if (RL.spinning || Date.now() < S.stat.spinAt + 2 * H) return;
+      S.stat.spinAt = Date.now(); S.stat.spins++; RL.spinning = true; saveState();
       const win = rnd(SLICES); const center = win * 36 + 18; const delta = 360 * 6 + ((360 - ((center + RL.abs) % 360)) % 360);
       RL.abs += delta; $('#disc').style.transform = `rotate(${RL.abs}deg)`; renderRoulette();
       setTimeout(() => {
@@ -589,7 +594,7 @@
         { bg: BG.hall, char: C.mila, name: 'Мила', music: 'tense', text: 'Я сбегаю со сцены. В коридоре меня хватает за руку Мила. — Дима. Я знаю, кто запер тебя в спортзале. Это был директор. Он забрал ключи у Вачика.' },
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'tense', text: 'Зачем ему это?' },
         { bg: BG.hall, char: C.mila, name: 'Мила', music: 'tense', text: 'Он боится. И еще… я украла кое-что из его сейфа. Вот. (Она протягивает мне флешку). — Здесь видео. Как Камран передает деньги. И как директор шантажирует его.' },
-        { choice: true, name: 'Дима', text: 'Что делать с флешкой?', music: 'tense', options: [ { text: 'Отдать флешку полиции', next: 78 }, { text: 'Найти Камрана', next: 79 } ]},
+        { choice: true, name: 'Дима', text: 'Что делать с флешкой?', music: 'tense', options: [ { text: 'Отдать флешку полиции', next: 77 }, { text: 'Найти Камрана', next: 78 } ]},
         { bg: BG.office, char: C.nikolay, name: 'Николай Андреевич', music: 'tense', text: 'Отделение полиции. — Это неполное видео, Дима. Нам нужно больше доказательств.', next: 80 },
         { bg: BG.street, char: C.kamran, name: 'Камран', music: 'sad', text: 'Школьный двор. — Зачем ты мне помогаешь? Директор заставил меня. Он сказал, что если я не передам деньги, он выгонит мою бабушку из школы.', next: 80 },
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'climax', sfx: 'scream', text: 'Я иду по пустому коридору. Внезапно экран телефона загорается: «Ты думал, что нашел правду? Ты даже не представляешь, кто настоящий Кукольник. Оглянись».' },
@@ -873,12 +878,48 @@
       if($('#cu')) $('#cu').addEventListener('input', e => { const v = Math.floor(+e.target.value); if (v >= 1 && v <= 10000) set(v); });
       if($('#pay')) $('#pay').addEventListener('click', () => {
         sheet.innerHTML = `<h2>Подтверждение</h2><p class="sub">Списать ★ ${n}?</p><button class="btn w" id="ok">Подтвердить ★ ${n}</button><button class="btn g w" id="mClose">Отмена</button>`;
-        if($('#ok')) $('#ok').addEventListener('click', () => { S.stars += n; S.stat.stars += n; addH('Пополнение', 'Оплата через Telegram', `+${n} ★`); toast(`+${n} ★`); closeModal(); renderTop(); });
+        if($('#ok')) $('#ok').addEventListener('click', () => buyStars(n));
         if($('#mClose')) $('#mClose').addEventListener('click', closeModal);
       });
       if($('#mClose')) $('#mClose').addEventListener('click', closeModal);
     }
     function closeModal(){ const m = $('#modal'); if(m) m.classList.add('hidden'); }
+
+    async function buyStars(n) {
+      if (!TG || typeof TG.openInvoice !== 'function') { toast('Пополнение работает внутри Telegram'); return; }
+      const before = S.stars;
+      try {
+        const res = await fetch('/api/invoice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
+          body: JSON.stringify({ amount: n })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.url) throw new Error(data.error || 'Не удалось создать счёт');
+        closeModal();
+        TG.openInvoice(data.url, async (status) => {
+          if (status === 'failed') { toast('Оплата не прошла'); return; }
+          if (status !== 'paid') return;
+          toast('Оплата получена, зачисляем…');
+          // Звёзды зачисляет сервер (вебхук Telegram), поэтому ждем обновления баланса
+          for (let i = 0; i < 10; i++) {
+            await new Promise(r => setTimeout(r, 1500));
+            await loadUserState();
+            if (S.stars >= before + n) {
+              S.stat.stars += n;
+              addH('Пополнение', 'Оплата через Telegram', `+${n} ★`);
+              toast(`+${n} ★`);
+              renderTop();
+              return;
+            }
+          }
+          toast('Звёзды зачислятся в ближайшие минуты');
+        });
+      } catch (e) {
+        console.error('Ошибка оплаты', e);
+        toast('Ошибка: ' + e.message);
+      }
+    }
 
     document.addEventListener('click', (e) => {
       if (e.target.closest('.close-modal')) e.target.closest('.modal').classList.add('hidden');
