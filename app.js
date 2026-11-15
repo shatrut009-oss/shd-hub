@@ -6,42 +6,34 @@
     const rnd = n => Math.floor(Math.random() * n);
     const H = 36e5, D = 864e5;
 
-    // ===== АУДИО ДВИЖОК (Музыка и Звуки) =====
+    // ===== МУЗЫКА =====
     const MUSIC = {
-  calm: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3', 
-  tense: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_2b1b0b6e9c.mp3?filename=dark-ambient-horror-111163.mp3', 
-  sad: 'https://cdn.pixabay.com/download/audio/2022/10/25/audio_9c5b2c8a4b.mp3?filename=sad-emotional-piano-124109.mp3', 
-  climax: 'https://cdn.pixabay.com/download/audio/2021/11/25/audio_00ff97be42.mp3?filename=epic-hollywood-trailer-11470.mp3' 
-};
+      calm: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3', 
+      tense: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_2b1b0b6e9c.mp3?filename=dark-ambient-horror-111163.mp3', 
+      sad: 'https://cdn.pixabay.com/download/audio/2022/10/25/audio_9c5b2c8a4b.mp3?filename=sad-emotional-piano-124109.mp3', 
+      climax: 'https://cdn.pixabay.com/download/audio/2021/11/25/audio_00ff97be42.mp3?filename=epic-hollywood-trailer-11470.mp3' 
+    };
 
-    let bgmVolume = 0.05;
+    let bgmVolume = 0.05; // Очень тихо по умолчанию
     let currentMusicUrl = null;
     const musicPlayer = new Audio();
     musicPlayer.loop = true;
     musicPlayer.volume = bgmVolume;
 
     function playMusic(type) {
-  const url = MUSIC[type];
-  if (!url || currentMusicUrl === url) return; 
-  
-  currentMusicUrl = url;
-  musicPlayer.src = url;
-  
-  // Принудительно разблокируем аудио-контекст для Telegram
-  if (audioCtx && audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
+      const url = MUSIC[type];
+      if (!url || currentMusicUrl === url) return; 
+      
+      currentMusicUrl = url;
+      musicPlayer.src = url;
+      
+      if (audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
 
-  // Пытаемся включить
-  musicPlayer.play()
-    .then(() => console.log("Музыка заиграла!"))
-    .catch(e => {
-      console.log("Автоплей заблокирован. Ждем клика по экрану.");
-      // Добавляем страховку: если не получилось, включаем по первому клику
-      document.addEventListener('click', () => {
-        musicPlayer.play();
-      }, { once: true });
-    });
+      musicPlayer.play()
+        .then(() => {})
+        .catch(e => {
+          document.addEventListener('click', () => { musicPlayer.play(); }, { once: true });
+        });
     }
 
     function stopMusic() {
@@ -49,25 +41,71 @@
       currentMusicUrl = null;
     }
 
+    // ===== ЗВУКОВЫЕ ЭФФЕКТЫ (Синтез) =====
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null; try { audioCtx = AudioContext ? new AudioContext() : null; } catch(e) {}
-    let sfxVolume = 1.0;
+    let sfxVolume = 0.6;
     
     function playSFX(type) { 
       if (!audioCtx) return; 
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
       try { 
-        const osc = audioCtx.createOscillator(); 
-        const gain = audioCtx.createGain(); 
-        osc.connect(gain); gain.connect(audioCtx.destination); 
-        const now = audioCtx.currentTime; 
-        gain.gain.setValueAtTime(0.1 * sfxVolume, now); 
+        const now = audioCtx.currentTime;
+        const gain = audioCtx.createGain();
+        gain.connect(audioCtx.destination);
+        
         if (type === 'click') { 
-          osc.type = 'sine'; osc.frequency.setValueAtTime(600, now); 
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1); osc.start(); osc.stop(now + 0.1); 
+          const osc = audioCtx.createOscillator(); 
+          osc.type = 'sine'; osc.frequency.setValueAtTime(800, now); 
+          gain.gain.setValueAtTime(0.05 * sfxVolume, now); 
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05); 
+          osc.connect(gain); osc.start(); osc.stop(now + 0.05); 
         } else if (type === 'step') { 
+          const osc = audioCtx.createOscillator(); 
           osc.type = 'triangle'; osc.frequency.setValueAtTime(100, now); 
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3); osc.start(); osc.stop(now + 0.3); 
-        } 
+          gain.gain.setValueAtTime(0.2 * sfxVolume, now); 
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2); 
+          osc.connect(gain); osc.start(); osc.stop(now + 0.2); 
+        } else if (type === 'door') {
+          // Удар и скрип
+          const osc = audioCtx.createOscillator();
+          osc.type = 'sawtooth'; osc.frequency.setValueAtTime(50, now);
+          gain.gain.setValueAtTime(0.3 * sfxVolume, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+          osc.connect(gain); osc.start(); osc.stop(now + 0.5);
+
+          const osc2 = audioCtx.createOscillator();
+          osc2.type = 'sine'; osc2.frequency.setValueAtTime(200, now);
+          osc2.frequency.exponentialRampToValueAtTime(100, now + 0.3);
+          const gain2 = audioCtx.createGain();
+          gain2.gain.setValueAtTime(0.1 * sfxVolume, now);
+          gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc2.connect(gain2); gain2.connect(audioCtx.destination);
+          osc2.start(); osc2.stop(now + 0.3);
+        } else if (type === 'tape') {
+          // Шипение (белый шум на 1.5 сек)
+          const bufferSize = audioCtx.sampleRate * 1.5;
+          const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) { data[i] = Math.random() * 2 - 1; }
+          const source = audioCtx.createBufferSource();
+          source.buffer = buffer;
+          const filter = audioCtx.createBiquadFilter();
+          filter.type = 'highpass'; filter.frequency.value = 1000;
+          gain.gain.setValueAtTime(0.15 * sfxVolume, now);
+          gain.gain.linearRampToValueAtTime(0.15 * sfxVolume, now + 1.2);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+          source.connect(filter); filter.connect(gain);
+          source.start(); source.stop(now + 1.5);
+        } else if (type === 'scream') {
+          const osc = audioCtx.createOscillator();
+          osc.type = 'sawtooth'; osc.frequency.setValueAtTime(400, now);
+          osc.frequency.exponentialRampToValueAtTime(150, now + 0.5);
+          gain.gain.setValueAtTime(0.2 * sfxVolume, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+          osc.connect(gain); osc.start(); osc.stop(now + 0.6);
+        }
       } catch(e) {} 
     }
     
@@ -299,7 +337,6 @@
           { text: 'Позвонить Дерзкому', next: 31 }
         ]},
         
-        // Ветка Директора (22-30)
         { bg: BG.office, char: C.director, name: '', music: 'tense', text: 'Кабинет директора. Светло, но царит напряжение. Алексей Евгеньевич сидит за большим дубовым столом, просматривая бумаги.' }, // 22
         { bg: BG.office, char: C.dima, name: 'Дима', music: 'tense', text: 'Я врываюсь в кабинет без стука и кладу фотографию прямо на его стол. Директор поднимает глаза, и я вижу, как краска сходит с его лица.' }, // 23
         { bg: BG.office, char: C.dima, name: 'Дима', music: 'tense', text: 'Алексей Евгеньевич, что это? Кто этот мужчина и за что вы ему платите?' }, // 24
@@ -310,7 +347,6 @@
         { bg: BG.office, char: C.director, name: 'Директор', music: 'tense', text: 'Слушай меня внимательно. Если ты кому-то покажешь это фото, я тебя выпру из школы. Ты понял меня? Убирайся!' }, // 29
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'tense', text: 'Я выхожу из кабинета, сжимая фото в кармане. Он явно что-то скрывает, но с ним бесполезно говорить. Я решаю идти в спортзал сам.', next: 40 }, // 30
         
-        // Ветка Звонка (31-39)
         { bg: BG.street, char: C.dima, name: 'Дима', music: 'calm', text: 'Школьный двор. Я набираю номер Дерзкого. Он отвечает после второго гудка, на фоне слышен гул столовой.' }, // 31
         { bg: BG.street, char: C.derz, name: 'Дерзкий', music: 'calm', text: 'Чего хотел, братуха? Я тут булочку отбиваю у десятиклассников.' }, // 32
         { bg: BG.street, char: C.dima, name: 'Дима', music: 'calm', text: 'Дерзкий, это не шутки. Кто-то подкинул мне фото директора с деньгами и записку с угрозами. Меня вызывают в старый спортзал.' }, // 33
@@ -321,7 +357,6 @@
         { bg: BG.street, char: C.derz, name: 'Дерзкий', music: 'calm', text: 'Ладно, братуха. Но если тебя там прикончат, я твой компьютер заберу. И приставку.' }, // 38
         { bg: BG.street, char: C.dima, name: 'Дима', music: 'calm', text: 'Я вешаю трубку и направляюсь к старому корпусу. В любом случае, мне нужно туда попасть.', next: 40 }, // 39
 
-        // Спортзал (40-...)
         { bg: BG.gym, char: null, name: '', music: 'tense', text: '12:00. Старый школьный спортзал. Полутемно. Окна заколочены досками, повсюду штабеля досок, мешки с цементом и строительный мусор. В воздухе висит густая пыль.' }, // 40
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Я тихо прохожу мимо штабелей, стараясь не шуметь. Внутри пахнет сыростью и краской. В центре зала стоит Руслан. На нем оранжевая каска и рабочий комбинезон. Он что-то измеряет рулеткой и делает пометки в блокноте.' }, // 41
         { bg: BG.gym, char: C.ruslan, name: 'Руслан', music: 'tense', text: 'Ты что здесь забыл, парень? Здесь опасно, полы гнилые. Мы тут стену ломаем, того и гляди придавит.' }, // 42
@@ -336,21 +371,18 @@
           { text: 'Включить диктофон', next: 54 }
         ]}, // 49
         
-        // Ветка Тетради (50-53)
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Я открываю тетрадь. На первой странице список фамилий: Директор, Софья Андреевна, Наталья Олеговна, и какой-то Андрей Андреев. Рядом с Андреем стоит жирный крестик.' }, // 50
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Я перелистываю страницу и читаю запись: «Наталья Олеговна перевела 50 тысяч на счет школы. Это не спонсорская помощь. Это откуп. За что? Нужно копнуть глубже».' }, // 51
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Бабушка? Какое она имеет к этому отношение? Я листаю дальше. Там записи про Камрана, про то, как он передает деньги. Про какого-то Дениса. И снова про Андрея.' }, // 52
-        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'В этот момент дверь спортзала с грохотом захлопывается. В замке поворачивается ключ.', next: 58 }, // 53
+        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', sfx: 'door', text: 'В этот момент дверь спортзала с грохотом захлопывается. В замке поворачивается ключ.', next: 58 }, // 53
         
-        // Ветка Диктофона (54-57)
-        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Я включаю диктофон. Запись старая, шипящая. Голос мужской, с хрипотцой: «...все должно быть сделано тихо. Директор в курсе. Софья Андреевна прикроет. Если кто-то узнает про этот эксперимент, мы все сядем. Особенно после того, что случилось с Андреем...».' }, // 54
+        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', sfx: 'tape', text: 'Я включаю диктофон. Запись старая, шипящая. Голос мужской, с хрипотцой: «...все должно быть сделано тихо. Директор в курсе. Софья Андреевна прикроет. Если кто-то узнает про этот эксперимент, мы все сядем. Особенно после того, что случилось с Андреем...».' }, // 54
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Что за эксперимент? Кто такой Андрей? Я перематываю запись, но там только шум.' }, // 55
-        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'В этот момент дверь спортзала с грохотом захлопывается. В замке поворачивается ключ.', next: 58 }, // 56
+        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', sfx: 'door', text: 'В этот момент дверь спортзала с грохотом захлопывается. В замке поворачивается ключ.', next: 58 }, // 56
         
-        // Продолжение после спортзала (58-...)
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Я бросаюсь к двери и дергаю ручку. Бесполезно. Металл даже не дрогнул.' }, // 58
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Эй! Кто здесь? Откройте!' }, // 59
-        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'С той стороны слышны удаляющиеся шаги. Я остаюсь в темноте. В кармане лежит тетрадь с фамилией моей бабушки. Кто-то запер меня здесь. И этот кто-то знает, что я нашел.' }, // 60
+        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', sfx: 'steps', text: 'С той стороны слышны удаляющиеся шаги. Я остаюсь в темноте. В кармане лежит тетрадь с фамилией моей бабушки. Кто-то запер меня здесь. И этот кто-то знает, что я нашел.' }, // 60
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'calm', text: 'Меня выпустил Руслан. Он услышал грохот двери и открыл своим ключом, пробурчав что-то про хулиганов. Я не стал ему ничего рассказывать. Утром следующего дня я иду в школу. У доски объявлений стоит Ксюша и приклеивает листовку «Праведные сёстры».' }, // 61
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'calm', text: 'Ксюш, привет. Что это?' }, // 62
         { bg: BG.hall, char: C.ksusha, name: 'Ксюша', music: 'calm', text: 'О, привет, Дим. Это кружок. Праведные сёстры. Там реально помогают. Слушают, советуют. Я вот хожу. Мне стало легче после нашего разрыва.' }, // 63
@@ -372,14 +404,10 @@
           { text: 'Найти Камрана', next: 79 }
         ]}, // 77
 
-        // Ветка Полиции (78)
         { bg: BG.office, char: C.nikolay, name: 'Николай Андреевич', music: 'tense', text: 'Отделение полиции. — Это неполное видео, Дима. Здесь не видно лица мужчины, которому передают деньги. Если мы пойдем с этим в суд, Камрана посадят, а директор выкрутится. Нам нужно больше доказательств.', next: 80 }, // 78
-
-        // Ветка Камрана (79)
         { bg: BG.street, char: C.kamran, name: 'Камран', music: 'sad', text: 'Школьный двор. — Зачем ты мне помогаешь? Я же тебя терпеть не могу. Директор заставил меня. Он сказал, что если я не передам деньги, он выгонит мою бабушку, Софью Андреевну, из школы. Я не мог позволить.', next: 80 }, // 79
 
-        // Финал (80-81)
-        { bg: BG.hall, char: C.dima, name: 'Дима', music: 'climax', text: 'Я иду по пустому коридору. Внезапно экран моего телефона загорается. Пришло сообщение с неизвестного номера: «Ты думал, что нашел правду? Ты даже не представляешь, кто настоящий Кукольник. Ты заперт в игре, Дима. И следующие гости уже идут за тобой. Оглянись».' }, // 80
+        { bg: BG.hall, char: C.dima, name: 'Дима', music: 'climax', sfx: 'scream', text: 'Я иду по пустому коридору. Внезапно экран моего телефона загорается. Пришло сообщение с неизвестного номера: «Ты думал, что нашел правду? Ты даже не представляешь, кто настоящий Кукольник. Ты заперт в игре, Дима. И следующие гости уже идут за тобой. Оглянись».' }, // 80
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'climax', text: 'Я резко оборачиваюсь. В конце темного коридора мелькает тень. Кто-то стоит там и смотрит на меня. Сердце уходит в пятки. КОНЕЦ ЭПИЗОДА 1.' } // 81
       ],
       
@@ -407,13 +435,10 @@
     }
 
     function startVN(epIndex) { 
-  vnState = { active: true, ep: epIndex, scene: 0 }; 
-  $('#vn-screen').classList.remove('hidden'); 
-  
-  // ВАЖНО: Запускаем музыку прямо в момент клика!
-  playMusic(STORY[epIndex][0].music || 'calm');
-  
-  showScene(); 
+      vnState = { active: true, ep: epIndex, scene: 0 }; 
+      $('#vn-screen').classList.remove('hidden'); 
+      playMusic(STORY[epIndex][0].music || 'calm');
+      showScene(); 
     }
 
     function showScene() {
@@ -424,8 +449,8 @@
       const bgEl = $('#vn-bg'), charEl = $('#vn-char'), dialogEl = $('#vn-dialog'), speakerEl = $('#vn-speaker'), textEl = $('#vn-text'), epInfo = $('#vn-ep-info');
       dialogEl.style.display = 'block';
       
-      // Включаем музыку, если она указана
       if (scene.music) { playMusic(scene.music); }
+      if (scene.sfx) { playSFX(scene.sfx); }
 
       if (scene.choice) {
         textEl.textContent = scene.text;
@@ -483,10 +508,8 @@
     
     if ($('#vol-sfx')) $('#vol-sfx').addEventListener('input', (e) => { sfxVolume = e.target.value / 100; });
     if ($('#vol-music')) $('#vol-music').addEventListener('input', (e) => { 
-  // Ограничиваем максимальную громкость: даже если ползунок на 100, 
-  // реальная громкость будет не больше 10% от системы
-  musicPlayer.volume = (e.target.value / 100) * 0.10; 
-});
+      musicPlayer.volume = (e.target.value / 100) * 0.10; 
+    });
 
     function openChoicesModal() {
       $('#choices-modal').classList.remove('hidden');
