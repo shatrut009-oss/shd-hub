@@ -8,11 +8,11 @@
 
     // ===== АУДИО ДВИЖОК (Музыка и Звуки) =====
     const MUSIC = {
-      calm: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0c6c3d5e0.mp3?filename=ambient-piano-amp-strings-10711.mp3', 
-      tense: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_2b1b0b6e9c.mp3?filename=dark-ambient-horror-111163.mp3', 
-      sad: 'https://cdn.pixabay.com/download/audio/2022/10/25/audio_9c5b2c8a4b.mp3?filename=sad-emotional-piano-124109.mp3', 
-      climax: 'https://cdn.pixabay.com/download/audio/2021/11/25/audio_00ff97be42.mp3?filename=epic-hollywood-trailer-11470.mp3' 
-    };
+  calm: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', 
+  tense: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', 
+  sad: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', 
+  climax: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3' 
+};
 
     let bgmVolume = 0.4;
     let currentMusicUrl = null;
