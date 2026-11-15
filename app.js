@@ -21,12 +21,27 @@
     musicPlayer.volume = bgmVolume;
 
     function playMusic(type) {
-      const url = MUSIC[type];
-      if (!url || currentMusicUrl === url) return; 
-      
-      currentMusicUrl = url;
-      musicPlayer.src = url;
-      musicPlayer.play().catch(e => console.log("Музыка ждет клика"));
+  const url = MUSIC[type];
+  if (!url || currentMusicUrl === url) return; 
+  
+  currentMusicUrl = url;
+  musicPlayer.src = url;
+  
+  // Принудительно разблокируем аудио-контекст для Telegram
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+
+  // Пытаемся включить
+  musicPlayer.play()
+    .then(() => console.log("Музыка заиграла!"))
+    .catch(e => {
+      console.log("Автоплей заблокирован. Ждем клика по экрану.");
+      // Добавляем страховку: если не получилось, включаем по первому клику
+      document.addEventListener('click', () => {
+        musicPlayer.play();
+      }, { once: true });
+    });
     }
 
     function stopMusic() {
