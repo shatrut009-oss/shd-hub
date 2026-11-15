@@ -18,18 +18,15 @@ const CHANNELS = {
   news: ['shgsh_novosti', 'hladenko', 'gladmedia', 'gladdrophub'] 
 };
 
-// ==========================================
 // ===== API ДЛЯ БАЗЫ ДАННЫХ (SUPABASE) =====
-// ==========================================
 
 app.get('/api/user/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    // Ищем по колонке `id`
     const { data, error } = await supabase
       .from('users')
       .select('*')
-      .eq('id', id)
+      .eq('id', id) // Ищем по колонке id
       .single();
       
     if (error && error.code !== 'PGRST116') { 
@@ -37,10 +34,14 @@ app.get('/api/user/:id', async (req, res) => {
     }
     
     if (!data) {
-      // Если пользователя нет, создаем (используя id)
+      // Если пользователя нет, создаем нового (добавляем базовые ники, чтобы база не ругалась)
       const { data: newUser, error: createError } = await supabase
         .from('users')
-        .insert([{ id: id }])
+        .insert([{ 
+          id: id,
+          username: 'player_' + id,
+          first_name: 'Игрок'
+        }])
         .select()
         .single();
         
@@ -50,6 +51,7 @@ app.get('/api/user/:id', async (req, res) => {
     
     res.json(data);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -59,7 +61,6 @@ app.post('/api/user/:id', async (req, res) => {
   const state = req.body;
   
   try {
-    // Вызываем функцию, передавая p_id
     const { error } = await supabase.rpc('update_user_state', {
       p_id: id,
       p_stars: state.stars,
@@ -79,10 +80,7 @@ app.post('/api/user/:id', async (req, res) => {
   }
 });
 
-// ==========================================
-// ===== ПАРСИНГ ТЕЛЕГРАМ КАНАЛОВ ===========
-// ==========================================
-
+// ===== ПАРСИНГ ТЕЛЕГРАМ КАНАЛОВ =====
 async function fetchTelegramPosts(channels, type) {
   let allPosts = [];
   for (const channel of channels) {
