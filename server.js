@@ -55,29 +55,28 @@ app.get('/api/user/:id', async (req, res) => {
   }
 });
 
-// Сохранить/обновить данные пользователя
+// Сохранить/обновить данные пользователя (ТЕПЕРЬ ИСПОЛЬЗУЕТ RPC ФУНКЦИЮ!)
 app.post('/api/user/:id', async (req, res) => {
   const { id } = req.params;
   const state = req.body;
   
   try {
-    const { error } = await supabase
-      .from('users')
-      .upsert({
-        telegram_id: id,
-        stars: state.stars,
-        coins: state.coins,
-        inv: state.inv,
-        hist: state.hist,
-        choices: state.choices,
-        active_badge: state.activeBadge,
-        stat: state.stat,
-        updated_at: new Date().toISOString()
-      });
+    // Вызываем нашу функцию из Supabase
+    const { error } = await supabase.rpc('update_user_state', {
+      p_telegram_id: id,
+      p_stars: state.stars,
+      p_coins: state.coins,
+      p_inv: state.inv,
+      p_hist: state.hist,
+      p_choices: state.choices,
+      p_active_badge: state.activeBadge,
+      p_stat: state.stat
+    });
       
     if (error) throw error;
     res.json({ success: true });
   } catch (err) {
+    console.error('Ошибка при сохранении:', err);
     res.status(500).json({ error: err.message });
   }
 });
