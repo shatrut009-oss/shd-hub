@@ -29,24 +29,19 @@
       </div>
       <div class="nick" id="nick">Гость</div>
     </div>
-    <div class="chips">
-      <span class="chip" style="border-color:rgba(255,200,61,.5)">★<b id="cS">0</b></span>
-      <span class="chip" style="border-color:rgba(77,163,255,.5)">◆<b id="cC">0</b></span>
-    </div>
   </header>
-  
+
   <main>
     <!-- ГЛАВНОЕ МЕНЮ -->
-    <section class="sc on" id="s-menu">
+    <section class="sc" id="s-menu">
       <h2>Главное меню</h2>
       <p class="sub" style="margin-bottom:12px">Выбери раздел.</p>
       <div class="menu">
-        <button class="tile hot" data-go="edit"><span class="i">🎬</span><b>Эдиты</b><span class="sub">Видео из ТГ</span></button>
+        <button class="tile hot" data-go="detective"><span class="i">🔎</span><b>Детектив</b><span class="sub">Сезон 1</span></button>
+        <button class="tile" data-go="edit"><span class="i">🎬</span><b>Эдиты</b><span class="sub">Видео из ТГ</span></button>
         <button class="tile" data-go="cases"><span class="i">🎁</span><b>Кейсы</b><span class="sub">3 кейса</span></button>
-        <button class="tile" data-go="roulette"><span class="i">🎡</span><b>Рулетки</b><span class="sub"><span id="rlSub">2 вида</span></span></button>
-        <button class="tile" data-go="detective"><span class="i">🔎</span><b>Детектив</b><span class="sub">Расследование</span></button>
-        <button class="tile" data-go="awards"><span class="i">🏅</span><b>Награды</b><span class="sub" id="awSub">0 из 15</span></button>
-        <button class="tile" data-go="profile"><span class="i">👤</span><b>Профиль</b><span class="sub">Баланс</span></button>
+        <button class="tile" data-go="awards"><span class="i">🏅</span><b>Награды</b><span class="sub" id="awSub">0 из 10</span></button>
+        <button class="tile" data-go="profile"><span class="i">👤</span><b>Профиль</b><span class="sub">Персонажи</span></button>
       </div>
     </section>
 
@@ -60,31 +55,8 @@
     <!-- КЕЙСЫ -->
     <section class="sc" id="s-cases">
       <h2>Кейсы</h2>
-      <p class="sub" style="margin-bottom:12px">Открой кейс.</p>
+      <p class="sub" style="margin-bottom:12px">Бесплатные кейсы открываются по таймеру.</p>
       <div id="caseList"></div>
-    </section>
-
-    <!-- РУЛЕТКА -->
-    <section class="sc" id="s-roulette">
-      <h2>Рулетка</h2>
-      <p class="sub">Крути на удачу!</p>
-      
-      <div class="roulette-tabs">
-        <button class="rt-btn active" data-rt="daily">Ежедневная</button>
-        <button class="rt-btn" data-rt="char">Персонажи (★ 7)</button>
-      </div>
-
-      <div id="roulette-daily">
-        <div class="wheelbox"><div class="ptr"></div><div class="disc" id="disc"></div><div class="hub">ШД</div></div>
-        <button class="btn w" id="spinBtn">Крутить</button>
-        <div class="sub" id="spinTxt" style="margin-top:10px;text-align:center"></div>
-      </div>
-
-      <div id="roulette-char" class="hidden">
-        <div class="wheelbox"><div class="ptr"></div><div class="disc" id="disc2"></div><div class="hub">👤</div></div>
-        <button class="btn w" id="spinBtn2" style="background:linear-gradient(90deg, #ffc83d, #ff9d00); color:#000;">Крутить (★ 7)</button>
-        <div class="sub" id="spinTxt2" style="margin-top:10px;text-align:center"></div>
-      </div>
     </section>
 
     <!-- ДЕТЕКТИВ -->
@@ -108,35 +80,12 @@
         </div>
         <div class="prof-info">
           <div class="nick" id="nick2">Гость</div>
-          <div class="sub" id="prof-points">0 очков</div>
+          <div class="sub">Персонажей: <span id="bC">0</span></div>
         </div>
       </div>
 
-      <div class="prof-balance">
-        <div class="lab">Баланс звёзд</div>
-        <div class="row" style="margin-top:8px;">
-          <div class="o" style="font-size:32px; color:var(--star)">★ <span id="bS">0</span></div>
-          <button class="btn sm" id="topBtn">+ Пополнить</button>
-        </div>
-      </div>
-
-      <div class="lab" style="margin:16px 0 8px">Мои персонажи (<span id="bC">0</span>)</div>
+      <div class="lab" style="margin:16px 0 8px">Мои персонажи</div>
       <div class="grid" id="inv"></div>
-
-      <div class="rating-card" id="btn-open-rating">
-        <div class="row">
-          <div class="lab">Твоё место в рейтинге</div>
-          <div style="font-weight:bold; color:var(--star); font-size:12px;">ТОП</div>
-        </div>
-        <div class="rating-main">
-          <div class="rating-place" id="my-rank">?</div>
-          <div class="rating-total">место из <span id="total-users">0</span></div>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <div class="sub" id="my-points-text">0 очков</div>
-          <div class="sub" style="color:#fff">Открыть ›</div>
-        </div>
-      </div>
     </section>
   </main>
   <button class="back hidden" id="backBtn">← В меню</button>
@@ -161,30 +110,19 @@
   </div>
 </div>
 
-<!-- МОДАЛКА: РЕЗУЛЬТАТ (ВЫПАЛ ПЕРСОНАЖ) -->
+<!-- МОДАЛКА: РЕЗУЛЬТАТ -->
 <div id="modal-win" class="modal hidden center">
   <div class="modal-sheet win-sheet" id="win-content"></div>
 </div>
 
-<!-- МОДАЛКА: ИСТОРИЯ ВЫИГРЫШЕЙ -->
+<!-- МОДАЛКА: ИСТОРИЯ -->
 <div id="modal-history" class="modal hidden">
   <div class="modal-sheet" style="background: #101016; border-radius: 24px 24px 0 0;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-      <h2 style="font-family:'Oswald'; font-size:24px;">История кейсов</h2>
+      <h2 style="font-family:'Oswald'; font-size:24px;">История</h2>
       <button class="close-modal" style="color:#fff; font-size:24px;">✕</button>
     </div>
     <div id="history-list" style="display:flex; flex-direction:column; gap:10px;"></div>
-  </div>
-</div>
-
-<!-- МОДАЛКА: РЕЙТИНГ -->
-<div id="modal-rating" class="modal hidden">
-  <div class="modal-sheet" style="background: #101016; border-radius: 24px 24px 0 0; height: 80vh;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-      <h2 style="font-family:'Oswald'; font-size:24px;">Рейтинг</h2>
-      <button class="close-modal" style="color:#fff; font-size:24px;">✕</button>
-    </div>
-    <div id="rating-list" style="display:flex; flex-direction:column; gap:8px; overflow-y:auto; padding-bottom:20px;"></div>
   </div>
 </div>
 
@@ -192,7 +130,7 @@
 <div id="pause-modal" class="modal hidden">
   <div class="modal-sheet" style="background:#121016; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; max-height: 85vh;">
     <div style="text-align:center; padding-bottom:20px;">
-      <div class="sub" style="font-size:14px; color:#d4b872;" id="pause-ep-title">Эпизод 1</div>
+      <div class="sub" style="font-size:14px; color:#d4b872;">Пауза</div>
       <h2 style="font-family:'Oswald'; font-size:24px; color:#fff; margin:5px 0;">Детектив</h2>
     </div>
     <button class="btn w" id="pause-continue" style="background:#ffc83d; color:#000; font-family:'Oswald'; font-size:18px; padding:15px; margin-bottom:15px;">▶ Продолжить</button>
@@ -201,21 +139,20 @@
       <button class="pause-item" id="pause-album"><span>🖼 Фотоальбом</span></button>
       <div class="pause-item" style="flex-direction:column; align-items:flex-start; gap:10px; padding:15px;"><span>🎵 Музыка</span><input type="range" min="0" max="100" value="100" class="vol-slider" id="vol-music"></div>
       <div class="pause-item" style="flex-direction:column; align-items:flex-start; gap:10px; padding:15px;"><span>🔊 Звуки</span><input type="range" min="0" max="100" value="100" class="vol-slider" id="vol-sfx"></div>
-      <button class="pause-item" id="pause-restart"><span>↺ Пройти заново</span></button>
-      <button class="pause-item" id="pause-exit"><span>➔ К историям</span></button>
+      <button class="pause-item" id="pause-restart"><span>↺ Пройти эпизод заново</span></button>
+      <button class="pause-item" id="pause-exit"><span>➔ К эпизодам</span></button>
     </div>
   </div>
 </div>
 
 <!-- АЛЬБОМ -->
 <div id="album-modal" class="modal hidden">
-  <div class="modal-sheet" style="background:#0d0d11; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; height: 80vh;">
+  <div class="modal-sheet" style="background:#0d0d11; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; max-height: 80vh;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
       <h2 style="font-family:'Oswald'; font-size:24px;">Фотоальбом</h2>
       <button class="close-modal" style="color:#fff; font-size:24px;">✕</button>
     </div>
-    <p class="sub" style="margin-bottom:15px; line-height:1.5;">Здесь собираются особые сцены, открытые за алмазы.</p>
-    <div class="sub" style="color:#d4b872; margin-bottom:10px; text-transform:uppercase; letter-spacing:1px;">Открыто 0 из 8</div>
+    <p class="sub" style="margin-bottom:15px; line-height:1.5;">Здесь будут собираться особые сцены из сюжета.</p>
     <div class="album-grid">
       <div class="album-item locked"><span class="lock-icon">🔒</span></div>
       <div class="album-item locked"><span class="lock-icon">🔒</span></div>
@@ -236,19 +173,17 @@
   </div>
 </div>
 
-<!-- ПОПОЛНЕНИЕ -->
-<div id="modal" class="modal hidden"><div class="modal-sheet" id="mSheet"></div></div>
 <div id="toast"></div>
 
 <script>
-  // Логика перехода с экрана заставки
-  (function() {
+  // Заставка: по нажатию открывает приложение
+  (function () {
     var splash = document.getElementById('splash');
     var app = document.getElementById('app');
     if (splash && app) {
-      var enter = function() {
+      var enter = function () {
         splash.classList.add('open');
-        setTimeout(function() {
+        setTimeout(function () {
           splash.classList.add('gone');
           app.classList.add('on');
         }, 800);
@@ -260,7 +195,7 @@
 </script>
 
 <script>
-  // Если скрипт упал, показываем причину на экране, а не молчим
+  // Если скрипт упал, показываем причину на экране
   window.addEventListener('error', function (e) {
     var b = document.getElementById('err-banner');
     if (!b) {
@@ -275,4 +210,4 @@
 
 <script src="app.js"></script>
 </body>
-  </html>
+</html>
