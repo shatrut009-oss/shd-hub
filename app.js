@@ -83,6 +83,9 @@
     const TG = window.Telegram && window.Telegram.WebApp; if (TG) { try { TG.ready(); TG.expand(); } catch(e) {} }
     const U = (TG && TG.initDataUnsafe && TG.initDataUnsafe.user) || {};
     const NAME = [U.first_name, U.last_name].filter(Boolean).join(' ') || 'Гость';
+    
+    // Твой ID в Telegram (или тестовый, если открыт в браузере)
+    const TG_ID = (U && U.id) ? U.id : '999999';
 
     // ===== ДАННЫЕ =====
     const RAR = { common: ['Обычный', '#9aa0a6'], rare: ['Редкий', '#4da3ff'], epic: ['Эпический', '#b36bff'], legend: ['Легендарный', '#ffb020'], mythic: ['Мифический', '#ff3ea5'] };
@@ -112,19 +115,57 @@
       free: { name: 'Ежедневный', cost: 0, bg: '#222', icon: '🎁', odds: { common: 60, rare: 28, epic: 8, legend: 3, mythic: 1 } } 
     };
 
-    // ===== ЛОКАЛЬНОЕ СОХРАНЕНИЕ =====
+    // ===== СОХРАНЕНИЕ В SUPABASE =====
     const DEFAULT_S = {
       stars: 20, coins: 0, inv: [], hist: [], liked: {}, choices: [], activeBadge: null,
       spinAt: 0, dailyAt: 0, stat: { cases: 0, likes: 0, spins: 0, spinsChar: 0, stars: 0, daily: 0, chapters: 0 }
     };
     let S = { ...DEFAULT_S };
-    try {
-      const saved = localStorage.getItem('shd_app_state');
-      if (saved) S = { ...DEFAULT_S, ...JSON.parse(saved) };
-    } catch(e) {}
+
+    // Загрузка данных из БД при старте
+    async function loadUserState() {
+      try {
+        const res = await fetch(`/api/user/${TG_ID}`);
+        const data = await res.json();
+        if (data) {
+          S = { 
+            ...DEFAULT_S, 
+            stars: data.stars !== null ? data.stars : DEFAULT_S.stars, 
+            coins: data.coins !== null ? data.coins : DEFAULT_S.coins, 
+            inv: data.inv || [], 
+            hist: data.hist || [], 
+            choices: data.choices || [], 
+            activeBadge: data.active_badge, 
+            stat: data.stat || DEFAULT_S.stat 
+          };
+          renderTop();
+          renderProfile();
+        }
+      } catch(e) { 
+        console.error('Ошибка загрузки БД', e); 
+        // Фолбэк на локальное хранилище
+        try {
+          const saved = localStorage.getItem('shd_app_state');
+          if (saved) S = { ...DEFAULT_S, ...JSON.parse(saved) };
+        } catch(err) {}
+      }
+    }
     
+    // Сохранение в БД
+    let saveTimeout;
     function saveState() {
       try { localStorage.setItem('shd_app_state', JSON.stringify(S)); } catch(e) {}
+      
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(async () => {
+        try {
+          await fetch(`/api/user/${TG_ID}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(S)
+          });
+        } catch(e) { console.error('Ошибка сохранения БД', e); }
+      }, 1000);
     }
 
     function getPoints() {
@@ -147,7 +188,14 @@
     function go(name){
       SCREENS.forEach(s => { const el = $('#s-' + s); if(el) el.classList.toggle('on', s === name); });
       const backBtn = $('#backBtn'); if (backBtn) backBtn.classList.toggle('hidden', name === 'menu');
-      try { if (name === 'edit') loadRealEdits(); if (name === 'cases') renderCases(); if (name === 'roulette') renderRoulette(); if (name === 'detective') renderDetective(); if (name === 'awards') renderAwards(); if (name === 'profile') renderProfile(); } catch(e) {}
+      try { 
+        if (name === 'edit') loadRealEdits(); 
+        if (name === 'cases') renderCases(); 
+        if (name === 'roulette') renderRoulette(); 
+        if (name === 'detective') renderDetective(); 
+        if (name === 'awards') renderAwards(); 
+        if (name === 'profile') renderProfile(); 
+      } catch(e) {}
     }
     document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) go(g.dataset.go); });
     if ($('#backBtn')) $('#backBtn').addEventListener('click', () => go('menu'));
@@ -232,9 +280,7 @@
         </div>
 
         <div class="preview-strip">
-          <div class="preview-track">
-            ${previewItems}
-          </div>
+          <div class="preview-track">${previewItems}</div>
           <div class="preview-ptr"></div>
         </div>
 
@@ -303,6 +349,7 @@
             <button class="btn w close-win" style="padding:15px;">Забрать</button>
           </div>
         `;
+        S.stat.cases++;
         addH(`Кейс «${c.name}»`, `Выпал: ${ch.n} (${RAR[r][0]})`, c.cost ? `-${c.cost} ${c.cur === 'stars' ? '★' : '◆'}` : 'Бесплатно'); 
         renderTop();
       }, 3300);
@@ -320,7 +367,6 @@
       list.innerHTML = S.hist.map(h => {
         const d = new Date(h.at);
         const dateStr = `${d.getDate()}.${d.getMonth()+1}, ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-        
         let icon = '🎁'; let iconBg = 'rgba(255,255,255,0.1)';
         if (h.t.includes('Дневничок')) { icon = '🎒'; iconBg = 'rgba(157, 77, 255, 0.2)'; }
         else if (h.t.includes('Шпаргалка')) { icon = '📘'; iconBg = 'rgba(77, 163, 255, 0.2)'; }
@@ -423,7 +469,6 @@
             </div>
           `;
           modalWin.classList.remove('hidden');
-          
         } else {
           addH('Рулетка (Персонажи)', 'Пусто', '-7 ★');
           toast('Пусто. Попробуй еще!');
@@ -432,7 +477,7 @@
     });
 
     // ==========================================
-    // ===== БЛОК ЭПИЗОДОВ (ДЕТЕКТИВ) ==========
+    // ===== ДЕТЕКТИВ (ВОССТАНОВЛЕН) ============
     // ==========================================
     
     const BG = {
@@ -452,7 +497,6 @@
     ];
 
     const STORY = [
-      // ЭПИЗОД 1
       [
         { bg: BG.hall, char: C.dima, name: '', music: 'calm', text: 'Коридор школы, второй этаж. Утро. Яркий солнечный свет бьет в окна, отражается от начищенного линолеума. Ряды металлических шкафчиков. У одного из них стоит Дима в школьной форме с расслабленным галстуком, рядом висит его джинсовка.' },
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'calm', text: 'Я стою у своего открытого шкафчика, нервно теребя в руках учебник по геометрии. В коридоре шумно, старшеклассники толкаются, кто-то смеется, но я не обращаю внимания. Мысли крутятся вокруг предстоящей контрольной.' },
@@ -475,11 +519,8 @@
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'tense', text: 'Камран бросает на меня победный взгляд и быстро уходит. Я открываю шкафчик, чтобы достать тетрадь, и замираю. На стопке учебников лежит белый конверт без подписи.' },
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'tense', text: 'Внутри — фотография. На ней запечатлен директор школы, Алексей Евгеньевич, передающий какому-то мужчине в кожанке толстую пачку денег. А на обороте — короткая записка: «Ты следующий. Игра началась. 12:00, старый спортзал. Приходи один».' },
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'tense', text: 'Я быстро оглядываюсь по сторонам. Коридор пустеет. Кто-то знает о моих проблемах с Натальей Олеговной. И этот кто-то явно следит за мной.' },
-        { choice: true, name: 'Дима', text: 'Что делать?', options: [
-          { text: 'Показать фото директору', next: 22 },
-          { text: 'Позвонить Дерзкому', next: 31 }
-        ]},
-        { bg: BG.office, char: C.director, name: '', music: 'tense', text: 'Кабинет директора. Светло, но царит напряжение. Алексей Евгеньевич сидит за большим дубовым столом.' }, // 22
+        { choice: true, name: 'Дима', text: 'Что делать?', options: [ { text: 'Показать фото директору', next: 22 }, { text: 'Позвонить Дерзкому', next: 31 } ]},
+        { bg: BG.office, char: C.director, name: '', music: 'tense', text: 'Кабинет директора. Светло, но царит напряжение. Алексей Евгеньевич сидит за большим дубовым столом.' },
         { bg: BG.office, char: C.dima, name: 'Дима', music: 'tense', text: 'Я врываюсь в кабинет без стука и кладу фотографию прямо на его стол. Директор поднимает глаза, и я вижу, как краска сходит с его лица.' },
         { bg: BG.office, char: C.dima, name: 'Дима', music: 'tense', text: 'Алексей Евгеньевич, что это? Кто этот мужчина и за что вы ему платите?' },
         { bg: BG.office, char: C.director, name: 'Директор', music: 'tense', text: 'Где ты это взял? Немедленно убери это со стола!' },
@@ -487,8 +528,8 @@
         { bg: BG.office, char: C.director, name: 'Директор', music: 'tense', text: 'Это не твое дело! Это... это спонсорская помощь. Да, точно. На ремонт школы.' },
         { bg: BG.office, char: C.dima, name: 'Дима', music: 'tense', text: 'Не врите мне. На обороте написано, что это часть какой-то игры.' },
         { bg: BG.office, char: C.director, name: 'Директор', music: 'tense', text: 'Слушай меня внимательно. Если ты кому-то покажешь это фото, я тебя выпру из школы. Ты понял меня? Убирайся!' },
-        { bg: BG.hall, char: C.dima, name: 'Дима', music: 'tense', text: 'Я выхожу из кабинета, сжимая фото в кармане. Он явно что-то скрывает, но с ним бесполезно говорить. Я решаю идти в спортзал сам.', next: 40 }, // 30
-        { bg: BG.street, char: C.dima, name: 'Дима', music: 'calm', text: 'Школьный двор. Я набираю номер Дерзкого. Он отвечает после второго гудка, на фоне слышен гул столовой.' }, // 31
+        { bg: BG.hall, char: C.dima, name: 'Дима', music: 'tense', text: 'Я выхожу из кабинета, сжимая фото в кармане. Он явно что-то скрывает, но с ним бесполезно говорить. Я решаю идти в спортзал сам.', next: 40 },
+        { bg: BG.street, char: C.dima, name: 'Дима', music: 'calm', text: 'Школьный двор. Я набираю номер Дерзкого. Он отвечает после второго гудка, на фоне слышен гул столовой.' },
         { bg: BG.street, char: C.derz, name: 'Дерзкий', music: 'calm', text: 'Чего хотел, братуха? Я тут булочку отбиваю у десятиклассников.' },
         { bg: BG.street, char: C.dima, name: 'Дима', music: 'calm', text: 'Дерзкий, это не шутки. Кто-то подкинул мне фото директора с деньгами и записку с угрозами. Меня вызывают в старый спортзал.' },
         { bg: BG.street, char: C.derz, name: 'Дерзкий', music: 'calm', text: 'Твою ж мать. И что ты хочешь сделать?' },
@@ -496,8 +537,8 @@
         { bg: BG.street, char: C.derz, name: 'Дерзкий', music: 'calm', text: 'Сдурел? Это может быть ловушка Камрана. Или кого похуже.' },
         { bg: BG.street, char: C.dima, name: 'Дима', music: 'calm', text: 'Поэтому я звоню тебе. Приходи туда, но стой на стреме снаружи. Если я не выйду через двадцать минут — звони Вачику.' },
         { bg: BG.street, char: C.derz, name: 'Дерзкий', music: 'calm', text: 'Ладно, братуха. Но если тебя там прикончат, я твой компьютер заберу. И приставку.' },
-        { bg: BG.street, char: C.dima, name: 'Дима', music: 'calm', text: 'Я вешаю трубку и направляюсь к старому корпусу. В любом случае, мне нужно туда попасть.', next: 40 }, // 39
-        { bg: BG.gym, char: null, name: '', music: 'tense', text: '12:00. Старый школьный спортзал. Полутемно. Окна заколочены досками, повсюду штабеля досок, мешки с цементом и строительный мусор. В воздухе висит густая пыль.' }, // 40
+        { bg: BG.street, char: C.dima, name: 'Дима', music: 'calm', text: 'Я вешаю трубку и направляюсь к старому корпусу. В любом случае, мне нужно туда попасть.', next: 40 },
+        { bg: BG.gym, char: null, name: '', music: 'tense', text: '12:00. Старый школьный спортзал. Полутемно. Окна заколочены досками, повсюду штабеля досок, мешки с цементом и строительный мусор. В воздухе висит густая пыль.' },
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Я тихо прохожу мимо штабелей, стараясь не шуметь. Внутри пахнет сыростью и краской. В центре зала стоит Руслан. На нем оранжевая каска и рабочий комбинезон.' },
         { bg: BG.gym, char: C.ruslan, name: 'Руслан', music: 'tense', text: 'Ты что здесь забыл, парень? Здесь опасно, полы гнилые. Мы тут стену ломаем, того и гляди придавит.' },
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Да я… ключи ищу. Обронил где-то вчера.' },
@@ -506,20 +547,17 @@
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Вачик? Ты меня напугал. Ты знаешь, кто это сделал?' },
         { bg: BG.gym, char: C.vachik, name: 'Вачик', music: 'tense', text: 'Я видел его. Какой-то тип в темной одежде. Он прятал что-то в стене. Вон там, за матами. Но если хочешь найти правду — она там.' },
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Вачик кивает и растворяется в полумраке коридора. Я подхожу к матам, отодвигаю один. За ним в стене шатается кирпич. Я вытаскиваю его. В нише лежит старая тетрадь, диктофон и пачка фотографий.' },
-        { choice: true, name: 'Дима', text: 'Что сделать первым?', music: 'tense', options: [
-          { text: 'Открыть тетрадь', next: 50 },
-          { text: 'Включить диктофон', next: 54 }
-        ]}, // 49
-        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Я открываю тетрадь. На первой странице список фамилий: Директор, Софья Андреевна, Наталья Олеговна, и какой-то Андрей Андреев. Рядом с Андреем стоит жирный крестик.' }, // 50
+        { choice: true, name: 'Дима', text: 'Что сделать первым?', music: 'tense', options: [ { text: 'Открыть тетрадь', next: 50 }, { text: 'Включить диктофон', next: 54 } ]},
+        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Я открываю тетрадь. На первой странице список фамилий: Директор, Софья Андреевна, Наталья Олеговна, и какой-то Андрей Андреев. Рядом с Андреем стоит жирный крестик.' },
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Я перелистываю страницу и читаю запись: «Наталья Олеговна перевела 50 тысяч на счет школы. Это не спонсорская помощь. Это откуп. За что? Нужно копнуть глубже».' },
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Бабушка? Какое она имеет к этому отношение? Я листаю дальше. Там записи про Камрана, про то, как он передает деньги. Про какого-то Дениса. И снова про Андрея.' },
-        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', sfx: 'door', text: 'В этот момент дверь спортзала с грохотом захлопывается. В замке поворачивается ключ.', next: 58 }, // 53
-        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', sfx: 'tape', text: 'Я включаю диктофон. Запись старая, шипящая. Голос мужской: «...все должно быть сделано тихо. Директор в курсе. Если кто-то узнает про этот эксперимент, мы все сядем. Особенно после того, что случилось с Андреем...».' }, // 54
+        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', sfx: 'door', text: 'В этот момент дверь спортзала с грохотом захлопывается. В замке поворачивается ключ.', next: 58 },
+        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', sfx: 'tape', text: 'Я включаю диктофон. Запись старая, шипящая. Голос мужской: «...все должно быть сделано тихо. Директор в курсе. Если кто-то узнает про этот эксперимент, мы все сядем. Особенно после того, что случилось с Андреем...».' },
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Что за эксперимент? Кто такой Андрей? Я перематываю запись, но там только шум.' },
-        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', sfx: 'door', text: 'В этот момент дверь спортзала с грохотом захлопывается. В замке поворачивается ключ.', next: 58 }, // 56
-        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Я бросаюсь к двери и дергаю ручку. Бесполезно. Металл даже не дрогнул.' }, // 58
+        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', sfx: 'door', text: 'В этот момент дверь спортзала с грохотом захлопывается. В замке поворачивается ключ.', next: 58 },
+        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Я бросаюсь к двери и дергаю ручку. Бесполезно. Металл даже не дрогнул.' },
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Эй! Кто здесь? Откройте!' },
-        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', sfx: 'step', text: 'С той стороны слышны удаляющиеся шаги. Я остаюсь в темноте. В кармане лежит тетрадь с фамилией моей бабушки. Кто-то запер меня здесь.' }, // 60
+        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', sfx: 'step', text: 'С той стороны слышны удаляющиеся шаги. Я остаюсь в темноте. В кармане лежит тетрадь с фамилией моей бабушки. Кто-то запер меня здесь.' },
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'calm', text: 'Меня выпустил Руслан. Утром следующего дня я иду в школу. У доски объявлений стоит Ксюша и приклеивает листовку «Праведные сёстры».' },
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'calm', text: 'Ксюш, привет. Что это?' },
         { bg: BG.hall, char: C.ksusha, name: 'Ксюша', music: 'calm', text: 'О, привет. Это кружок. Праведные сёстры. Там реально помогают. Я вот хожу.' },
@@ -536,16 +574,12 @@
         { bg: BG.hall, char: C.mila, name: 'Мила', music: 'tense', text: 'Я сбегаю со сцены. В коридоре меня хватает за руку Мила. — Дима. Я знаю, кто запер тебя в спортзале. Это был директор. Он забрал ключи у Вачика.' },
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'tense', text: 'Зачем ему это?' },
         { bg: BG.hall, char: C.mila, name: 'Мила', music: 'tense', text: 'Он боится. И еще… я украла кое-что из его сейфа. Вот. (Она протягивает мне флешку). — Здесь видео. Как Камран передает деньги. И как директор шантажирует его.' },
-        { choice: true, name: 'Дима', text: 'Что делать с флешкой?', music: 'tense', options: [
-          { text: 'Отдать флешку полиции', next: 78 },
-          { text: 'Найти Камрана', next: 79 }
-        ]}, // 77
-        { bg: BG.office, char: C.nikolay, name: 'Николай Андреевич', music: 'tense', text: 'Отделение полиции. — Это неполное видео, Дима. Нам нужно больше доказательств.', next: 80 }, // 78
-        { bg: BG.street, char: C.kamran, name: 'Камран', music: 'sad', text: 'Школьный двор. — Зачем ты мне помогаешь? Директор заставил меня. Он сказал, что если я не передам деньги, он выгонит мою бабушку из школы.', next: 80 }, // 79
-        { bg: BG.hall, char: C.dima, name: 'Дима', music: 'climax', sfx: 'scream', text: 'Я иду по пустому коридору. Внезапно экран телефона загорается: «Ты думал, что нашел правду? Ты даже не представляешь, кто настоящий Кукольник. Оглянись».' }, // 80
-        { bg: BG.hall, char: C.dima, name: 'Дима', music: 'climax', text: 'Я резко оборачиваюсь. В конце темного коридора мелькает тень. Сердце уходит в пятки. КОНЕЦ ЭПИЗОДА 1.' } // 81
+        { choice: true, name: 'Дима', text: 'Что делать с флешкой?', music: 'tense', options: [ { text: 'Отдать флешку полиции', next: 78 }, { text: 'Найти Камрана', next: 79 } ]},
+        { bg: BG.office, char: C.nikolay, name: 'Николай Андреевич', music: 'tense', text: 'Отделение полиции. — Это неполное видео, Дима. Нам нужно больше доказательств.', next: 80 },
+        { bg: BG.street, char: C.kamran, name: 'Камран', music: 'sad', text: 'Школьный двор. — Зачем ты мне помогаешь? Директор заставил меня. Он сказал, что если я не передам деньги, он выгонит мою бабушку из школы.', next: 80 },
+        { bg: BG.hall, char: C.dima, name: 'Дима', music: 'climax', sfx: 'scream', text: 'Я иду по пустому коридору. Внезапно экран телефона загорается: «Ты думал, что нашел правду? Ты даже не представляешь, кто настоящий Кукольник. Оглянись».' },
+        { bg: BG.hall, char: C.dima, name: 'Дима', music: 'climax', text: 'Я резко оборачиваюсь. В конце темного коридора мелькает тень. Сердце уходит в пятки. КОНЕЦ ЭПИЗОДА 1.' }
       ],
-      // ЗАГЛУШКИ 2-9
       [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 2 в разработке.' } ], [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 3 в разработке.' } ],
       [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 4 в разработке.' } ], [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 5 в разработке.' } ],
       [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 6 в разработке.' } ], [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 7 в разработке.' } ],
@@ -827,7 +861,6 @@
       if (e.target.closest('.close-modal')) e.target.closest('.modal').classList.add('hidden');
       if (e.target.closest('.close-win')) {
         e.target.closest('.modal').classList.add('hidden');
-        // Если открыт кейс, возвращаем экран кейсов
         if ($('#s-cases').classList.contains('on')) renderCases();
       }
     });
@@ -835,8 +868,12 @@
     // ===== СТАРТ =====
     if($('#nick')) $('#nick').textContent = NAME; if($('#nick2')) $('#nick2').textContent = NAME;
     if($('#av')) $('#av').textContent = NAME[0].toUpperCase(); if($('#av2')) $('#av2').textContent = NAME[0].toUpperCase();
-    renderTop();
-    renderProfile();
+    
+    // Запускаем загрузку из БД
+    loadUserState().then(() => {
+        renderTop();
+        renderProfile();
+    });
     
   } catch (error) { console.error("Критическая ошибка:", error); }
 })();
