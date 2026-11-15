@@ -5,7 +5,6 @@
   const rnd = n => Math.floor(Math.random() * n);
   const H = 36e5, D = 864e5;
 
-  // ===== ЗВУКИ =====
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   const audioCtx = AudioContext ? new AudioContext() : null;
   
@@ -15,7 +14,6 @@
     const gain = audioCtx.createGain();
     osc.connect(gain); gain.connect(audioCtx.destination);
     const now = audioCtx.currentTime;
-    
     if (type === 'click') {
       osc.frequency.setValueAtTime(600, now);
       gain.gain.setValueAtTime(0.05, now);
@@ -37,15 +35,11 @@
     }
   });
 
-  // ===== TELEGRAM =====
   const TG = window.Telegram && window.Telegram.WebApp;
-  if (TG) { 
-    try { TG.ready(); TG.expand(); } catch(e) {} 
-  }
+  if (TG) { try { TG.ready(); TG.expand(); } catch(e) {} }
   const U = (TG && TG.initDataUnsafe && TG.initDataUnsafe.user) || {};
   const NAME = [U.first_name, U.last_name].filter(Boolean).join(' ') || 'Гость';
 
-  // ===== СПРАВОЧНИКИ =====
   const RAR = { common: ['Обычный', '#9aa0a6'], rare: ['Редкий', '#4da3ff'], epic: ['Эпический', '#b36bff'], legend: ['Легендарный', '#ffb020'], mythic: ['Мифический', '#ff3ea5'] };
   const CHARS = [
     { n: 'Дима', r: 'common' }, { n: 'Ксюша', r: 'common' }, { n: 'Вачик', r: 'common' }, { n: 'Бабушка Димы', r: 'common' },
@@ -62,7 +56,7 @@
   };
 
   const S = {
-    stars: 20, coins: 0, inv: [], hist: [], liked: {},
+    stars: 20, coins: 0, inv: [], hist: [], liked: {}, choices: [], // choices - история выборов
     spinAt: 0, dailyAt: 0, det: { st: 0, clues: 0, done: false },
     stat: { cases: 0, likes: 0, spins: 0, stars: 0, daily: 0, chapters: 0, epic: 0, legend: 0, mythic: 0 }
   };
@@ -70,26 +64,7 @@
 
   function toast(msg){ const t = $('#toast'); if(!t) return; t.textContent = msg; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2200); }
 
-  // ===== ЗАСТАВКА =====
-  let entered = false;
-  function enterApp() {
-    if (entered) return;
-    entered = true;
-    const splash = $('#splash');
-    const app = $('#app');
-    if (splash) splash.classList.add('open');
-    setTimeout(() => {
-      if (splash) splash.classList.add('gone');
-      if (app) app.classList.add('on');
-    }, 800);
-  }
-
-  if ($('#splash')) {
-    $('#splash').addEventListener('click', enterApp);
-    $('#splash').addEventListener('touchstart', enterApp, {passive: true});
-  }
-
-  const SCREENS = ['menu', 'edit', 'cases', 'roulette', 'detective', 'awards', 'profile'];
+  const SCREENS = ['menu', 'edit', 'cases', 'roulette', 'detective', 'choices', 'awards', 'profile'];
   function go(name){
     SCREENS.forEach(s => { const el = $('#s-' + s); if(el) el.classList.toggle('on', s === name); });
     const backBtn = $('#backBtn');
@@ -99,6 +74,7 @@
     if (name === 'cases') renderCases();
     if (name === 'roulette') renderRoulette();
     if (name === 'detective') renderDetective();
+    if (name === 'choices') renderChoices(); // Рендер выборов
     if (name === 'awards') renderAwards();
     if (name === 'profile') renderProfile();
   }
@@ -111,26 +87,18 @@
 
   // ===== ЭДИТЫ =====
   async function loadRealEdits() {
-    const container = $('#posts');
-    if (!container) return;
+    const container = $('#posts'); if (!container) return;
     container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px;">Загрузка свежих видео...</div>';
     
     try {
       const res = await fetch('/api/posts?type=edits');
       const posts = await res.json();
-      
-      if (!posts || !posts.length) {
-        container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px;">Новых эдитов пока нет.</div>';
-        return;
-      }
+      if (!posts || !posts.length) { container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px;">Новых эдитов пока нет.</div>'; return; }
 
       container.innerHTML = posts.map(p => {
         let mediaHtml = '';
-        if (p.videoUrl) {
-          mediaHtml = `<video src="${p.videoUrl}" controls controlsList="nodownload" playsinline style="width:100%; height:auto; max-height:400px; object-fit:cover; border-radius: 16px 16px 0 0;"></video>`;
-        } else if (p.image) {
-          mediaHtml = `<img src="${p.image}" style="width:100%; height:auto; max-height:400px; object-fit:cover; border-radius: 16px 16px 0 0;">`;
-        }
+        if (p.videoUrl) mediaHtml = `<video src="${p.videoUrl}" controls controlsList="nodownload" playsinline style="width:100%; height:auto; max-height:400px; object-fit:cover; border-radius: 16px 16px 0 0;"></video>`;
+        else if (p.image) mediaHtml = `<img src="${p.image}" style="width:100%; height:auto; max-height:400px; object-fit:cover; border-radius: 16px 16px 0 0;">`;
 
         const d = new Date(p.date);
         const dateStr = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
@@ -138,30 +106,16 @@
         return `<article class="post" style="padding: 0; overflow: hidden; margin-bottom: 20px;">
           ${mediaHtml}
           <div class="b">
-            <div class="row" style="margin-bottom: 6px;">
-              <div class="au" style="margin:0;">@${esc(p.author)}</div>
-              <div class="sub" style="font-size: 11px;">${dateStr}</div>
-            </div>
+            <div class="row" style="margin-bottom: 6px;"><div class="au" style="margin:0;">@${esc(p.author)}</div><div class="sub" style="font-size: 11px;">${dateStr}</div></div>
             <p class="sub" style="margin-bottom: 10px; color: #fff; font-size: 14px; white-space: pre-wrap;">${esc(p.text.substring(0, 120))}...</p>
-            <div class="row">
-              <a href="https://t.me/${p.author}" target="_blank" class="btn sm g" style="text-decoration:none;">В канал</a>
-              <button class="like" data-like="${p.id}">♥ Нравится</button>
-            </div>
+            <div class="row"><a href="https://t.me/${p.author}" target="_blank" class="btn sm g" style="text-decoration:none;">В канал</a><button class="like" data-like="${p.id}">♥ Нравится</button></div>
           </div>
         </article>`;
       }).join('');
-
-    } catch (err) {
-      container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px; color: #ff1e3c;">Ошибка загрузки</div>';
-    }
+    } catch (err) { container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px; color: #ff1e3c;">Ошибка загрузки</div>'; }
   }
 
-  if ($('#posts')) $('#posts').addEventListener('click', e => { 
-    const b = e.target.closest('[data-like]'); 
-    if (!b) return; 
-    b.classList.toggle('on');
-    b.textContent = b.classList.contains('on') ? '♥ В избранном' : '♥ Нравится';
-  });
+  if ($('#posts')) $('#posts').addEventListener('click', e => { const b = e.target.closest('[data-like]'); if (!b) return; b.classList.toggle('on'); b.textContent = b.classList.contains('on') ? '♥ В избранном' : '♥ Нравится'; });
 
   // ===== КЕЙСЫ =====
   function renderCases(){
@@ -229,7 +183,13 @@
   });
 
   // ===== ДЕТЕКТИВ =====
-  const NV_EPS = [{id:1,t:'Раздевалка 9Б',rel:'2026-11-01'}, {id:2,t:'Подвал',rel:'2026-11-22'}, {id:3,t:'Сёстры',rel:'2026-11-29'}];
+  const NV_EPS = [
+    {id:1,t:'Раздевалка 9Б',rel:'2026-11-01'}, {id:2,t:'Подвал',rel:'2026-11-22'}, 
+    {id:3,t:'Сёстры',rel:'2026-11-29'}, {id:4,t:'Журнал',rel:'2026-12-06'}, 
+    {id:5,t:'Палочки',rel:'2026-12-13'}, {id:6,t:'Камеры',rel:'2026-12-20'}, 
+    {id:7,t:'Мастерская',rel:'2026-12-27'}, {id:8,t:'Блог',rel:'2027-01-03'}, 
+    {id:9,t:'Финал',rel:'2027-01-10'}
+  ];
   const NV_R = (x,y,w,h,f) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}"/>`;
   const NV_C = (x,y,r,f) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${f}"/>`;
   const NV_LK = (k,col) => Array.from({length:k}, (_,i) => NV_R(20+i*46,40,40,110,col)).join('');
@@ -259,8 +219,8 @@
     body.innerHTML = `<h2>Детектив</h2><p class="sub" style="margin-bottom:12px">Погрузись в тайны школьных коридоров. Твой выбор имеет значение.</p>` +
       NV_EPS.map((e, i) => {
         const avail = i === 0;
-        const btn = avail ? `<button class="btn" data-nv="play">${NV.node === 'n0' ? 'Начать дело' : 'Продолжить'}</button>` : `<span class="tag" style="color:var(--mut)">В разработке</span>`;
-        return `<div class="nvEp"><div><b>${e.id}. ${esc(e.t)}</b><div class="sub">${avail ? 'Дело открыто' : 'Скоро'}</div></div>${btn}</div>`;
+        const btn = avail ? `<button class="btn" data-nv="play">${NV.node === 'n0' ? 'Начать дело' : 'Продолжить'}</button>` : `<span class="tag" style="color:var(--mut)">Скоро</span>`;
+        return `<div class="nvEp"><div><b>${e.id}. ${esc(e.t)}</b><div class="sub">${avail ? 'Дело открыто' : new Date(e.rel).toLocaleDateString('ru-RU', {day:'numeric', month:'short'})}</div></div>${btn}</div>`;
       }).join('');
   }
   
@@ -295,6 +255,10 @@
       S.stars -= c.star; NV.unlocked.push(c.key); renderTop(); toast('Выбор открыт');
     }
     if (c.f && !NV.flags.includes(c.f)) NV.flags.push(c.f);
+    
+    // СОХРАНЯЕМ ВЫБОР В ИСТОРИЮ
+    S.choices.unshift({ ep: "Эпизод 1", loc: NV_TITLE[N.bg], choice: c.t });
+
     NV.node = c.to; renderNvNode();
   }
   
@@ -306,14 +270,44 @@
     else if (a === 'menu') renderDetective();
   });
 
-  // ===== НАГРАДЫ =====
+  // ===== МОИ ВЫБОРЫ (НОВАЯ ФУНКЦИЯ) =====
+  function renderChoices() {
+    const el = $('#choicesList'); if (!el) return;
+    if (!S.choices.length) {
+      el.innerHTML = '<div class="sub" style="text-align:center; margin-top:20px;">Ты пока не сделал ни одного выбора в расследовании.</div>';
+      return;
+    }
+    el.innerHTML = S.choices.map(c => `
+      <div class="card" style="padding:12px; margin-bottom:8px; border-left: 3px solid var(--acc);">
+        <div class="sub" style="font-size:10px; margin-bottom:4px; text-transform:uppercase;">${esc(c.ep)} · ${esc(c.loc)}</div>
+        <b style="font-size:14px; color:#fff;">${esc(c.choice)}</b>
+      </div>
+    `).join('');
+  }
+
+  // ===== НАГРАДЫ (30 ШТУК) =====
+  function achievements(){
+    const s = S.stat, L = [];
+    // Кейсы (5)
+    [1, 5, 10, 25, 50].forEach(n => L.push([`Открыто кейсов: ${n}`, s.cases >= n]));
+    // Лайки (5)
+    [1, 5, 10, 25, 50].forEach(n => L.push([`Поставлено лайков: ${n}`, s.likes >= n]));
+    // Рулетка (5)
+    [1, 5, 10, 25, 50].forEach(n => L.push([`Прокручено рулетки: ${n}`, s.spins >= n]));
+    // Звёзды (5)
+    [10, 50, 100, 250, 500].forEach(n => L.push([`Пополнено звёзд: ${n}`, s.stars >= n]));
+    // Главы детектива (5)
+    [1, 2, 3, 4, 5].forEach(n => L.push([`Пройдено глав: ${n}`, s.chapters >= n]));
+    // Редкости (5)
+    [1, 3, 5].forEach(n => L.push([`Эпических персонажей: ${n}`, s.epic >= n]));
+    [1, 3].forEach(n => L.push([`Легендарных персонажей: ${n}`, s.legend >= n]));
+    // Итого 30 штук
+    return L;
+  }
+
   function renderAwards(){ 
     const list = $('#achList'); const sub = $('#awSub'); if (!list) return;
-    const s = S.stat; const L = [];
-    [1, 10, 50].forEach(n => L.push([`Открыто кейсов: ${n}`, s.cases >= n]));
-    [1, 10, 50].forEach(n => L.push([`Поставлено лайков: ${n}`, s.likes >= n]));
-    [1, 10, 50].forEach(n => L.push([`Прокручено рулетки: ${n}`, s.spins >= n]));
-    
+    const L = achievements();
     const done = L.filter(a => a[1]).length;
     if(sub) sub.textContent = `${done} из ${L.length}`;
     list.innerHTML = L.map(a => `<div class="ach ${a[1] ? 'done' : ''}"><span>${esc(a[0])}</span></div>`).join('');
@@ -329,7 +323,11 @@
     $('#hist').innerHTML = S.hist.length ? S.hist.slice(0, 12).map(h => `<div class="card row" style="padding:10px 12px;margin-bottom:8px"><div><b style="font-size:13px">${esc(h.t)}</b><div class="sub">${esc(h.d)}</div></div><b style="font-size:13px">${esc(h.a)}</b></div>`).join('') : '<div class="sub">История пуста</div>';
     renderTop();
     if($('#rlSub')) $('#rlSub').textContent = Date.now() < S.spinAt + 2 * H ? 'до следующей: ' + fmt(S.spinAt + 2 * H - Date.now()) : 'доступна сейчас';
-    renderAwards();
+    
+    // ПРАВИЛЬНЫЙ ПОДСЧЕТ НАГРАД В ПРОФИЛЕ
+    const L = achievements();
+    const done = L.filter(a => a[1]).length;
+    if($('#pAw')) $('#pAw').textContent = `${done} из ${L.length}`;
   }
 
   // ===== ПОПОЛНЕНИЕ =====
