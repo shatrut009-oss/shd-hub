@@ -43,7 +43,7 @@
       <div class="menu">
         <button class="tile hot" data-go="edit"><span class="i">🎬</span><b>Эдиты</b><span class="sub">Видео из ТГ</span></button>
         <button class="tile" data-go="cases"><span class="i">🎁</span><b>Кейсы</b><span class="sub">3 кейса</span></button>
-        <button class="tile" data-go="roulette"><span class="i">🎡</span><b>Рулетки</b><span class="sub"><span class="dot"></span><span id="rlSub">2 вида</span></span></button>
+        <button class="tile" data-go="roulette"><span class="i">🎡</span><b>Рулетки</b><span class="sub"><span id="rlSub">2 вида</span></span></button>
         <button class="tile" data-go="detective"><span class="i">🔎</span><b>Детектив</b><span class="sub">Расследование</span></button>
         <button class="tile" data-go="awards"><span class="i">🏅</span><b>Награды</b><span class="sub" id="awSub">0 из 15</span></button>
         <button class="tile" data-go="profile"><span class="i">👤</span><b>Профиль</b><span class="sub">Баланс</span></button>
@@ -259,6 +259,20 @@
   })();
 </script>
 
+<script>
+  // Если скрипт упал, показываем причину на экране, а не молчим
+  window.addEventListener('error', function (e) {
+    var b = document.getElementById('err-banner');
+    if (!b) {
+      b = document.createElement('div');
+      b.id = 'err-banner';
+      b.style.cssText = 'position:fixed;left:8px;right:8px;top:8px;z-index:9999;background:#7a0010;color:#fff;padding:10px;border-radius:10px;font:12px/1.4 sans-serif;word-break:break-word';
+      document.body.appendChild(b);
+    }
+    b.textContent = 'Ошибка скрипта: ' + (e.message || e.error) + (e.filename ? ' (' + e.filename.split('/').pop() + ':' + e.lineno + ')' : '');
+  });
+</script>
+
 <script src="app.js"></script>
 </body>
-</html>
+  </html>
