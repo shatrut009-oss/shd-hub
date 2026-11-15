@@ -95,13 +95,17 @@
   <button class="back hidden" id="backBtn">← В меню</button>
 </div>
 
-<!-- Экран Детектива (Визуальная новелла) -->
+<!-- ЭКРАН НОВЕЛЛЫ (Перекрывает все) -->
 <div id="vn-screen" class="hidden">
   <div class="vn-bg" id="vn-bg"></div>
   <div class="vn-char-box" id="vn-char-box"><div class="vn-char" id="vn-char"></div></div>
   <button class="vn-pause-btn" id="vn-pause-btn">II</button>
+  
   <div class="vn-dialog" id="vn-dialog">
-    <div class="vn-speaker" id="vn-speaker">Дима</div>
+    <div class="vn-top-row">
+      <div class="vn-speaker" id="vn-speaker">Дима</div>
+      <div class="vn-ep-info" id="vn-ep-info">Эпизод 1</div>
+    </div>
     <div class="vn-text" id="vn-text">Текст...</div>
     <div class="vn-next-btn" id="vn-next-btn">➔</div>
   </div>
@@ -111,9 +115,8 @@
 <div id="pause-modal" class="modal hidden">
   <div class="modal-sheet" style="background:#121016; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; max-height: 85vh;">
     <div style="text-align:center; padding-bottom:20px;">
-      <div class="sub" style="font-size:14px; color:#d4b872;">Эпизод 1</div>
-      <h2 style="font-family:'Oswald'; font-size:28px; color:#fff; margin:5px 0;">Раздевалка</h2>
-      <div class="sub" style="color:#8b95a5;">Расследование начинается</div>
+      <div class="sub" style="font-size:14px; color:#d4b872;" id="pause-ep-title">Эпизод 1</div>
+      <h2 style="font-family:'Oswald'; font-size:24px; color:#fff; margin:5px 0;">Детектив</h2>
     </div>
     <button class="btn w" id="pause-continue" style="background:#ffc83d; color:#000; font-family:'Oswald'; font-size:18px; padding:15px; margin-bottom:15px;">▶ Продолжить</button>
     <div class="pause-list">
@@ -135,7 +138,7 @@
       <h2 style="font-family:'Oswald'; font-size:24px;">Фотоальбом</h2>
       <button id="album-close" style="color:#fff; font-size:24px;">✕</button>
     </div>
-    <p class="sub" style="margin-bottom:15px; line-height:1.5;">Здесь собираются особые сцены, открытые за алмазы. Открытая сцена остаётся в альбоме навсегда.</p>
+    <p class="sub" style="margin-bottom:15px; line-height:1.5;">Здесь собираются особые сцены, открытые за алмазы.</p>
     <div class="sub" style="color:#d4b872; margin-bottom:10px; text-transform:uppercase; letter-spacing:1px;">Открыто 0 из 8</div>
     <div class="album-grid">
       <div class="album-item locked"><span class="lock-icon">🔒</span></div>
