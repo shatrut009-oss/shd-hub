@@ -8,13 +8,13 @@
 
     // ===== АУДИО ДВИЖОК (Музыка и Звуки) =====
     const MUSIC = {
-  calm: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', 
-  tense: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', 
-  sad: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', 
-  climax: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3' 
+  calm: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3', 
+  tense: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_2b1b0b6e9c.mp3?filename=dark-ambient-horror-111163.mp3', 
+  sad: 'https://cdn.pixabay.com/download/audio/2022/10/25/audio_9c5b2c8a4b.mp3?filename=sad-emotional-piano-124109.mp3', 
+  climax: 'https://cdn.pixabay.com/download/audio/2021/11/25/audio_00ff97be42.mp3?filename=epic-hollywood-trailer-11470.mp3' 
 };
 
-    let bgmVolume = 0.15;
+    let bgmVolume = 0.05;
     let currentMusicUrl = null;
     const musicPlayer = new Audio();
     musicPlayer.loop = true;
@@ -484,8 +484,8 @@
     if ($('#vol-sfx')) $('#vol-sfx').addEventListener('input', (e) => { sfxVolume = e.target.value / 100; });
     if ($('#vol-music')) $('#vol-music').addEventListener('input', (e) => { 
   // Ограничиваем максимальную громкость: даже если ползунок на 100, 
-  // реальная громкость будет не больше 25% от системы
-  musicPlayer.volume = (e.target.value / 100) * 0.25; 
+  // реальная громкость будет не больше 10% от системы
+  musicPlayer.volume = (e.target.value / 100) * 0.10; 
 });
 
     function openChoicesModal() {
