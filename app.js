@@ -5,6 +5,39 @@
   const rnd = n => Math.floor(Math.random() * n);
   const H = 36e5, D = 864e5;
 
+  // ===== ЗВУКИ =====
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const audioCtx = AudioContext ? new AudioContext() : null;
+  
+  function playSound(type) {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    const now = audioCtx.currentTime;
+    
+    if (type === 'click') {
+      osc.frequency.setValueAtTime(600, now);
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      osc.start(); osc.stop(now + 0.1);
+    } else if (type === 'step') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(150, now);
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+      osc.start(); osc.stop(now + 0.2);
+    }
+  }
+
+  // Звук на все клики по кнопкам
+  document.addEventListener('click', () => { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }, { once: true });
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('button') || e.target.closest('.tile') || e.target.closest('.nvCh')) {
+      playSound('click');
+    }
+  });
+
   const TG = window.Telegram && window.Telegram.WebApp;
   if (TG) { TG.ready(); TG.expand(); }
   const U = (TG && TG.initDataUnsafe && TG.initDataUnsafe.user) || {};
@@ -57,36 +90,44 @@
   function giveChar(rar){ const pool = CHARS.filter(c => c.r === rar); const c = pool[rnd(pool.length)]; S.inv.unshift({ n: c.n, r: rar }); if (rar === 'epic') S.stat.epic++; if (rar === 'legend') S.stat.legend++; if (rar === 'mythic') S.stat.mythic++; return c; }
   function cavHtml(name, rar){ return `<div class="cav" style="--c:${RAR[rar][1]}">${esc(name[0])}</div>`; }
 
-  // ===== РЕАЛЬНАЯ ЗАГРУЗКА ЭДИТОВ =====
+  // ===== ЭДИТЫ (Загрузка из Telegram, без скачивания) =====
   async function loadRealEdits() {
     const container = $('#posts');
-    container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px;">Загрузка видео из Telegram...</div>';
+    container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px;">Загрузка свежих видео...</div>';
     
     try {
       const res = await fetch('/api/posts?type=edits');
       const posts = await res.json();
       
       if (!posts || !posts.length) {
-        container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px;">Эдитов пока нет. Загляните позже!</div>';
+        container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px;">Новых эдитов пока нет.</div>';
         return;
       }
 
       container.innerHTML = posts.map(p => {
         let mediaHtml = '';
         if (p.videoUrl) {
-          mediaHtml = `<video src="${p.videoUrl}" controls playsinline style="width:100%; height:auto; max-height:400px; object-fit:cover; border-radius: 16px 16px 0 0;"></video>`;
+          // Убрали кнопку скачивания (controlsList), оставили только play/pause
+          mediaHtml = `<video src="${p.videoUrl}" controls controlsList="nodownload" playsinline style="width:100%; height:auto; max-height:400px; object-fit:cover; border-radius: 16px 16px 0 0;"></video>`;
         } else if (p.image) {
           mediaHtml = `<img src="${p.image}" style="width:100%; height:auto; max-height:400px; object-fit:cover; border-radius: 16px 16px 0 0;">`;
         }
 
-        return `<article class="post" style="padding: 0; overflow: hidden;">
+        // Форматируем дату для красоты
+        const d = new Date(p.date);
+        const dateStr = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+
+        return `<article class="post" style="padding: 0; overflow: hidden; margin-bottom: 20px;">
           ${mediaHtml}
           <div class="b">
-            <div class="au">@${esc(p.author)}</div>
-            <p class="sub" style="margin-bottom: 10px; color: #fff; font-size: 14px;">${esc(p.text.substring(0, 100))}</p>
+            <div class="row" style="margin-bottom: 6px;">
+              <div class="au" style="margin:0;">@${esc(p.author)}</div>
+              <div class="sub" style="font-size: 11px;">${dateStr}</div>
+            </div>
+            <p class="sub" style="margin-bottom: 10px; color: #fff; font-size: 14px; white-space: pre-wrap;">${esc(p.text.substring(0, 120))}...</p>
             <div class="row">
-              <a href="https://t.me/${p.author}" target="_blank" class="btn sm g" style="text-decoration:none;">Открыть канал</a>
-              <button class="like" data-like="${p.id}">♥ Лайк</button>
+              <a href="https://t.me/${p.author}" target="_blank" class="btn sm g" style="text-decoration:none;">В канал</a>
+              <button class="like" data-like="${p.id}">♥ Нравится</button>
             </div>
           </div>
         </article>`;
@@ -94,7 +135,7 @@
 
     } catch (err) {
       console.error(err);
-      container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px; color: #ff1e3c;">Ошибка загрузки видео</div>';
+      container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px; color: #ff1e3c;">Ошибка загрузки</div>';
     }
   }
 
@@ -102,10 +143,10 @@
     const b = e.target.closest('[data-like]'); 
     if (!b) return; 
     b.classList.toggle('on');
-    b.textContent = b.classList.contains('on') ? '♥ В лайках' : '♥ Лайк';
+    b.textContent = b.classList.contains('on') ? '♥ В избранном' : '♥ Нравится';
   });
 
-  // ===== ОСТАЛЬНОЙ КОД (КЕЙСЫ, РУЛЕТКА, ДЕТЕКТИВ) =====
+  // ===== КЕЙСЫ =====
   function renderCases(){
     $('#caseList').innerHTML = ['diary', 'cheat', 'stick'].map(k => {
       const c = CASES[k];
@@ -133,6 +174,7 @@
     renderTop();
   }
 
+  // ===== РУЛЕТКА =====
   const SLICES = 10, FREE = [3, 7];
   const RL = { abs: 0, spinning: false };
   function fmt(ms){ const m = Math.ceil(ms / 60000), h = Math.floor(m / 60); return h ? `${h} ч ${m % 60} мин` : `${m} мин`; }
@@ -147,7 +189,7 @@
     const left = S.spinAt + 2 * H - Date.now();
     $('#spinBtn').disabled = left > 0 || RL.spinning;
     $('#spinBtn').textContent = left > 0 ? 'Подождите' : 'Крутить';
-    $('#spinTxt').textContent = RL.spinning ? 'Крутим…' : (left > 0 ? 'Следующая прокрутка через ' + fmt(left) : 'Готово к прокрутке');
+    $('#spinTxt').textContent = RL.spinning ? 'Крутим…' : (left > 0 ? 'Новая попытка через ' + fmt(left) : 'Испытай удачу');
   }
   $('#spinBtn').addEventListener('click', () => {
     if (RL.spinning || Date.now() < S.spinAt + 2 * H) return;
@@ -157,17 +199,19 @@
     setTimeout(() => {
       RL.spinning = false; const hit = FREE.includes(win);
       addH('Рулетка', hit ? 'Бесплатный кейс' : 'Пусто', hit ? 'Кейс' : '—'); renderRoulette();
-      if (hit) { toast('Бесплатный кейс!'); setTimeout(() => { go('cases'); openCase('free'); }, 400); }
-      else toast('Пусто. Попробуйте через 2 часа');
+      if (hit) { toast('Джекпот! Бесплатный кейс!'); setTimeout(() => { go('cases'); openCase('free'); }, 400); }
+      else toast('Увы, пусто. Повезет в следующий раз');
     }, 5100);
   });
 
+  // ===== ДЕТЕКТИВ =====
   const NV_EPS = [{id:1,t:'Раздевалка 9Б',rel:'2026-11-01'}, {id:2,t:'Подвал',rel:'2026-11-22'}, {id:3,t:'Сёстры',rel:'2026-11-29'}, {id:4,t:'Журнал',rel:'2026-12-06'}, {id:5,t:'Палочки',rel:'2026-12-13'}, {id:6,t:'Камеры',rel:'2026-12-20'}, {id:7,t:'Мастерская',rel:'2026-12-27'}, {id:8,t:'Блог',rel:'2027-01-03'}, {id:9,t:'Финал',rel:'2027-01-10'}];
   const NV_R = (x,y,w,h,f) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}"/>`;
   const NV_C = (x,y,r,f) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${f}"/>`;
   const NV_LK = (k,col) => Array.from({length:k}, (_,i) => NV_R(20+i*46,40,40,110,col)).join('');
   const NV_ART = { raz:()=>NV_R(0,0,400,180,'#1a0c12')+NV_LK(8,'#2b2f3a')+NV_R(40,140,320,10,'#5a3a2a')+NV_C(200,20,8,'#ffdf8a'), hall:()=>NV_R(0,0,400,180,'#0a1a2a')+NV_LK(8,'#1f3a5a')+NV_R(0,150,400,30,'#132033'), dir:()=>NV_R(0,0,400,180,'#101a0a')+NV_R(250,30,110,70,'#2a4a2a')+NV_R(120,110,160,18,'#4a2e18')+NV_R(190,95,30,20,'#222'), garage:()=>NV_R(0,0,400,180,'#16161c')+NV_R(60,120,280,12,'#555')+NV_R(120,85,160,35,'#2a2a33')+NV_C(150,125,14,'#111')+NV_C(250,125,14,'#111'), staff:()=>NV_R(0,0,400,180,'#0f1a06')+NV_R(60,110,280,16,'#5a3f22')+NV_R(80,95,40,15,'#2d6a9a'), sizo:()=>NV_R(0,0,400,180,'#1a1a1a')+Array.from({length:10},(_,i)=>NV_R(40+i*32,20,5,140,'#666')).join('') };
   const NV_TITLE = {raz:'Раздевалка 9Б', hall:'Коридор', dir:'Приёмная директора', garage:'Подвал', staff:'Охрана школы', sizo:'СИЗО'};
+  
   const NV_NODES = {
     n0:{bg:'raz', t:'Утро, раздевалка 9Б. Вачик лежит на полу без сознания. Ключ от подвала валяется рядом. Что ты делаешь?', ch:[{t:'Вызвать скорую', to:'n1a'}, {t:'Спрятать ключ в карман', to:'n1b', f:'hid'}, {t:'Позвать Дерзкого и Риту', to:'n1c'}]},
     n1a:{bg:'raz', t:'Скорая едет. Вачик на секунду приходит в себя и шепчет: «Не доверяй директору».', ch:[{t:'Спросить, что он имеет в виду', to:'n2'}, {t:'Не отвлекаться, идти в коридор', to:'n2b'}]},
@@ -185,17 +229,17 @@
   };
   
   const NV = { node:'n0', flags:[], unlocked:[] };
-  const nvStatus = t => { const el = $('#nvStatus'); if (el) el.textContent = t; };
 
   function renderDetective(){
     const today = new Date().toISOString().slice(0, 10);
-    $('#nvBody').innerHTML = `<h2>Детектив</h2><p class="sub" style="margin-bottom:12px">Эпизоды выходят по расписанию. Прогресс сохраняется в браузере.</p>` +
+    $('#nvBody').innerHTML = `<h2>Детектив</h2><p class="sub" style="margin-bottom:12px">Погрузись в тайны школьных коридоров. Твой выбор имеет значение.</p>` +
       NV_EPS.map((e, i) => {
         const avail = i === 0 && today >= e.rel;
-        const btn = avail ? `<button class="btn" data-nv="play">${NV.node === 'n0' ? 'Играть' : 'Продолжить'}</button>` : `<span class="tag" style="color:var(--mut)">${new Date(e.rel).toLocaleDateString('ru-RU', {day:'numeric', month:'short'})}</span>`;
-        return `<div class="nvEp"><div><b>${e.id}. ${esc(e.t)}</b><div class="sub">${avail ? 'Открыт' : 'Скоро'}</div></div>${btn}</div>`;
-      }).join('') + `<div class="nvStatus" id="nvStatus">Прогресс сохраняется локально</div>`;
+        const btn = avail ? `<button class="btn" data-nv="play">${NV.node === 'n0' ? 'Начать дело' : 'Продолжить'}</button>` : `<span class="tag" style="color:var(--mut)">В разработке</span>`;
+        return `<div class="nvEp"><div><b>${e.id}. ${esc(e.t)}</b><div class="sub">${avail ? 'Дело открыто' : 'Скоро'}</div></div>${btn}</div>`;
+      }).join('');
   }
+  
   function renderNvNode(){
     const N = NV_NODES[NV.node];
     const choices = (N.ch || []).filter(c => !c.need || NV.flags.includes(c.need));
@@ -206,8 +250,17 @@
       }
       return `<button class="nvCh" data-nv="choose" data-i="${i}"><span>${esc(c.t)}</span></button>`;
     }).join('');
-    $('#nvBody').innerHTML = `<div class="nvArt"><svg viewBox="0 0 400 180" preserveAspectRatio="xMidYMid slice">${NV_ART[N.bg]()}</svg><div class="nvCap">${esc(NV_TITLE[N.bg])}</div></div><div class="nvBox"><p>${esc(N.t)}</p></div>${list}${N.end ? '' : '<button class="btn g" style="width:100%;margin-top:6px" data-nv="menu">К эпизодам</button>'}<div class="nvStatus" id="nvStatus">Прогресс сохраняется локально</div>`;
+    
+    // Добавляем класс для анимации появления
+    $('#nvBody').innerHTML = `<div class="nvArt"><svg viewBox="0 0 400 180" preserveAspectRatio="xMidYMid slice">${NV_ART[N.bg]()}</svg><div class="nvCap">${esc(NV_TITLE[N.bg])}</div></div>
+    <div class="nvBox fade-in"><p>${esc(N.t)}</p></div>
+    <div class="fade-in" style="animation-delay: 0.3s;">${list}</div>
+    ${N.end ? '' : '<button class="btn g fade-in" style="width:100%;margin-top:6px; animation-delay: 0.5s;" data-nv="menu">Свернуть дело</button>'}`;
+    
+    // Звук шагов при переходе
+    playSound('step');
   }
+  
   function nvChoose(i){
     const N = NV_NODES[NV.node];
     const c = (N.ch || []).filter(x => !x.need || NV.flags.includes(x.need))[i];
@@ -216,11 +269,12 @@
     if (c.restart) { NV.node = 'n0'; NV.flags = []; return renderNvNode(); }
     if (c.star && !NV.unlocked.includes(c.key)) {
       if (S.stars < c.star) return toast('Нужно ★ ' + c.star + '. Пополни звёзды');
-      S.stars -= c.star; NV.unlocked.push(c.key); renderTop(); toast('Выбор открыт навсегда');
+      S.stars -= c.star; NV.unlocked.push(c.key); renderTop(); toast('Выбор открыт');
     }
     if (c.f && !NV.flags.includes(c.f)) NV.flags.push(c.f);
     NV.node = c.to; renderNvNode();
   }
+  
   document.addEventListener('click', e => {
     const b = e.target.closest('[data-nv]'); if (!b) return;
     const a = b.dataset.nv;
@@ -229,6 +283,7 @@
     else if (a === 'menu') renderDetective();
   });
 
+  // ===== НАГРАДЫ =====
   function achievements(){
     const s = S.stat, L = [];
     [1, 10, 50, 100].forEach(n => L.push([`Откройте кейсов: ${n}`, s.cases >= n]));
@@ -246,6 +301,7 @@
   $('#dailyBtn').addEventListener('click', () => { if (Date.now() < S.dailyAt + D) return toast('Бесплатный кейс уже открыт сегодня'); S.dailyAt = Date.now(); S.stat.daily++; go('cases'); openCase('free'); });
 
   function renderTop(){ $('#cS').textContent = S.stars; $('#cC').textContent = S.coins; }
+  
   function renderProfile(){
     $('#bS').textContent = S.stars; $('#bC').textContent = S.coins;
     const done = achievements().filter(a => a[1]).length; $('#pAw').textContent = `${done} из 30`;
@@ -256,10 +312,30 @@
     $('#awSub').textContent = `${done} из 30`;
   }
 
+  // ===== ПОПОЛНЕНИЕ =====
   $('#topBtn').addEventListener('click', openTopup);
   function openTopup(){
     $('#modal').classList.remove('hidden');
     $('#mSheet').innerHTML = `<h2>Пополнить звёзды</h2><p class="sub">Оплата проходит внутри Telegram. Звёзды зачисляются на баланс бота.</p><div class="pre">${[50, 100, 250, 500, 1000].map(n => `<button data-n="${n}">★ ${n}</button>`).join('')}</div><input id="cu" type="number" min="1" max="10000" placeholder="Своя сумма"><button class="btn w" id="pay">Оплатить ★ 250</button><button class="btn g w" id="mClose">Закрыть</button>`;
+    let n = 250; const set = v => { n = v; $('#pay').textContent = `Оплатить ★ ${n}`; $$('[data-n]').forEach(b => b.classList.toggle('on', +b.dataset.n === n)); };
+    set(250);
+    $('#mSheet').addEventListener('click', e => { const b = e.target.closest('[data-n]'); if (b) { $('#cu').value = ''; set(+b.dataset.n); } });
+    $('#cu').addEventListener('input', e => { const v = Math.floor(+e.target.value); if (v >= 1 && v <= 10000) set(v); });
+    $('#pay').addEventListener('click', () => {
+      $('#mSheet').innerHTML = `<h2>Подтверждение покупки</h2><p class="sub">Списать ★ ${n} из вашего аккаунта Telegram и зачислить на баланс?</p><button class="btn w" id="ok">Подтвердить ★ ${n}</button><button class="btn g w" id="mClose">Отмена</button>`;
+      $('#ok').addEventListener('click', () => { S.stars += n; S.stat.stars += n; addH('Пополнение звёзд', 'Оплата через Telegram', `+${n} ★`); toast(`+${n} ★ на баланс`); closeModal(); renderTop(); });
+      $('#mClose').addEventListener('click', closeModal);
+    });
+    $('#mClose').addEventListener('click', closeModal);
+  }
+  function closeModal(){ $('#modal').classList.add('hidden'); }
+  $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+
+  $('#nick').textContent = NAME; $('#nick2').textContent = NAME;
+  $('#av').textContent = NAME[0].toUpperCase(); $('#av2').textContent = NAME[0].toUpperCase();
+  renderTop();
+  setInterval(() => { if ($('#s-roulette').classList.contains('on')) renderRoulette(); }, 1000);
+})();et').innerHTML = `<h2>Пополнить звёзды</h2><p class="sub">Оплата проходит внутри Telegram. Звёзды зачисляются на баланс бота.</p><div class="pre">${[50, 100, 250, 500, 1000].map(n => `<button data-n="${n}">★ ${n}</button>`).join('')}</div><input id="cu" type="number" min="1" max="10000" placeholder="Своя сумма"><button class="btn w" id="pay">Оплатить ★ 250</button><button class="btn g w" id="mClose">Закрыть</button>`;
     let n = 250; const set = v => { n = v; $('#pay').textContent = `Оплатить ★ ${n}`; $$('[data-n]').forEach(b => b.classList.toggle('on', +b.dataset.n === n)); };
     set(250);
     $('#mSheet').addEventListener('click', e => { const b = e.target.closest('[data-n]'); if (b) { $('#cu').value = ''; set(+b.dataset.n); } });
