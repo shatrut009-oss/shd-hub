@@ -6,6 +6,7 @@ const { createClient } = require('@supabase/supabase-js');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Берем ключи из переменных окружения на Render
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -20,21 +21,22 @@ const CHANNELS = {
 
 // ===== API ДЛЯ БАЗЫ ДАННЫХ (SUPABASE) =====
 
+// Получить данные пользователя по ID (твоему Telegram ID)
 app.get('/api/user/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const { data, error } = await supabase
       .from('users')
       .select('*')
-      .eq('id', id) // Ищем по колонке id
+      .eq('id', id)
       .single();
       
-    if (error && error.code !== 'PGRST116') { 
+    if (error && error.code !== 'PGRST116') { // PGRST116 значит "не найдено"
       return res.status(500).json({ error: error.message });
     }
     
     if (!data) {
-      // Если пользователя нет, создаем нового (добавляем базовые ники, чтобы база не ругалась)
+      // Если тебя еще нет в базе, создаем запись (добавляем дефолтные ники)
       const { data: newUser, error: createError } = await supabase
         .from('users')
         .insert([{ 
@@ -51,11 +53,12 @@ app.get('/api/user/:id', async (req, res) => {
     
     res.json(data);
   } catch (err) {
-    console.error(err);
+    console.error("Ошибка БД (GET):", err);
     res.status(500).json({ error: err.message });
   }
 });
 
+// Сохранить прогресс пользователя
 app.post('/api/user/:id', async (req, res) => {
   const { id } = req.params;
   const state = req.body;
@@ -75,7 +78,7 @@ app.post('/api/user/:id', async (req, res) => {
     if (error) throw error;
     res.json({ success: true });
   } catch (err) {
-    console.error('Ошибка при сохранении:', err);
+    console.error('Ошибка БД (POST):', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -125,5 +128,6 @@ app.get('/api/posts', async (req, res) => {
   } catch (e) { res.json([]); }
 });
 
+// Раздача фронтенда
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.listen(port, '0.0.0.0', () => console.log(`Сервер запущен на порту ${port}`));
