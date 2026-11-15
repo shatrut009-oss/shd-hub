@@ -10,6 +10,7 @@
 </head>
 <body>
 
+<!-- ЗАСТАВКА -->
 <div id="splash">
   <svg viewBox="900 310 770 815" aria-hidden="true">
     <g class="half l" fill="#fff" fill-rule="evenodd"><path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/></g>
@@ -18,6 +19,7 @@
   <div class="hint">НАЖМИ, ЧТОБЫ ВОЙТИ</div>
 </div>
 
+<!-- ПРИЛОЖЕНИЕ -->
 <div id="app">
   <header class="top">
     <div class="who"><div class="av" id="av">Г</div><div class="nick" id="nick">Гость</div></div>
@@ -28,6 +30,7 @@
   </header>
   
   <main>
+    <!-- ГЛАВНОЕ МЕНЮ -->
     <section class="sc on" id="s-menu">
       <h2>Главное меню</h2>
       <p class="sub" style="margin-bottom:12px">Выбери раздел.</p>
@@ -41,12 +44,14 @@
       </div>
     </section>
 
+    <!-- ЭДИТЫ -->
     <section class="sc" id="s-edit">
       <h2>Эдиты</h2>
       <p class="sub" style="margin-bottom:12px">Реальные видео.</p>
       <div id="posts"></div>
     </section>
 
+    <!-- КЕЙСЫ -->
     <section class="sc" id="s-cases">
       <h2>Кейсы</h2>
       <p class="sub" style="margin-bottom:12px">Открой кейс.</p>
@@ -54,6 +59,7 @@
       <div id="caseStage"></div>
     </section>
 
+    <!-- РУЛЕТКА -->
     <section class="sc" id="s-roulette">
       <h2>Рулетка</h2>
       <p class="sub">Одна прокрутка в 2 часа.</p>
@@ -62,10 +68,12 @@
       <div class="sub" id="spinTxt" style="margin-top:10px;text-align:center"></div>
     </section>
 
+    <!-- ДЕТЕКТИВ (СПИСОК ЭПИЗОДОВ) -->
     <section class="sc" id="s-detective">
       <div id="nvBody"></div>
     </section>
 
+    <!-- НАГРАДЫ -->
     <section class="sc" id="s-awards">
       <h2>Награды</h2>
       <div class="card">
@@ -76,6 +84,7 @@
       <div id="achList"></div>
     </section>
 
+    <!-- ПРОФИЛЬ -->
     <section class="sc" id="s-profile">
       <div class="card row">
         <div class="who"><div class="av" id="av2">Г</div><div><div class="nick" style="font-size:17px" id="nick2">Гость</div><div class="sub">Теоретик</div></div></div>
@@ -95,7 +104,7 @@
   <button class="back hidden" id="backBtn">← В меню</button>
 </div>
 
-<!-- ЭКРАН НОВЕЛЛЫ (Перекрывает все) -->
+<!-- ЭКРАН НОВЕЛЛЫ (Изначально скрыт!) -->
 <div id="vn-screen" class="hidden">
   <div class="vn-bg" id="vn-bg"></div>
   <div class="vn-char-box" id="vn-char-box"><div class="vn-char" id="vn-char"></div></div>
@@ -111,7 +120,7 @@
   </div>
 </div>
 
-<!-- Меню Паузы -->
+<!-- МЕНЮ ПАУЗЫ -->
 <div id="pause-modal" class="modal hidden">
   <div class="modal-sheet" style="background:#121016; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; max-height: 85vh;">
     <div style="text-align:center; padding-bottom:20px;">
@@ -131,7 +140,7 @@
   </div>
 </div>
 
-<!-- Фотоальбом -->
+<!-- ФОТОАЛЬБОМ -->
 <div id="album-modal" class="modal hidden">
   <div class="modal-sheet" style="background:#0d0d11; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; height: 80vh;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -153,7 +162,7 @@
   </div>
 </div>
 
-<!-- Экран Твоих выборов -->
+<!-- ТВОИ ВЫБОРЫ -->
 <div id="choices-modal" class="modal hidden">
   <div class="modal-sheet" style="background:#0d0d11; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; max-height: 80vh;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -166,6 +175,7 @@
 
 <div id="toast"></div>
 
+<!-- СКРИПТ ЗАСТАВКИ (Стоит до app.js, чтобы точно сработать) -->
 <script>
   (function() {
     var splash = document.getElementById('splash');
@@ -186,4 +196,4 @@
 
 <script src="app.js"></script>
 </body>
-  </html>
+</html>
