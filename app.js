@@ -68,7 +68,6 @@
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2); 
           osc.connect(gain); osc.start(); osc.stop(now + 0.2); 
         } else if (type === 'door') {
-          // Удар и скрип
           const osc = audioCtx.createOscillator();
           osc.type = 'sawtooth'; osc.frequency.setValueAtTime(50, now);
           gain.gain.setValueAtTime(0.3 * sfxVolume, now);
@@ -84,7 +83,6 @@
           osc2.connect(gain2); gain2.connect(audioCtx.destination);
           osc2.start(); osc2.stop(now + 0.3);
         } else if (type === 'tape') {
-          // Шипение (белый шум на 1.5 сек)
           const bufferSize = audioCtx.sampleRate * 1.5;
           const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
           const data = buffer.getChannelData(0);
@@ -308,6 +306,18 @@
       office: 'https://i.postimg.cc/D0SNS7TV/IMG-20261115-094102-192.jpg'
     };
 
+    const EP_NAMES = [
+      'Тот, кто дергает за ниточки',
+      'Праведные сёстры',
+      'Скелет в шкафу',
+      'Лицо Кукольника',
+      'Правила игры',
+      'Разбитые маски',
+      'Исцеление болью',
+      'В ловушке котельной',
+      'Новый Кукольник'
+    ];
+
     const STORY = [
       // ЭПИЗОД 1
       [
@@ -427,11 +437,95 @@
     function renderDetective() {
       const body = $('#nvBody'); if (!body) return;
       if ($('#vn-screen')) $('#vn-screen').classList.add('hidden');
-      body.innerHTML = `<div style="text-align:center; margin-top:20px;"><h1 style="font-family:'Oswald'; font-size:32px; color:#fff;">Детектив</h1><div style="display:flex; flex-direction:column; gap:10px; max-width:300px; margin:20px auto;">
-        ${STORY.map((ep, i) => { const isUnlocked = i === 0 || S.stat.chapters >= i; return `<button class="btn w" style="background:${isUnlocked ? 'linear-gradient(90deg, var(--acc), var(--acc2))' : '#222'}; color:${isUnlocked ? '#fff' : '#666'};" data-ep="${i}" ${!isUnlocked ? 'disabled' : ''}>${isUnlocked ? '▶ ' : '🔒 '} Эпизод ${i+1}</button>`; }).join('')}
-      </div><div style="display:flex; justify-content:center; margin-top:20px;"><button class="btn sm g" id="btn-my-choices">♥ Твои выборы</button></div></div>`;
-      $$('[data-ep]').forEach(btn => { btn.addEventListener('click', (e) => startVN(+e.target.dataset.ep)); });
-      if($('#btn-my-choices')) $('#btn-my-choices').addEventListener('click', () => openChoicesModal());
+      
+      // Определяем, какой эпизод сейчас активен (первый непройденный)
+      const activeEpIndex = Math.min(S.stat.chapters, STORY.length - 1);
+      
+      // Берем фон для большой карточки из первого кадра этого эпизода
+      const activeBg = STORY[activeEpIndex][0].bg || BG.hall;
+
+      let html = `
+        <div class="ep-header">
+          <h1 class="ep-title-main">Эпизоды</h1>
+          <div class="ep-progress">пройдено ${S.stat.chapters} из ${STORY.length}</div>
+        </div>
+        
+        <!-- Большая карточка активного эпизода -->
+        <div class="ep-card-active" id="btn-play-active">
+          <div class="ep-card-bg" style="background-image:url('${activeBg}')"></div>
+          <div class="ep-card-content">
+            <div class="ep-card-sub">Эпизод ${activeEpIndex + 1} · ты здесь</div>
+            <div class="ep-card-title">${EP_NAMES[activeEpIndex]}</div>
+            <button class="btn ep-btn-play w">▶ Продолжить</button>
+          </div>
+        </div>
+        
+        <!-- Список остальных эпизодов -->
+        <div class="ep-list">
+      `;
+
+      EP_NAMES.forEach((name, i) => {
+        if (i === activeEpIndex) return; // Активный пропускаем, он уже сверху
+        
+        const isUnlocked = i < S.stat.chapters;
+        // Если этот эпизод - следующий после активного, делаем его "скоро"
+        const isUpcoming = (i === activeEpIndex + 1) && (S.stat.chapters < STORY.length);
+        
+        if (isUnlocked) {
+          // Пройденный эпизод (можно переиграть)
+          html += `
+            <div class="ep-item" data-ep="${i}">
+              <div class="ep-num">0${i+1}</div>
+              <div class="ep-info"><div class="ep-name">${name}</div></div>
+            </div>
+          `;
+        } else if (isUpcoming) {
+          // Следующий эпизод - "скоро"
+          html += `
+            <div class="ep-item future">
+              <div class="ep-header-row">⏳ Эпизод ${i+1} · скоро</div>
+              <div class="ep-name">${name}</div>
+              <div class="ep-wait-badge">в разработке</div>
+            </div>
+          `;
+        } else {
+          // Обычные заблокированные
+          html += `
+            <div class="ep-item locked">
+              <div class="ep-num">0${i+1}</div>
+              <div class="ep-info"><div class="ep-name">${name}</div></div>
+              <div class="ep-lock">🔒</div>
+            </div>
+          `;
+        }
+      });
+
+      html += `
+        </div>
+        <div style="display:flex; justify-content:center; gap:10px; margin-top:24px; flex-wrap:wrap;">
+          <button class="btn sm g" id="btn-my-choices">♥ Твои выборы</button>
+          <button class="btn sm g" id="btn-album">🖼 Фотоальбом</button>
+        </div>
+      `;
+
+      body.innerHTML = html;
+
+      // Обработчики кликов
+      if ($('#btn-play-active')) {
+        $('#btn-play-active').addEventListener('click', () => startVN(activeEpIndex));
+      }
+      
+      $$('.ep-item[data-ep]').forEach(el => {
+        el.addEventListener('click', () => startVN(+el.dataset.ep));
+      });
+
+      if ($('#btn-my-choices')) {
+        $('#btn-my-choices').addEventListener('click', () => openChoicesModal());
+      }
+      
+      if ($('#btn-album')) {
+        $('#btn-album').addEventListener('click', () => $('#album-modal').classList.remove('hidden'));
+      }
     }
 
     function startVN(epIndex) { 
