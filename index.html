@@ -10,7 +10,6 @@
 </head>
 <body>
 
-<!-- ЗАСТАВКА -->
 <div id="splash">
   <svg viewBox="900 310 770 815" aria-hidden="true">
     <g class="half l" fill="#fff" fill-rule="evenodd"><path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/></g>
@@ -19,10 +18,15 @@
   <div class="hint">НАЖМИ, ЧТОБЫ ВОЙТИ</div>
 </div>
 
-<!-- ПРИЛОЖЕНИЕ -->
 <div id="app">
   <header class="top">
-    <div class="who"><div class="av" id="av">Г</div><div class="nick" id="nick">Гость</div></div>
+    <div class="who">
+      <div class="av-wrap">
+        <div class="av" id="av">Г</div>
+        <div class="badge-icon hidden" id="activeBadge"></div>
+      </div>
+      <div class="nick" id="nick">Гость</div>
+    </div>
     <div class="chips">
       <span class="chip" style="border-color:rgba(255,200,61,.5)">★<b id="cS">0</b></span>
       <span class="chip" style="border-color:rgba(77,163,255,.5)">◆<b id="cC">0</b></span>
@@ -30,28 +34,25 @@
   </header>
   
   <main>
-    <!-- ГЛАВНОЕ МЕНЮ -->
     <section class="sc on" id="s-menu">
       <h2>Главное меню</h2>
       <p class="sub" style="margin-bottom:12px">Выбери раздел.</p>
       <div class="menu">
         <button class="tile hot" data-go="edit"><span class="i">🎬</span><b>Эдиты</b><span class="sub">Видео из ТГ</span></button>
         <button class="tile" data-go="cases"><span class="i">🎁</span><b>Кейсы</b><span class="sub">3 кейса</span></button>
-        <button class="tile" data-go="roulette"><span class="i">🎡</span><b>Рулетка</b><span class="sub"><span class="dot"></span><span id="rlSub">раз в 2 часа</span></span></button>
+        <button class="tile" data-go="roulette"><span class="i">🎡</span><b>Рулетки</b><span class="sub"><span class="dot"></span><span id="rlSub">2 вида</span></span></button>
         <button class="tile" data-go="detective"><span class="i">🔎</span><b>Детектив</b><span class="sub">Расследование</span></button>
         <button class="tile" data-go="awards"><span class="i">🏅</span><b>Награды</b><span class="sub" id="awSub">0 из 30</span></button>
         <button class="tile" data-go="profile"><span class="i">👤</span><b>Профиль</b><span class="sub">Баланс</span></button>
       </div>
     </section>
 
-    <!-- ЭДИТЫ -->
     <section class="sc" id="s-edit">
       <h2>Эдиты</h2>
       <p class="sub" style="margin-bottom:12px">Реальные видео.</p>
       <div id="posts"></div>
     </section>
 
-    <!-- КЕЙСЫ -->
     <section class="sc" id="s-cases">
       <h2>Кейсы</h2>
       <p class="sub" style="margin-bottom:12px">Открой кейс.</p>
@@ -59,42 +60,57 @@
       <div id="caseStage"></div>
     </section>
 
-    <!-- РУЛЕТКА -->
+    <!-- РУЛЕТКИ -->
     <section class="sc" id="s-roulette">
       <h2>Рулетка</h2>
-      <p class="sub">Одна прокрутка в 2 часа.</p>
-      <div class="wheelbox"><div class="ptr"></div><div class="disc" id="disc"></div><div class="hub">ШД</div></div>
-      <button class="btn w" id="spinBtn">Крутить</button>
-      <div class="sub" id="spinTxt" style="margin-top:10px;text-align:center"></div>
+      <p class="sub">Крути на удачу!</p>
+      
+      <div class="roulette-tabs">
+        <button class="rt-btn active" data-rt="daily">Ежедневная (Бесплатно)</button>
+        <button class="rt-btn" data-rt="char">Персонажи (★ 7)</button>
+      </div>
+
+      <!-- Ежедневная рулетка -->
+      <div id="roulette-daily">
+        <div class="wheelbox"><div class="ptr"></div><div class="disc" id="disc"></div><div class="hub">ШД</div></div>
+        <button class="btn w" id="spinBtn">Крутить</button>
+        <div class="sub" id="spinTxt" style="margin-top:10px;text-align:center"></div>
+      </div>
+
+      <!-- Персонажная рулетка -->
+      <div id="roulette-char" class="hidden">
+        <div class="wheelbox"><div class="ptr"></div><div class="disc" id="disc2"></div><div class="hub">👤</div></div>
+        <button class="btn w" id="spinBtn2" style="background:linear-gradient(90deg, #ffc83d, #ff9d00); color:#000;">Крутить (★ 7)</button>
+        <div class="sub" id="spinTxt2" style="margin-top:10px;text-align:center"></div>
+      </div>
     </section>
 
-    <!-- ДЕТЕКТИВ (СПИСОК ЭПИЗОДОВ) -->
     <section class="sc" id="s-detective">
       <div id="nvBody"></div>
     </section>
 
-    <!-- НАГРАДЫ -->
     <section class="sc" id="s-awards">
       <h2>Награды</h2>
-      <div class="card">
-        <div class="row"><div><b>Ежедневный кейс</b><div class="sub">Бесплатно раз в сутки</div></div>
-          <button class="btn sm" id="dailyBtn">Открыть</button></div>
-      </div>
       <div class="lab" style="margin:12px 0 6px">Достижения</div>
       <div id="achList"></div>
     </section>
 
-    <!-- ПРОФИЛЬ -->
     <section class="sc" id="s-profile">
       <div class="card row">
-        <div class="who"><div class="av" id="av2">Г</div><div><div class="nick" style="font-size:17px" id="nick2">Гость</div><div class="sub">Теоретик</div></div></div>
+        <div class="who">
+          <div class="av-wrap">
+            <div class="av" id="av2">Г</div>
+            <div class="badge-icon hidden" id="activeBadge2"></div>
+          </div>
+          <div><div class="nick" style="font-size:17px" id="nick2">Гость</div><div class="sub">Теоретик</div></div>
+        </div>
       </div>
       <div class="card">
         <div class="row"><div><div class="lab">Баланс звёзд</div><div class="o" style="font-size:30px">★ <span id="bS">0</span></div></div>
           <button class="btn sm" id="topBtn">+ Пополнить</button></div>
         <div class="sub" style="margin-top:8px">Монеты актива: <b id="bC">0</b> ◆</div>
       </div>
-      <div class="card row"><div><div class="lab">Награды</div><b id="pAw">0 из 30</b></div><button class="btn sm g" data-go="awards">Все</button></div>
+      <div class="card row"><div><div class="lab">Награды</div><b id="pAw">0 из 30</b></div><button class="btn sm" id="btn-open-awards">Выбрать ачивку</button></div>
       <div class="lab" style="margin:12px 0 6px">Коллекция</div>
       <div class="grid" id="inv"></div>
       <div class="lab" style="margin:12px 0 6px">История</div>
@@ -104,23 +120,30 @@
   <button class="back hidden" id="backBtn">← В меню</button>
 </div>
 
-<!-- ЭКРАН НОВЕЛЛЫ (Изначально скрыт!) -->
+<!-- Экран Новеллы -->
 <div id="vn-screen" class="hidden">
   <div class="vn-bg" id="vn-bg"></div>
   <div class="vn-char-box" id="vn-char-box"><div class="vn-char" id="vn-char"></div></div>
   <button class="vn-pause-btn" id="vn-pause-btn">II</button>
-  
   <div class="vn-dialog" id="vn-dialog">
-    <div class="vn-top-row">
-      <div class="vn-speaker" id="vn-speaker">Дима</div>
-      <div class="vn-ep-info" id="vn-ep-info">Эпизод 1</div>
-    </div>
-    <div class="vn-text" id="vn-text">Текст...</div>
+    <div class="vn-top-row"><div class="vn-speaker" id="vn-speaker"></div><div class="vn-ep-info" id="vn-ep-info"></div></div>
+    <div class="vn-text" id="vn-text"></div>
     <div class="vn-next-btn" id="vn-next-btn">➔</div>
   </div>
 </div>
 
-<!-- МЕНЮ ПАУЗЫ -->
+<!-- Модалка выбора ачивки -->
+<div id="modal-badges" class="modal hidden">
+  <div class="modal-sheet" style="background:#121016; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; max-height: 85vh;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h2 style="font-family:'Oswald'; font-size:24px;">Мои награды</h2>
+      <button id="badges-close" style="color:#fff; font-size:24px;">✕</button>
+    </div>
+    <div id="badges-list" class="badges-list"></div>
+  </div>
+</div>
+
+<!-- Меню Паузы -->
 <div id="pause-modal" class="modal hidden">
   <div class="modal-sheet" style="background:#121016; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; max-height: 85vh;">
     <div style="text-align:center; padding-bottom:20px;">
@@ -133,14 +156,13 @@
       <button class="pause-item" id="pause-album"><span>🖼 Фотоальбом</span></button>
       <div class="pause-item" style="flex-direction:column; align-items:flex-start; gap:10px; padding:15px;"><span>🎵 Музыка</span><input type="range" min="0" max="100" value="100" class="vol-slider" id="vol-music"></div>
       <div class="pause-item" style="flex-direction:column; align-items:flex-start; gap:10px; padding:15px;"><span>🔊 Звуки</span><input type="range" min="0" max="100" value="100" class="vol-slider" id="vol-sfx"></div>
-      <div class="pause-item"><span>📳 Вибрация</span><label class="toggle"><input type="checkbox" id="vib-toggle" checked><span class="slider"></span></label></div>
       <button class="pause-item" id="pause-restart"><span>↺ Пройти заново</span></button>
       <button class="pause-item" id="pause-exit"><span>➔ К историям</span></button>
     </div>
   </div>
 </div>
 
-<!-- ФОТОАЛЬБОМ -->
+<!-- Фотоальбом -->
 <div id="album-modal" class="modal hidden">
   <div class="modal-sheet" style="background:#0d0d11; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; height: 80vh;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -154,15 +176,11 @@
       <div class="album-item locked"><span class="lock-icon">🔒</span></div>
       <div class="album-item locked"><span class="lock-icon">🔒</span></div>
       <div class="album-item locked"><span class="lock-icon">🔒</span></div>
-      <div class="album-item locked"><span class="lock-icon">🔒</span></div>
-      <div class="album-item locked"><span class="lock-icon">🔒</span></div>
-      <div class="album-item locked"><span class="lock-icon">🔒</span></div>
-      <div class="album-item locked"><span class="lock-icon">🔒</span></div>
     </div>
   </div>
 </div>
 
-<!-- ТВОИ ВЫБОРЫ -->
+<!-- Твои выборы -->
 <div id="choices-modal" class="modal hidden">
   <div class="modal-sheet" style="background:#0d0d11; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; max-height: 80vh;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -175,7 +193,6 @@
 
 <div id="toast"></div>
 
-<!-- СКРИПТ ЗАСТАВКИ (Стоит до app.js, чтобы точно сработать) -->
 <script>
   (function() {
     var splash = document.getElementById('splash');
@@ -196,4 +213,4 @@
 
 <script src="app.js"></script>
 </body>
-</html>
+  </html>
