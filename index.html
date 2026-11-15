@@ -57,7 +57,6 @@
       <h2>Кейсы</h2>
       <p class="sub" style="margin-bottom:12px">Открой кейс.</p>
       <div id="caseList"></div>
-      <div id="caseStage"></div>
     </section>
 
     <section class="sc" id="s-roulette">
@@ -86,14 +85,12 @@
       <div id="nvBody"></div>
     </section>
 
-    <!-- НОВЫЙ ЭКРАН НАГРАД (Сетка) -->
     <section class="sc" id="s-awards">
       <h2>Награды</h2>
       <div class="sub" style="margin-bottom:12px">Нажми на награду, чтобы надеть её на аватарку.</div>
       <div id="achGrid" class="ach-grid"></div>
     </section>
 
-    <!-- НОВЫЙ ПРОФИЛЬ -->
     <section class="sc" id="s-profile">
       <div class="prof-header">
         <div class="av-wrap">
@@ -117,7 +114,6 @@
       <div class="lab" style="margin:16px 0 8px">Мои персонажи (<span id="bC">0</span>)</div>
       <div class="grid" id="inv"></div>
 
-      <!-- Блок рейтинга -->
       <div class="rating-card" id="btn-open-rating">
         <div class="row">
           <div class="lab">Твоё место в рейтинге</div>
@@ -137,7 +133,6 @@
   <button class="back hidden" id="backBtn">← В меню</button>
 </div>
 
-<!-- ВИЗУАЛЬНАЯ НОВЕЛЛА -->
 <div id="vn-screen" class="hidden">
   <div class="vn-bg" id="vn-bg"></div>
   <div class="vn-char-box" id="vn-char-box"><div class="vn-char" id="vn-char"></div></div>
@@ -154,6 +149,11 @@
   <div class="modal-sheet" style="background: linear-gradient(180deg, #1e1338 0%, #101016 100%); border-top: none; border-radius: 24px 24px 0 0;">
     <div id="case-modal-content"></div>
   </div>
+</div>
+
+<!-- МОДАЛКА: РЕЗУЛЬТАТ (ВЫПАЛ ПЕРСОНАЖ) -->
+<div id="modal-win" class="modal hidden">
+  <div class="modal-sheet win-sheet" id="win-content"></div>
 </div>
 
 <!-- МОДАЛКА: ИСТОРИЯ ВЫИГРЫШЕЙ -->
@@ -178,7 +178,6 @@
   </div>
 </div>
 
-<!-- СТАРЫЕ МОДАЛКИ -->
 <div id="pause-modal" class="modal hidden">
   <div class="modal-sheet" style="background:#121016; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; max-height: 85vh;">
     <div style="text-align:center; padding-bottom:20px;">
