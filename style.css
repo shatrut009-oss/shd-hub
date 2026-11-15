@@ -128,3 +128,13 @@ main{flex:1;position:relative;overflow:hidden}
 .nvEp{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-radius:16px;background:var(--card);border:1px solid var(--line);margin-bottom:8px}
 .nvEp b{font-family:Oswald;text-transform:uppercase;font-size:15px}
 .nvStatus{font-size:12px;color:var(--mut);margin:8px 0 12px}
+/* Плавное появление текста в детективе */
+.fade-in {
+  animation: fadeIn 0.8s ease forwards;
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
