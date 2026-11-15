@@ -124,23 +124,27 @@
       try {
         const res = await fetch(`/api/user/${TG_ID}`);
         const data = await res.json();
+        
         if (data && !data.error) {
           S = { 
             ...DEFAULT_S, 
-            stars: data.stars != null ? data.stars : DEFAULT_S.stars, 
-            coins: data.coins != null ? data.coins : DEFAULT_S.coins, 
-            inv: data.inv || [], 
-            hist: data.hist || [], 
-            choices: data.choices || [], 
-            activeBadge: data.active_badge, 
-            stat: data.stat || DEFAULT_S.stat 
+            stars: (data.stars !== null && data.stars !== undefined) ? data.stars : DEFAULT_S.stars, 
+            coins: (data.coins !== null && data.coins !== undefined) ? data.coins : DEFAULT_S.coins, 
+            inv: Array.isArray(data.inv) ? data.inv : [], 
+            hist: Array.isArray(data.hist) ? data.hist : [], 
+            choices: Array.isArray(data.choices) ? data.choices : [], 
+            activeBadge: data.active_badge || null, 
+            stat: { ...DEFAULT_S.stat, ...(data.stat || {}) } // Защита от неполных данных!
           };
         }
       } catch(e) { 
         console.error('Ошибка загрузки БД', e); 
         try {
           const saved = localStorage.getItem('shd_app_state');
-          if (saved) S = { ...DEFAULT_S, ...JSON.parse(saved) };
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            S = { ...DEFAULT_S, ...parsed, stat: { ...DEFAULT_S.stat, ...(parsed.stat || {}) } };
+          }
         } catch(err) {}
       }
       renderTop();
@@ -165,6 +169,7 @@
 
     function getPoints() {
       let p = 0;
+      if (!Array.isArray(S.inv)) return 0;
       S.inv.forEach(c => {
         if (c.r === 'common') p += 1;
         else if (c.r === 'rare') p += 5;
@@ -196,7 +201,7 @@
         if (name === 'detective') renderDetective(); 
         if (name === 'awards') renderAwards(); 
         if (name === 'profile') renderProfile(); 
-      } catch(e) {}
+      } catch(e) { console.error(e); }
     }
     document.addEventListener('click', e => { const g = e.target.closest('[data-go]'); if (g) go(g.dataset.go); });
     if ($('#backBtn')) $('#backBtn').addEventListener('click', () => go('menu'));
@@ -310,7 +315,7 @@
       modal.classList.remove('hidden');
       
       const track = content.querySelector('.preview-track');
-      setTimeout(() => { track.style.transform = 'translateX(-140px)'; track.style.transition = 'transform 2s ease-out'; }, 100);
+      if(track) setTimeout(() => { track.style.transform = 'translateX(-140px)'; track.style.transition = 'transform 2s ease-out'; }, 100);
 
       $('#confirm-open-case').addEventListener('click', () => {
         modal.classList.add('hidden');
@@ -480,10 +485,7 @@
     });
 
 
-    // ==========================================
-    // ===== БЛОК ЭПИЗОДОВ (СЮЖЕТ) ==============
-    // ==========================================
-    
+    // ===== БЛОК ЭПИЗОДОВ (СЮЖЕТ) =====
     const BG = {
       hall: 'https://i.postimg.cc/XqVLZjcx/AIRetouch-20261115-083654547-(1).png',
       gym: 'https://i.postimg.cc/WzCdBS39/AIRetouch-20261115-084408474-(1).png',
@@ -495,29 +497,15 @@
     };
 
     const EP_NAMES = [
-      'Тот, кто дергает за ниточки', 
-      'Праведные сёстры', 
-      'Скелет в шкафу', 
-      'Лицо Кукольника', 
-      'Правила игры', 
-      'Разбитые маски', 
-      'Исцеление болью', 
-      'В ловушке котельной', 
-      'Новый Кукольник'
+      'Тот, кто дергает за ниточки', 'Праведные сёстры', 'Скелет в шкафу', 
+      'Лицо Кукольника', 'Правила игры', 'Разбитые маски', 
+      'Исцеление болью', 'В ловушке котельной', 'Новый Кукольник'
     ];
 
-    // ==============================================================
-    // ВАЖНО: Здесь ты указываешь, сколько эпизодов уже вышло.
-    // Сейчас вышел только 1. Когда допишешь 2-й эпизод в массив STORY, 
-    // просто поменяй это число на 2, и он откроется игрокам.
-    // ==============================================================
     const RELEASED_EPISODES = 1; 
 
     const STORY = [
-      // ==========================================
-      // ЭПИЗОД 1 (УЖЕ НАПИСАН)
-      // ==========================================
-      [
+      [ /* ЭПИЗОД 1 */
         { bg: BG.hall, char: C.dima, name: '', music: 'calm', text: 'Коридор школы, второй этаж. Утро. Яркий солнечный свет бьет в окна, отражается от начищенного линолеума. Ряды металлических шкафчиков. У одного из них стоит Дима в школьной форме с расслабленным галстуком, рядом висит его джинсовка.' },
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'calm', text: 'Я стою у своего открытого шкафчика, нервно теребя в руках учебник по геометрии. В коридоре шумно, старшеклассники толкаются, кто-то смеется, но я не обращаю внимания. Мысли крутятся вокруг предстоящей контрольной.' },
         { bg: BG.hall, char: C.derz, name: 'Дерзкий', music: 'calm', text: 'Здорово, чемпион! Ты сегодня на спаррингах в зале будешь, или опять дома железо тягаешь?' },
@@ -600,11 +588,6 @@
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'climax', sfx: 'scream', text: 'Я иду по пустому коридору. Внезапно экран телефона загорается: «Ты думал, что нашел правду? Ты даже не представляешь, кто настоящий Кукольник. Оглянись».' },
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'climax', text: 'Я резко оборачиваюсь. В конце темного коридора мелькает тень. Сердце уходит в пятки. КОНЕЦ ЭПИЗОДА 1.' }
       ],
-
-      // ==========================================
-      // ЗАГЛУШКИ ДЛЯ ЭПИЗОДОВ 2-9 
-      // (Замени текст внутри квадратных скобок на свой сюжет)
-      // ==========================================
       [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 2 в разработке.' } ],
       [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 3 в разработке.' } ],
       [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 4 в разработке.' } ],
@@ -621,16 +604,17 @@
       const body = $('#nvBody'); if (!body) return;
       if ($('#vn-screen')) $('#vn-screen').classList.add('hidden');
       
-      // Определяем активный эпизод (первый непройденный из вышедших)
-      let activeEpIndex = Math.min(S.stat.chapters, RELEASED_EPISODES - 1);
+      const chapters = S.stat?.chapters || 0;
+      let activeEpIndex = Math.min(chapters, RELEASED_EPISODES - 1);
+      if (activeEpIndex < 0) activeEpIndex = 0;
       
       const activeBg = STORY[activeEpIndex][0].bg || BG.hall;
-      const isFinishedAll = S.stat.chapters >= RELEASED_EPISODES;
+      const isFinishedAll = chapters >= RELEASED_EPISODES;
 
       let html = `
         <div class="ep-header">
           <h1 class="ep-title-main">Эпизоды</h1>
-          <div class="ep-progress">пройдено ${Math.min(S.stat.chapters, RELEASED_EPISODES)} из ${STORY.length}</div>
+          <div class="ep-progress">пройдено ${Math.min(chapters, RELEASED_EPISODES)} из ${STORY.length}</div>
         </div>
         
         <div class="ep-card-active" id="btn-play-active">
@@ -646,19 +630,16 @@
       `;
 
       EP_NAMES.forEach((name, i) => {
-        if (i === activeEpIndex && !isFinishedAll) return; // Скрываем из списка, так как он большой сверху
+        if (i === activeEpIndex && !isFinishedAll) return; 
         
         const isReleased = i < RELEASED_EPISODES;
-        const isUnlocked = i < S.stat.chapters;
+        const isUnlocked = i < chapters;
         
         if (isUnlocked && isReleased) {
-          // Пройденный эпизод (можно переиграть)
           html += `<div class="ep-item" data-ep="${i}"><div class="ep-num">0${i+1}</div><div class="ep-info"><div class="ep-name">${name}</div></div><div class="ep-lock" style="color:var(--ok); font-size:14px;">✓</div></div>`;
         } else if (!isUnlocked && isReleased) {
-          // Вышедший, но еще не пройденный
           html += `<div class="ep-item future"><div class="ep-header-row">⏳ Эпизод ${i+1} · скоро</div><div class="ep-name">${name}</div><div class="ep-wait-badge">в разработке</div></div>`;
         } else {
-          // Заблокированные (в разработке)
           html += `<div class="ep-item locked"><div class="ep-num">0${i+1}</div><div class="ep-info"><div class="ep-name">${name}</div></div><div class="ep-lock">🔒</div></div>`;
         }
       });
@@ -805,7 +786,7 @@
     function renderProfile(){
       if (!$('#bS')) return;
       $('#bS').textContent = S.stars; 
-      $('#bC').textContent = S.inv.length;
+      $('#bC').textContent = Array.isArray(S.inv) ? S.inv.length : 0;
       
       const activeAch = ACHIEVEMENTS.find(a => a.id === S.activeBadge);
       const badgeHtml = activeAch ? activeAch.icon : '';
@@ -829,10 +810,10 @@
       $('#my-rank').textContent = myRank;
       $('#total-users').textContent = mockUsers.length + 42; 
 
-      const sortedInv = [...S.inv].sort((a,b) => {
+      const sortedInv = Array.isArray(S.inv) ? [...S.inv].sort((a,b) => {
         const ranks = { mythic: 5, legend: 4, epic: 3, rare: 2, common: 1 };
         return ranks[b.r] - ranks[a.r];
-      });
+      }) : [];
 
       $('#inv').innerHTML = sortedInv.length ? sortedInv.map(i => `
         <div class="pc" style="--c:${RAR[i.r][1]}">
