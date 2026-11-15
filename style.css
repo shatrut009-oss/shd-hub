@@ -153,3 +153,35 @@ main { flex: 1; position: relative; overflow: hidden; }
 .lock-icon { font-size: 24px; opacity: 0.5; }
 #toast { position: fixed; left: 50%; bottom: calc(var(--sb) + 80px); transform: translate(-50%, 16px); background: var(--card2); border: 1px solid var(--acc); padding: 10px 16px; border-radius: 14px; font-size: 13px; opacity: 0; transition: .3s; z-index: 300; pointer-events: none; max-width: 92vw; text-align: center; }
 #toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ===== СПИСОК ЭПИЗОДОВ ДЕТЕКТИВА ===== */
+.ep-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; margin-top: 10px; }
+.ep-title-main { font-family: 'Oswald', sans-serif; font-size: 32px; color: #fff; margin: 0; }
+.ep-progress { color: var(--mut); font-size: 13px; }
+
+/* Большая карточка активного эпизода */
+.ep-card-active { position: relative; border-radius: 20px; overflow: hidden; margin-bottom: 24px; border: 1px solid rgba(255, 200, 61, 0.3); display: flex; flex-direction: column; justify-content: flex-end; min-height: 240px; cursor: pointer; transition: transform 0.2s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.ep-card-active:active { transform: scale(0.98); }
+.ep-card-bg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: brightness(0.6); z-index: 1; }
+.ep-card-content { position: relative; z-index: 2; padding: 20px; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0) 100%); }
+.ep-card-sub { color: var(--star); font-size: 13px; font-weight: 600; margin-bottom: 4px; font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; }
+.ep-card-title { font-family: 'Oswald', sans-serif; font-size: 26px; color: #fff; margin-bottom: 16px; line-height: 1.1; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+.ep-btn-play { background: #fff; color: #000; border-radius: 12px; font-weight: bold; font-size: 16px; padding: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(255,255,255,0.1); }
+
+/* Список остальных эпизодов */
+.ep-list { display: flex; flex-direction: column; gap: 8px; }
+.ep-item { display: flex; align-items: center; gap: 16px; padding: 10px 12px; border-radius: 16px; transition: 0.2s; cursor: pointer; }
+.ep-item:active:not(.locked):not(.future) { background: var(--card2); }
+.ep-num { width: 44px; height: 44px; border-radius: 12px; background: var(--card2); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-family: 'Oswald', sans-serif; font-size: 20px; color: var(--mut); flex: none; }
+.ep-item:not(.locked) .ep-num { color: #fff; border-color: rgba(255,255,255,0.2); }
+.ep-info { flex: 1; }
+.ep-name { font-weight: 600; font-size: 16px; color: #fff; margin-bottom: 2px; }
+.ep-item.locked { opacity: 0.5; cursor: default; }
+.ep-item.locked .ep-name { color: var(--mut); }
+.ep-lock { color: var(--mut); font-size: 18px; }
+
+/* Спец. карточка "Скоро" (следующий эпизод) */
+.ep-item.future { flex-direction: column; align-items: flex-start; padding: 16px; border: 1px solid rgba(157, 77, 255, 0.4); background: linear-gradient(135deg, rgba(157, 77, 255, 0.08), transparent); gap: 6px; margin-top: 10px; margin-bottom: 10px; cursor: default; }
+.ep-item.future .ep-header-row { display: flex; align-items: center; gap: 8px; color: var(--star); font-size: 13px; font-weight: 600; font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; }
+.ep-item.future .ep-name { font-size: 22px; font-family: 'Oswald', sans-serif; }
+.ep-wait-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(157, 77, 255, 0.15); color: #d7b8ff; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; margin-top: 4px; }
