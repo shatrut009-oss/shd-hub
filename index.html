@@ -60,24 +60,21 @@
       <div id="caseStage"></div>
     </section>
 
-    <!-- РУЛЕТКИ -->
     <section class="sc" id="s-roulette">
       <h2>Рулетка</h2>
       <p class="sub">Крути на удачу!</p>
       
       <div class="roulette-tabs">
-        <button class="rt-btn active" data-rt="daily">Ежедневная (Бесплатно)</button>
+        <button class="rt-btn active" data-rt="daily">Ежедневная</button>
         <button class="rt-btn" data-rt="char">Персонажи (★ 7)</button>
       </div>
 
-      <!-- Ежедневная рулетка -->
       <div id="roulette-daily">
         <div class="wheelbox"><div class="ptr"></div><div class="disc" id="disc"></div><div class="hub">ШД</div></div>
         <button class="btn w" id="spinBtn">Крутить</button>
         <div class="sub" id="spinTxt" style="margin-top:10px;text-align:center"></div>
       </div>
 
-      <!-- Персонажная рулетка -->
       <div id="roulette-char" class="hidden">
         <div class="wheelbox"><div class="ptr"></div><div class="disc" id="disc2"></div><div class="hub">👤</div></div>
         <button class="btn w" id="spinBtn2" style="background:linear-gradient(90deg, #ffc83d, #ff9d00); color:#000;">Крутить (★ 7)</button>
@@ -120,7 +117,6 @@
   <button class="back hidden" id="backBtn">← В меню</button>
 </div>
 
-<!-- Экран Новеллы -->
 <div id="vn-screen" class="hidden">
   <div class="vn-bg" id="vn-bg"></div>
   <div class="vn-char-box" id="vn-char-box"><div class="vn-char" id="vn-char"></div></div>
@@ -132,7 +128,6 @@
   </div>
 </div>
 
-<!-- Модалка выбора ачивки -->
 <div id="modal-badges" class="modal hidden">
   <div class="modal-sheet" style="background:#121016; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; max-height: 85vh;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -143,7 +138,6 @@
   </div>
 </div>
 
-<!-- Меню Паузы -->
 <div id="pause-modal" class="modal hidden">
   <div class="modal-sheet" style="background:#121016; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; max-height: 85vh;">
     <div style="text-align:center; padding-bottom:20px;">
@@ -162,7 +156,6 @@
   </div>
 </div>
 
-<!-- Фотоальбом -->
 <div id="album-modal" class="modal hidden">
   <div class="modal-sheet" style="background:#0d0d11; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; height: 80vh;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -180,7 +173,6 @@
   </div>
 </div>
 
-<!-- Твои выборы -->
 <div id="choices-modal" class="modal hidden">
   <div class="modal-sheet" style="background:#0d0d11; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; max-height: 80vh;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -191,6 +183,7 @@
   </div>
 </div>
 
+<div id="modal" class="modal hidden"><div class="modal-sheet" id="mSheet"></div></div>
 <div id="toast"></div>
 
 <script>
@@ -213,4 +206,4 @@
 
 <script src="app.js"></script>
 </body>
-  </html>
+</html>
