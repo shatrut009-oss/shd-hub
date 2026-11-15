@@ -78,7 +78,25 @@ main { flex: 1; position: relative; overflow: hidden; }
 .like { padding: 7px 12px; border-radius: 999px; background: var(--card2); border: 1px solid var(--line); font-size: 13px; }
 .like.on { border-color: var(--acc); color: var(--acc); }
 
-/* КЕЙСЫ */
+/* ===== НОВЫЙ ДИЗАЙН КЕЙСОВ ===== */
+.cases-header { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 20px; margin-top: 10px; }
+.history-btn { width: 100%; padding: 14px; border-radius: 16px; background: linear-gradient(90deg, #ffd700, #ffaa00); color: #000; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(255, 200, 0, 0.3); font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; }
+.online-badge { background: #101010; padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255, 255, 255, 0.05); }
+.online-dot { width: 8px; height: 8px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 8px #4ade80; }
+
+.case-cards-list { display: flex; flex-direction: column; gap: 12px; }
+.case-card { display: flex; align-items: center; padding: 16px; border-radius: 20px; position: relative; overflow: hidden; cursor: pointer; transition: transform 0.2s; }
+.case-card:active { transform: scale(0.97); }
+.case-card::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.2); z-index: 0; } /* Затемнение для читаемости */
+.case-card > * { position: relative; z-index: 1; }
+.case-icon { font-size: 50px; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-radius: 16px; margin-right: 16px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+.case-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.case-sub { font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.7); font-weight: 600; letter-spacing: 1px; }
+.case-title { font-family: 'Oswald', sans-serif; font-size: 24px; color: #fff; text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+.case-price { display: inline-flex; align-items: center; background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 999px; font-size: 14px; font-weight: 700; color: #fff; margin-top: 4px; width: fit-content; }
+.case-chevron { font-size: 32px; color: rgba(255,255,255,0.5); margin-left: 10px; }
+
+/* АНИМАЦИЯ КЕЙСА */
 .strip { position: relative; height: 120px; overflow: hidden; border-radius: 14px; background: #050507; border: 1px solid var(--line); margin: 12px 0; }
 .strip::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--star); z-index: 2; }
 .track { position: absolute; top: 10px; left: 0; display: flex; gap: 8px; transition: transform 3s cubic-bezier(.12, .7, .1, 1); }
