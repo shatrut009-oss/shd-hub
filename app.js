@@ -14,7 +14,7 @@
       climax: 'https://cdn.pixabay.com/download/audio/2021/11/25/audio_00ff97be42.mp3?filename=epic-hollywood-trailer-11470.mp3' 
     };
 
-    let bgmVolume = 0.05; // Очень тихо по умолчанию
+    let bgmVolume = 0.15; // Увеличили громкость музыки по умолчанию
     let currentMusicUrl = null;
     const musicPlayer = new Audio();
     musicPlayer.loop = true;
@@ -32,6 +32,7 @@
       musicPlayer.play()
         .then(() => {})
         .catch(e => {
+          // Если браузер заблокировал, ждем первого клика
           document.addEventListener('click', () => { musicPlayer.play(); }, { once: true });
         });
     }
@@ -44,8 +45,14 @@
     // ===== ЗВУКОВЫЕ ЭФФЕКТЫ (Синтез) =====
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null; try { audioCtx = AudioContext ? new AudioContext() : null; } catch(e) {}
-    let sfxVolume = 0.6;
+    let sfxVolume = 0.8; // Увеличили громкость звуков
     
+    // Возобновляем аудио при каждом клике (важно для мобилок!)
+    document.addEventListener('click', () => { 
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); 
+      if (musicPlayer && musicPlayer.paused && currentMusicUrl) musicPlayer.play().catch(()=>{});
+    });
+
     function playSFX(type) { 
       if (!audioCtx) return; 
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -57,31 +64,31 @@
         
         if (type === 'click') { 
           const osc = audioCtx.createOscillator(); 
-          osc.type = 'sine'; osc.frequency.setValueAtTime(800, now); 
-          gain.gain.setValueAtTime(0.05 * sfxVolume, now); 
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05); 
-          osc.connect(gain); osc.start(); osc.stop(now + 0.05); 
+          osc.type = 'sine'; osc.frequency.setValueAtTime(1000, now); 
+          gain.gain.setValueAtTime(0.2 * sfxVolume, now); 
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08); 
+          osc.connect(gain); osc.start(); osc.stop(now + 0.08); 
         } else if (type === 'step') { 
           const osc = audioCtx.createOscillator(); 
-          osc.type = 'triangle'; osc.frequency.setValueAtTime(100, now); 
-          gain.gain.setValueAtTime(0.2 * sfxVolume, now); 
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2); 
-          osc.connect(gain); osc.start(); osc.stop(now + 0.2); 
+          osc.type = 'triangle'; osc.frequency.setValueAtTime(150, now); 
+          gain.gain.setValueAtTime(0.4 * sfxVolume, now); 
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25); 
+          osc.connect(gain); osc.start(); osc.stop(now + 0.25); 
         } else if (type === 'door') {
           const osc = audioCtx.createOscillator();
-          osc.type = 'sawtooth'; osc.frequency.setValueAtTime(50, now);
-          gain.gain.setValueAtTime(0.3 * sfxVolume, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-          osc.connect(gain); osc.start(); osc.stop(now + 0.5);
+          osc.type = 'sawtooth'; osc.frequency.setValueAtTime(60, now);
+          gain.gain.setValueAtTime(0.4 * sfxVolume, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+          osc.connect(gain); osc.start(); osc.stop(now + 0.6);
 
           const osc2 = audioCtx.createOscillator();
-          osc2.type = 'sine'; osc2.frequency.setValueAtTime(200, now);
-          osc2.frequency.exponentialRampToValueAtTime(100, now + 0.3);
+          osc2.type = 'sine'; osc2.frequency.setValueAtTime(300, now);
+          osc2.frequency.exponentialRampToValueAtTime(100, now + 0.4);
           const gain2 = audioCtx.createGain();
-          gain2.gain.setValueAtTime(0.1 * sfxVolume, now);
-          gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          gain2.gain.setValueAtTime(0.2 * sfxVolume, now);
+          gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
           osc2.connect(gain2); gain2.connect(audioCtx.destination);
-          osc2.start(); osc2.stop(now + 0.3);
+          osc2.start(); osc2.stop(now + 0.4);
         } else if (type === 'tape') {
           const bufferSize = audioCtx.sampleRate * 1.5;
           const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
@@ -90,25 +97,36 @@
           const source = audioCtx.createBufferSource();
           source.buffer = buffer;
           const filter = audioCtx.createBiquadFilter();
-          filter.type = 'highpass'; filter.frequency.value = 1000;
-          gain.gain.setValueAtTime(0.15 * sfxVolume, now);
-          gain.gain.linearRampToValueAtTime(0.15 * sfxVolume, now + 1.2);
+          filter.type = 'highpass'; filter.frequency.value = 1500;
+          gain.gain.setValueAtTime(0.2 * sfxVolume, now);
+          gain.gain.linearRampToValueAtTime(0.2 * sfxVolume, now + 1.2);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
           source.connect(filter); filter.connect(gain);
           source.start(); source.stop(now + 1.5);
         } else if (type === 'scream') {
           const osc = audioCtx.createOscillator();
-          osc.type = 'sawtooth'; osc.frequency.setValueAtTime(400, now);
-          osc.frequency.exponentialRampToValueAtTime(150, now + 0.5);
-          gain.gain.setValueAtTime(0.2 * sfxVolume, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-          osc.connect(gain); osc.start(); osc.stop(now + 0.6);
+          osc.type = 'sawtooth'; osc.frequency.setValueAtTime(600, now);
+          osc.frequency.exponentialRampToValueAtTime(200, now + 0.6);
+          gain.gain.setValueAtTime(0.3 * sfxVolume, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+          osc.connect(gain); osc.start(); osc.stop(now + 0.7);
+        } else if (type === 'win') {
+          // Звук выигрыша кейса
+          const osc = audioCtx.createOscillator();
+          osc.type = 'sine'; osc.frequency.setValueAtTime(600, now);
+          osc.frequency.linearRampToValueAtTime(1200, now + 0.1);
+          gain.gain.setValueAtTime(0.3 * sfxVolume, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+          osc.connect(gain); osc.start(); osc.stop(now + 0.4);
         }
       } catch(e) {} 
     }
     
-    document.addEventListener('click', () => { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }, { once: true });
-    document.addEventListener('click', (e) => { if (e.target.closest('button') || e.target.closest('.tile') || e.target.closest('.vn-dialog')) playSFX('click'); });
+    document.addEventListener('click', (e) => { 
+      if (e.target.closest('button') || e.target.closest('.tile') || e.target.closest('.vn-dialog') || e.target.closest('.case-card')) {
+        playSFX('click'); 
+      }
+    });
 
     const TG = window.Telegram && window.Telegram.WebApp; if (TG) { try { TG.ready(); TG.expand(); } catch(e) {} }
     const U = (TG && TG.initDataUnsafe && TG.initDataUnsafe.user) || {};
@@ -179,12 +197,62 @@
       } catch (err) { container.innerHTML = '<div class="sub" style="text-align:center; padding: 20px; color: #ff1e3c;">Ошибка</div>'; } }
     if ($('#posts')) $('#posts').addEventListener('click', e => { const b = e.target.closest('[data-like]'); if (!b) return; b.classList.toggle('on'); b.textContent = b.classList.contains('on') ? '♥ В избранном' : '♥ Нравится'; S.stat.likes++; });
 
-    // ===== КЕЙСЫ =====
+    // ===== КЕЙСЫ (НОВЫЙ ДИЗАЙН) =====
     function renderCases(){
       const list = $('#caseList'); if (!list) return;
-      list.innerHTML = ['diary', 'cheat', 'stick'].map(k => { const c = CASES[k]; return `<div class="card row"><div><b style="font-family:Oswald;font-size:17px;text-transform:uppercase">${c.name}</b><div class="sub">${c.cur === 'stars' ? '★' : '◆'} ${c.cost} · главный: ${esc(c.head)}</div></div><button class="btn sm" data-case="${k}">Открыть</button></div>`; }).join('');
+      
+      // Генерируем фейковый онлайн
+      const onlineCount = 4517 + rnd(1500);
+      
+      let html = `
+        <div class="cases-header">
+          <button class="history-btn" id="btn-history">⏱ История выигрышей</button>
+          <div class="online-badge"><div class="online-dot"></div>${onlineCount.toLocaleString('ru-RU')} играют</div>
+        </div>
+        <div class="case-cards-list">
+      `;
+
+      const caseStyles = {
+        diary: { bg: 'linear-gradient(135deg, #2b1055 0%, #7597de 100%)', icon: '🎒', title: 'Дневничок', sub: 'Обычный кейс', cost: '◆ 3' },
+        cheat: { bg: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)', icon: '📘', title: 'Шпаргалка', sub: 'Рисковый', cost: '★ 10' },
+        stick: { bg: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)', icon: '🪄', title: 'Палочка', sub: 'Тайник', cost: '★ 13' }
+      };
+
+      ['diary', 'cheat', 'stick'].forEach(k => {
+        const c = CASES[k];
+        const st = caseStyles[k];
+        html += `
+          <div class="case-card" data-case="${k}" style="background: ${st.bg}">
+            <div class="case-icon">${st.icon}</div>
+            <div class="case-info">
+              <div class="case-sub">${st.sub}</div>
+              <div class="case-title">${st.title}</div>
+              <div class="case-price"><span>${st.cost}</span></div>
+            </div>
+            <div class="case-chevron">›</div>
+          </div>
+        `;
+      });
+
+      html += `</div><div id="caseStage"></div>`;
+      list.innerHTML = html;
+
+      // Обработчик кнопки истории
+      if ($('#btn-history')) {
+        $('#btn-history').addEventListener('click', () => {
+          go('profile');
+          setTimeout(() => {
+            const histEl = $('#hist');
+            if(histEl) histEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 100);
+        });
+      }
     }
-    if ($('#caseList')) $('#caseList').addEventListener('click', e => { const b = e.target.closest('[data-case]'); if (b) openCase(b.dataset.case); });
+
+    if ($('#caseList')) $('#caseList').addEventListener('click', e => { 
+      const b = e.target.closest('[data-case]'); 
+      if (b) openCase(b.dataset.case); 
+    });
 
     function openCase(k){
       const c = CASES[k]; if (c.cost) { if (S[c.cur] < c.cost) return toast('Недостаточно средств'); S[c.cur] -= c.cost; }
@@ -197,17 +265,31 @@
         items.push(`<div class="it" style="--c:${RAR[rar] ? RAR[rar][1] : '#ffb020'}">${img ? `<img src="${img}">` : '?'}</div>`); 
       }
       
-      const stage = $('#caseStage'); if(!stage) return; stage.innerHTML = `<div class="strip"><div class="track" id="track">${items.join('')}</div></div><div id="res"></div>`;
+      const stage = $('#caseStage'); if(!stage) return; 
+      stage.innerHTML = `<div class="strip"><div class="track" id="track">${items.join('')}</div></div><div id="res"></div>`;
       const stepW = 100; const offset = stage.clientWidth / 2 - 46 - WIN * stepW;
-      requestAnimationFrame(() => requestAnimationFrame(() => { const track = $('#track'); if(track) track.style.transform = `translateX(${offset}px)`; }));
-      $$('[data-case]').forEach(b => b.disabled = true);
+      
+      // Сброс и анимация
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => { 
+          const track = $('#track'); 
+          if(track) track.style.transform = `translateX(${offset}px)`; 
+        }); 
+      });
+      
+      // Блокируем кнопки
+      $$('[data-case]').forEach(b => { b.style.pointerEvents = 'none'; b.style.opacity = '0.5'; });
       
       setTimeout(() => {
         const ch = giveChar(r); 
+        playSFX('win'); // Звук выигрыша
         const text = `<div class="win" style="--c:${RAR[r][1]}">${cavHtml(ch.n, r, ch.img)}<b class="o" style="font-size:20px">${esc(ch.n)}</b><span class="tag" style="color:${RAR[r][1]}">${RAR[r][0]}</span></div>`; 
         addH(`Кейс «${c.name}»`, `Выпал: ${ch.n} (${RAR[r][0]})`, c.cost ? `-${c.cost} ${c.cur === 'stars' ? '★' : '◆'}` : 'Бесплатно'); 
         const res = $('#res'); if(res) res.innerHTML = text; 
-        $$('[data-case]').forEach(b => b.disabled = false); renderTop();
+        
+        // Разблокируем кнопки
+        $$('[data-case]').forEach(b => { b.style.pointerEvents = 'auto'; b.style.opacity = '1'; });
+        renderTop();
       }, 3300);
       renderTop();
     }
@@ -263,7 +345,7 @@
       RL.abs += delta; $('#disc').style.transform = `rotate(${RL.abs}deg)`; renderRoulette();
       setTimeout(() => {
         RL.spinning = false; const hit = FREE.includes(win); renderRoulette();
-        if (hit) { toast('Бесплатный кейс!'); setTimeout(() => { go('cases'); openCase('free'); }, 400); }
+        if (hit) { playSFX('win'); toast('Бесплатный кейс!'); setTimeout(() => { go('cases'); openCase('free'); }, 400); }
         else toast('Пусто');
       }, 5100);
     });
@@ -280,6 +362,7 @@
         RL2.spinning = false; renderRoulette();
         const isChar = win % 3 === 0;
         if (isChar) {
+          playSFX('win');
           const rar = roll({ epic: 70, legend: 25, mythic: 5 });
           const ch = giveChar(rar);
           addH('Рулетка (Персонажи)', `Выпал: ${ch.n} (${RAR[rar][0]})`, '-7 ★');
@@ -376,7 +459,7 @@
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Вачик? Ты меня напугал. Ты знаешь, кто это сделал?' }, // 46
         { bg: BG.gym, char: C.vachik, name: 'Вачик', music: 'tense', text: 'Я видел его. Какой-то тип в темной одежде. Он прятал что-то в стене. Вон там, за матами. Я туда не лезу, это не мое дело, я тут просто охраняю порядок. Но если хочешь найти правду — она там.' }, // 47
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Вачик кивает и растворяется в полумраке коридора. Я подхожу к матам, отодвигаю один. За ним в стене шатается кирпич. Я вытаскиваю его. В нише лежит старая потрепанная тетрадь, диктофон и пачка фотографий.' }, // 48
-        { choice: true, name: 'Дима', text: 'Что сделать первым?', options: [
+        { choice: true, name: 'Дима', text: 'Что сделать первым?', music: 'tense', options: [
           { text: 'Открыть тетрадь', next: 50 },
           { text: 'Включить диктофон', next: 54 }
         ]}, // 49
@@ -392,7 +475,7 @@
         
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Я бросаюсь к двери и дергаю ручку. Бесполезно. Металл даже не дрогнул.' }, // 58
         { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', text: 'Эй! Кто здесь? Откройте!' }, // 59
-        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', sfx: 'steps', text: 'С той стороны слышны удаляющиеся шаги. Я остаюсь в темноте. В кармане лежит тетрадь с фамилией моей бабушки. Кто-то запер меня здесь. И этот кто-то знает, что я нашел.' }, // 60
+        { bg: BG.gym, char: C.dima, name: 'Дима', music: 'tense', sfx: 'step', text: 'С той стороны слышны удаляющиеся шаги. Я остаюсь в темноте. В кармане лежит тетрадь с фамилией моей бабушки. Кто-то запер меня здесь. И этот кто-то знает, что я нашел.' }, // 60
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'calm', text: 'Меня выпустил Руслан. Он услышал грохот двери и открыл своим ключом, пробурчав что-то про хулиганов. Я не стал ему ничего рассказывать. Утром следующего дня я иду в школу. У доски объявлений стоит Ксюша и приклеивает листовку «Праведные сёстры».' }, // 61
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'calm', text: 'Ксюш, привет. Что это?' }, // 62
         { bg: BG.hall, char: C.ksusha, name: 'Ксюша', music: 'calm', text: 'О, привет, Дим. Это кружок. Праведные сёстры. Там реально помогают. Слушают, советуют. Я вот хожу. Мне стало легче после нашего разрыва.' }, // 63
@@ -409,7 +492,7 @@
         { bg: BG.hall, char: C.mila, name: 'Мила', music: 'tense', text: 'Я сбегаю со сцены. В коридоре меня хватает за руку Мила. — Дима. Я знаю, что ты нашел тетрадь. И знаю, кто запер тебя в спортзале. Это был директор. Он забрал ключи у Вачика.' }, // 74
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'tense', text: 'Зачем ему это?' }, // 75
         { bg: BG.hall, char: C.mila, name: 'Мила', music: 'tense', text: 'Он боится. И еще… я украла кое-что из его сейфа. Вот. (Она протягивает мне флешку). — Здесь видео. Как Камран передает деньги. И как директор шантажирует его.' }, // 76
-        { choice: true, name: 'Дима', text: 'Что делать с флешкой?', options: [
+        { choice: true, name: 'Дима', text: 'Что делать с флешкой?', music: 'tense', options: [
           { text: 'Отдать флешку полиции', next: 78 },
           { text: 'Найти Камрана', next: 79 }
         ]}, // 77
@@ -438,10 +521,7 @@
       const body = $('#nvBody'); if (!body) return;
       if ($('#vn-screen')) $('#vn-screen').classList.add('hidden');
       
-      // Определяем, какой эпизод сейчас активен (первый непройденный)
       const activeEpIndex = Math.min(S.stat.chapters, STORY.length - 1);
-      
-      // Берем фон для большой карточки из первого кадра этого эпизода
       const activeBg = STORY[activeEpIndex][0].bg || BG.hall;
 
       let html = `
@@ -450,7 +530,6 @@
           <div class="ep-progress">пройдено ${S.stat.chapters} из ${STORY.length}</div>
         </div>
         
-        <!-- Большая карточка активного эпизода -->
         <div class="ep-card-active" id="btn-play-active">
           <div class="ep-card-bg" style="background-image:url('${activeBg}')"></div>
           <div class="ep-card-content">
@@ -460,19 +539,16 @@
           </div>
         </div>
         
-        <!-- Список остальных эпизодов -->
         <div class="ep-list">
       `;
 
       EP_NAMES.forEach((name, i) => {
-        if (i === activeEpIndex) return; // Активный пропускаем, он уже сверху
+        if (i === activeEpIndex) return; 
         
         const isUnlocked = i < S.stat.chapters;
-        // Если этот эпизод - следующий после активного, делаем его "скоро"
         const isUpcoming = (i === activeEpIndex + 1) && (S.stat.chapters < STORY.length);
         
         if (isUnlocked) {
-          // Пройденный эпизод (можно переиграть)
           html += `
             <div class="ep-item" data-ep="${i}">
               <div class="ep-num">0${i+1}</div>
@@ -480,7 +556,6 @@
             </div>
           `;
         } else if (isUpcoming) {
-          // Следующий эпизод - "скоро"
           html += `
             <div class="ep-item future">
               <div class="ep-header-row">⏳ Эпизод ${i+1} · скоро</div>
@@ -489,7 +564,6 @@
             </div>
           `;
         } else {
-          // Обычные заблокированные
           html += `
             <div class="ep-item locked">
               <div class="ep-num">0${i+1}</div>
@@ -510,7 +584,6 @@
 
       body.innerHTML = html;
 
-      // Обработчики кликов
       if ($('#btn-play-active')) {
         $('#btn-play-active').addEventListener('click', () => startVN(activeEpIndex));
       }
@@ -543,6 +616,7 @@
       const bgEl = $('#vn-bg'), charEl = $('#vn-char'), dialogEl = $('#vn-dialog'), speakerEl = $('#vn-speaker'), textEl = $('#vn-text'), epInfo = $('#vn-ep-info');
       dialogEl.style.display = 'block';
       
+      // Включаем музыку, если в сцене указан трек
       if (scene.music) { playMusic(scene.music); }
       if (scene.sfx) { playSFX(scene.sfx); }
 
@@ -602,7 +676,7 @@
     
     if ($('#vol-sfx')) $('#vol-sfx').addEventListener('input', (e) => { sfxVolume = e.target.value / 100; });
     if ($('#vol-music')) $('#vol-music').addEventListener('input', (e) => { 
-      musicPlayer.volume = (e.target.value / 100) * 0.10; 
+      musicPlayer.volume = (e.target.value / 100) * 0.20; 
     });
 
     function openChoicesModal() {
