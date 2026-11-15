@@ -149,102 +149,23 @@ async function tg(method, payload) {
   return data.result;
 }
 
-// Создать счет на оплату звездами (Telegram Stars, валюта XTR)
-app.post('/api/invoice', async (req, res) => {
-  const user = authUser(req, res); if (!user) return;
-  if (!BOT_TOKEN) return res.status(503).json({ error: 'Бот не настроен' });
-
-  const amount = Math.floor(Number(req.body && req.body.amount));
-  if (!(amount >= 1 && amount <= 10000)) return res.status(400).json({ error: 'Некорректная сумма' });
-
-  try {
-    const url = await tg('createInvoiceLink', {
-      title: 'Звёзды ШД Hub',
-      description: `Пополнение баланса на ★ ${amount}`,
-      payload: JSON.stringify({ uid: String(user.id), amount }),
-      provider_token: '', // для Telegram Stars токен не нужен
-      currency: 'XTR',
-      prices: [{ label: `★ ${amount}`, amount }]
-    });
-    res.json({ url });
-  } catch (err) {
-    console.error('Ошибка счета:', err);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Уже зачисленные платежи (защита от двойного начисления при повторной доставке)
-const processedPayments = new Set();
-
-async function creditPayment(msg) {
-  const sp = msg.successful_payment;
-  if (sp.currency !== 'XTR') return;
-  if (processedPayments.has(sp.telegram_payment_charge_id)) return;
-
-  let info;
-  try { info = JSON.parse(sp.invoice_payload); } catch (e) { return; }
-  const uid = String(info.uid);
-  const amount = Number(info.amount);
-
-  // Платеж должен быть от того же пользователя и на ту же сумму
-  if (String(msg.from.id) !== uid || amount !== sp.total_amount) {
-    console.error('Платеж не совпадает с заказом', uid, amount, sp.total_amount);
-    return;
-  }
-  if (!supabase) throw new Error('База не подключена, зачисление невозможно');
-
-  const { data: row, error } = await supabase.from('users').select('stars').eq('id', uid).single();
-  if (error) throw error;
-
-  const { error: upErr } = await supabase
-    .from('users')
-    .update({ stars: (row.stars || 0) + amount })
-    .eq('id', uid);
-  if (upErr) throw upErr;
-
-  processedPayments.add(sp.telegram_payment_charge_id);
-  if (processedPayments.size > 10000) processedPayments.clear();
-  console.log(`Зачислено ★${amount} пользователю ${uid}`);
-}
-
-async function handleUpdate(update) {
-  // Telegram спрашивает перед списанием: отвечаем, что все в порядке
-  if (update.pre_checkout_query) {
-    await tg('answerPreCheckoutQuery', { pre_checkout_query_id: update.pre_checkout_query.id, ok: true });
-    return;
-  }
-
-  const msg = update.message;
-  if (!msg) return;
-
-  if (msg.successful_payment) {
-    await creditPayment(msg);
-    return;
-  }
-
-  // Команда /start: кнопка, которая открывает мини-приложение
-  if (msg.text && /^\/start(\s|$)/.test(msg.text) && WEBAPP_URL) {
-    await tg('sendMessage', {
-      chat_id: msg.chat.id,
-      text: 'Добро пожаловать в ШД Hub! Нажми кнопку, чтобы открыть приложение.',
-      reply_markup: {
-        inline_keyboard: [[{ text: '🎬 Открыть ШД Hub', web_app: { url: WEBAPP_URL } }]]
-      }
-    });
-  }
-}
-
-// Вебхук: сюда Telegram присылает сообщения пользователей
+// Вебхук: бот отвечает только на /start и открывает приложение
 app.post('/telegram/webhook', async (req, res) => {
   if (!BOT_TOKEN) return res.sendStatus(503);
   if (WEBHOOK_SECRET && req.get('x-telegram-bot-api-secret-token') !== WEBHOOK_SECRET) {
     return res.sendStatus(403);
   }
   try {
-    await handleUpdate(req.body || {});
+    const msg = (req.body || {}).message;
+    if (msg && msg.text && /^\/start(\s|$)/.test(msg.text) && WEBAPP_URL) {
+      await tg('sendMessage', {
+        chat_id: msg.chat.id,
+        text: 'Добро пожаловать в ШД Hub! Нажми кнопку, чтобы открыть приложение.',
+        reply_markup: { inline_keyboard: [[{ text: '🎬 Открыть ШД Hub', web_app: { url: WEBAPP_URL } }]] }
+      });
+    }
     res.sendStatus(200);
   } catch (err) {
-    // 500 заставит Telegram повторить доставку (важно для оплат)
     console.error('Ошибка вебхука:', err);
     res.sendStatus(500);
   }
@@ -315,7 +236,7 @@ app.listen(port, '0.0.0.0', async () => {
     try {
       await tg('setWebhook', {
         url: `${WEBAPP_URL}/telegram/webhook`,
-        allowed_updates: ['message', 'pre_checkout_query'],
+        allowed_updates: ['message'],
         ...(WEBHOOK_SECRET ? { secret_token: WEBHOOK_SECRET } : {})
       });
       console.log('Вебхук бота установлен');
