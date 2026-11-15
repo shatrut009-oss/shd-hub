@@ -14,7 +14,7 @@
   climax: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3' 
 };
 
-    let bgmVolume = 0.4;
+    let bgmVolume = 0.15;
     let currentMusicUrl = null;
     const musicPlayer = new Audio();
     musicPlayer.loop = true;
