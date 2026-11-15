@@ -124,8 +124,6 @@
       try {
         const res = await fetch(`/api/user/${TG_ID}`);
         const data = await res.json();
-        
-        // Если пришла ошибка от сервера или пустой ответ, не ломаем приложение
         if (data && !data.error) {
           S = { 
             ...DEFAULT_S, 
@@ -177,7 +175,6 @@
       return p;
     }
     
-    // Функция для форматирования времени (таймер рулетки)
     function fmt(ms) { 
       const h = Math.floor(ms / 3600000); 
       const m = Math.floor((ms % 3600000) / 60000); 
@@ -482,7 +479,11 @@
       }, 5100);
     });
 
-    // ===== ДЕТЕКТИВ =====
+
+    // ==========================================
+    // ===== БЛОК ЭПИЗОДОВ (СЮЖЕТ) ==============
+    // ==========================================
+    
     const BG = {
       hall: 'https://i.postimg.cc/XqVLZjcx/AIRetouch-20261115-083654547-(1).png',
       gym: 'https://i.postimg.cc/WzCdBS39/AIRetouch-20261115-084408474-(1).png',
@@ -494,12 +495,28 @@
     };
 
     const EP_NAMES = [
-      'Тот, кто дергает за ниточки', 'Праведные сёстры', 'Скелет в шкафу', 
-      'Лицо Кукольника', 'Правила игры', 'Разбитые маски', 
-      'Исцеление болью', 'В ловушке котельной', 'Новый Кукольник'
+      'Тот, кто дергает за ниточки', 
+      'Праведные сёстры', 
+      'Скелет в шкафу', 
+      'Лицо Кукольника', 
+      'Правила игры', 
+      'Разбитые маски', 
+      'Исцеление болью', 
+      'В ловушке котельной', 
+      'Новый Кукольник'
     ];
 
+    // ==============================================================
+    // ВАЖНО: Здесь ты указываешь, сколько эпизодов уже вышло.
+    // Сейчас вышел только 1. Когда допишешь 2-й эпизод в массив STORY, 
+    // просто поменяй это число на 2, и он откроется игрокам.
+    // ==============================================================
+    const RELEASED_EPISODES = 1; 
+
     const STORY = [
+      // ==========================================
+      // ЭПИЗОД 1 (УЖЕ НАПИСАН)
+      // ==========================================
       [
         { bg: BG.hall, char: C.dima, name: '', music: 'calm', text: 'Коридор школы, второй этаж. Утро. Яркий солнечный свет бьет в окна, отражается от начищенного линолеума. Ряды металлических шкафчиков. У одного из них стоит Дима в школьной форме с расслабленным галстуком, рядом висит его джинсовка.' },
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'calm', text: 'Я стою у своего открытого шкафчика, нервно теребя в руках учебник по геометрии. В коридоре шумно, старшеклассники толкаются, кто-то смеется, но я не обращаю внимания. Мысли крутятся вокруг предстоящей контрольной.' },
@@ -583,10 +600,19 @@
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'climax', sfx: 'scream', text: 'Я иду по пустому коридору. Внезапно экран телефона загорается: «Ты думал, что нашел правду? Ты даже не представляешь, кто настоящий Кукольник. Оглянись».' },
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'climax', text: 'Я резко оборачиваюсь. В конце темного коридора мелькает тень. Сердце уходит в пятки. КОНЕЦ ЭПИЗОДА 1.' }
       ],
-      [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 2 в разработке.' } ], [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 3 в разработке.' } ],
-      [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 4 в разработке.' } ], [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 5 в разработке.' } ],
-      [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 6 в разработке.' } ], [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 7 в разработке.' } ],
-      [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 8 в разработке.' } ], [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 9 в разработке.' } ]
+
+      // ==========================================
+      // ЗАГЛУШКИ ДЛЯ ЭПИЗОДОВ 2-9 
+      // (Замени текст внутри квадратных скобок на свой сюжет)
+      // ==========================================
+      [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 2 в разработке.' } ],
+      [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 3 в разработке.' } ],
+      [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 4 в разработке.' } ],
+      [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 5 в разработке.' } ],
+      [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 6 в разработке.' } ],
+      [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 7 в разработке.' } ],
+      [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 8 в разработке.' } ],
+      [ { bg: BG.hall, char: C.dima, name: 'Система', music: 'calm', text: 'Эпизод 9 в разработке.' } ]
     ];
 
     let vnState = { active: false, ep: 0, scene: 0 };
@@ -595,21 +621,24 @@
       const body = $('#nvBody'); if (!body) return;
       if ($('#vn-screen')) $('#vn-screen').classList.add('hidden');
       
-      const activeEpIndex = Math.min(S.stat.chapters, STORY.length - 1);
+      // Определяем активный эпизод (первый непройденный из вышедших)
+      let activeEpIndex = Math.min(S.stat.chapters, RELEASED_EPISODES - 1);
+      
       const activeBg = STORY[activeEpIndex][0].bg || BG.hall;
+      const isFinishedAll = S.stat.chapters >= RELEASED_EPISODES;
 
       let html = `
         <div class="ep-header">
           <h1 class="ep-title-main">Эпизоды</h1>
-          <div class="ep-progress">пройдено ${S.stat.chapters} из ${STORY.length}</div>
+          <div class="ep-progress">пройдено ${Math.min(S.stat.chapters, RELEASED_EPISODES)} из ${STORY.length}</div>
         </div>
         
         <div class="ep-card-active" id="btn-play-active">
           <div class="ep-card-bg" style="background-image:url('${activeBg}')"></div>
           <div class="ep-card-content">
-            <div class="ep-card-sub">Эпизод ${activeEpIndex + 1} · ты здесь</div>
+            <div class="ep-card-sub">${isFinishedAll ? 'Все доступные эпизоды пройдены' : `Эпизод ${activeEpIndex + 1} · ты здесь`}</div>
             <div class="ep-card-title">${EP_NAMES[activeEpIndex]}</div>
-            <button class="btn ep-btn-play w">▶ Продолжить</button>
+            <button class="btn ep-btn-play w">${isFinishedAll ? '▶ Пройти заново' : '▶ Продолжить'}</button>
           </div>
         </div>
         
@@ -617,15 +646,19 @@
       `;
 
       EP_NAMES.forEach((name, i) => {
-        if (i === activeEpIndex) return; 
-        const isUnlocked = i < S.stat.chapters;
-        const isUpcoming = (i === activeEpIndex + 1) && (S.stat.chapters < STORY.length);
+        if (i === activeEpIndex && !isFinishedAll) return; // Скрываем из списка, так как он большой сверху
         
-        if (isUnlocked) {
-          html += `<div class="ep-item" data-ep="${i}"><div class="ep-num">0${i+1}</div><div class="ep-info"><div class="ep-name">${name}</div></div></div>`;
-        } else if (isUpcoming) {
+        const isReleased = i < RELEASED_EPISODES;
+        const isUnlocked = i < S.stat.chapters;
+        
+        if (isUnlocked && isReleased) {
+          // Пройденный эпизод (можно переиграть)
+          html += `<div class="ep-item" data-ep="${i}"><div class="ep-num">0${i+1}</div><div class="ep-info"><div class="ep-name">${name}</div></div><div class="ep-lock" style="color:var(--ok); font-size:14px;">✓</div></div>`;
+        } else if (!isUnlocked && isReleased) {
+          // Вышедший, но еще не пройденный
           html += `<div class="ep-item future"><div class="ep-header-row">⏳ Эпизод ${i+1} · скоро</div><div class="ep-name">${name}</div><div class="ep-wait-badge">в разработке</div></div>`;
         } else {
+          // Заблокированные (в разработке)
           html += `<div class="ep-item locked"><div class="ep-num">0${i+1}</div><div class="ep-info"><div class="ep-name">${name}</div></div><div class="ep-lock">🔒</div></div>`;
         }
       });
@@ -804,3 +837,77 @@
       $('#inv').innerHTML = sortedInv.length ? sortedInv.map(i => `
         <div class="pc" style="--c:${RAR[i.r][1]}">
           <div class="cav" style="width:50px;height:50px;overflow:hidden;padding:0;border-radius:50%;">
+            ${i.img ? `<img src="${i.img}" style="width:100%;height:100%;object-fit:cover;">` : ''}
+          </div>
+          <div style="font-size:11px; margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%; text-align:center;">${esc(i.n)}</div>
+        </div>
+      `).join('') : '<div class="sub" style="grid-column:1/-1; text-align:center;">У тебя пока нет персонажей. Открой кейс!</div>';
+    }
+
+    if ($('#btn-open-rating')) {
+      $('#btn-open-rating').addEventListener('click', () => {
+        const list = $('#rating-list');
+        const pts = getPoints();
+        
+        const users = [
+          { name: 'Тимур', pts: 2100, me: false }, { name: 'Кирилл', pts: 1200, me: false },
+          { name: 'Анна', pts: 850, me: false }, { name: 'Мила', pts: 540, me: false },
+          { name: 'Соня', pts: 320, me: false }, { name: 'Артем', pts: 110, me: false },
+          { name: 'Даша', pts: 80, me: false }, { name: 'Егор', pts: 2500, me: false },
+          { name: 'Влад', pts: 400, me: false }, { name: 'Максим', pts: 50, me: false }
+        ];
+        users.push({ name: NAME, pts: pts, me: true });
+        users.sort((a, b) => b.pts - a.pts);
+
+        list.innerHTML = users.map((u, i) => `
+          <div class="rating-row ${u.me ? 'me' : ''}">
+            <div class="rating-pos">${i+1}</div>
+            <div class="rating-name">${esc(u.name)} ${u.me ? '(Ты)' : ''}</div>
+            <div class="rating-score">${u.pts} очков</div>
+          </div>
+        `).join('');
+        
+        $('#modal-rating').classList.remove('hidden');
+      });
+    }
+
+    function renderTop(){ if($('#cS')) $('#cS').textContent = S.stars; if($('#cC')) $('#cC').textContent = S.coins; }
+
+    // ===== ПОПОЛНЕНИЕ =====
+    if ($('#topBtn')) $('#topBtn').addEventListener('click', openTopup);
+    function openTopup(){
+      const modal = $('#modal'); const sheet = $('#mSheet'); if(!modal || !sheet) return;
+      modal.classList.remove('hidden');
+      sheet.innerHTML = `<h2>Пополнить звёзды</h2><p class="sub">Оплата проходит внутри Telegram.</p><div class="pre">${[50, 100, 250, 500, 1000].map(n => `<button data-n="${n}">★ ${n}</button>`).join('')}</div><input id="cu" type="number" min="1" max="10000" placeholder="Своя сумма"><button class="btn w" id="pay">Оплатить ★ 250</button><button class="btn g w" id="mClose">Закрыть</button>`;
+      let n = 250; const set = v => { n = v; if($('#pay')) $('#pay').textContent = `Оплатить ★ ${n}`; $$('[data-n]').forEach(b => b.classList.toggle('on', +b.dataset.n === n)); };
+      set(250);
+      sheet.addEventListener('click', e => { const b = e.target.closest('[data-n]'); if (b) { if($('#cu')) $('#cu').value = ''; set(+b.dataset.n); } });
+      if($('#cu')) $('#cu').addEventListener('input', e => { const v = Math.floor(+e.target.value); if (v >= 1 && v <= 10000) set(v); });
+      if($('#pay')) $('#pay').addEventListener('click', () => {
+        sheet.innerHTML = `<h2>Подтверждение</h2><p class="sub">Списать ★ ${n}?</p><button class="btn w" id="ok">Подтвердить ★ ${n}</button><button class="btn g w" id="mClose">Отмена</button>`;
+        if($('#ok')) $('#ok').addEventListener('click', () => { S.stars += n; S.stat.stars += n; addH('Пополнение', 'Оплата через Telegram', `+${n} ★`); toast(`+${n} ★`); closeModal(); renderTop(); });
+        if($('#mClose')) $('#mClose').addEventListener('click', closeModal);
+      });
+      if($('#mClose')) $('#mClose').addEventListener('click', closeModal);
+    }
+    function closeModal(){ const m = $('#modal'); if(m) m.classList.add('hidden'); }
+
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.close-modal')) e.target.closest('.modal').classList.add('hidden');
+      if (e.target.closest('.close-win')) {
+        e.target.closest('.modal').classList.add('hidden');
+        if ($('#s-cases').classList.contains('on')) renderCases();
+      }
+    });
+
+    // ===== СТАРТ =====
+    if($('#nick')) $('#nick').textContent = NAME; if($('#nick2')) $('#nick2').textContent = NAME;
+    if($('#av')) $('#av').textContent = NAME[0].toUpperCase(); if($('#av2')) $('#av2').textContent = NAME[0].toUpperCase();
+    
+    loadUserState().then(() => {
+        renderTop();
+        renderProfile();
+    });
+    
+  } catch (error) { console.error("Критическая ошибка:", error); }
+})();
