@@ -392,9 +392,13 @@
     }
 
     function startVN(epIndex) { 
-      vnState = { active: true, ep: epIndex, scene: 0 }; 
-      $('#vn-screen').classList.remove('hidden'); 
-      showScene(); 
+  vnState = { active: true, ep: epIndex, scene: 0 }; 
+  $('#vn-screen').classList.remove('hidden'); 
+  
+  // ВАЖНО: Запускаем музыку прямо в момент клика!
+  playMusic(STORY[epIndex][0].music || 'calm');
+  
+  showScene(); 
     }
 
     function showScene() {
