@@ -42,7 +42,7 @@
         <button class="tile" data-go="cases"><span class="i">🎁</span><b>Кейсы</b><span class="sub">3 кейса</span></button>
         <button class="tile" data-go="roulette"><span class="i">🎡</span><b>Рулетки</b><span class="sub"><span class="dot"></span><span id="rlSub">2 вида</span></span></button>
         <button class="tile" data-go="detective"><span class="i">🔎</span><b>Детектив</b><span class="sub">Расследование</span></button>
-        <button class="tile" data-go="awards"><span class="i">🏅</span><b>Награды</b><span class="sub" id="awSub">0 из 30</span></button>
+        <button class="tile" data-go="awards"><span class="i">🏅</span><b>Награды</b><span class="sub" id="awSub">0 из 15</span></button>
         <button class="tile" data-go="profile"><span class="i">👤</span><b>Профиль</b><span class="sub">Баланс</span></button>
       </div>
     </section>
@@ -86,37 +86,58 @@
       <div id="nvBody"></div>
     </section>
 
+    <!-- НОВЫЙ ЭКРАН НАГРАД (Сетка) -->
     <section class="sc" id="s-awards">
       <h2>Награды</h2>
-      <div class="lab" style="margin:12px 0 6px">Достижения</div>
-      <div id="achList"></div>
+      <div class="sub" style="margin-bottom:12px">Нажми на награду, чтобы надеть её на аватарку.</div>
+      <div id="achGrid" class="ach-grid"></div>
     </section>
 
+    <!-- НОВЫЙ ПРОФИЛЬ -->
     <section class="sc" id="s-profile">
-      <div class="card row">
-        <div class="who">
-          <div class="av-wrap">
-            <div class="av" id="av2">Г</div>
-            <div class="badge-icon hidden" id="activeBadge2"></div>
-          </div>
-          <div><div class="nick" style="font-size:17px" id="nick2">Гость</div><div class="sub">Теоретик</div></div>
+      <div class="prof-header">
+        <div class="av-wrap">
+          <div class="av" id="av2">Г</div>
+          <div class="badge-icon hidden" id="activeBadge2"></div>
+        </div>
+        <div class="prof-info">
+          <div class="nick" id="nick2">Гость</div>
+          <div class="sub" id="prof-points">0 очков</div>
         </div>
       </div>
-      <div class="card">
-        <div class="row"><div><div class="lab">Баланс звёзд</div><div class="o" style="font-size:30px">★ <span id="bS">0</span></div></div>
-          <button class="btn sm" id="topBtn">+ Пополнить</button></div>
-        <div class="sub" style="margin-top:8px">Монеты актива: <b id="bC">0</b> ◆</div>
+
+      <div class="prof-balance">
+        <div class="lab">Баланс звёзд</div>
+        <div class="row" style="margin-top:8px;">
+          <div class="o" style="font-size:32px; color:var(--star)">★ <span id="bS">0</span></div>
+          <button class="btn sm" id="topBtn">+ Пополнить</button>
+        </div>
       </div>
-      <div class="card row"><div><div class="lab">Награды</div><b id="pAw">0 из 30</b></div><button class="btn sm" id="btn-open-awards">Выбрать ачивку</button></div>
-      <div class="lab" style="margin:12px 0 6px">Коллекция</div>
+
+      <div class="lab" style="margin:16px 0 8px">Мои персонажи (<span id="bC">0</span>)</div>
       <div class="grid" id="inv"></div>
-      <div class="lab" style="margin:12px 0 6px">История</div>
-      <div id="hist"></div>
+
+      <!-- Блок рейтинга -->
+      <div class="rating-card" id="btn-open-rating">
+        <div class="row">
+          <div class="lab">Твоё место в рейтинге</div>
+          <div style="font-weight:bold; color:var(--star); font-size:12px;">ТОП</div>
+        </div>
+        <div class="rating-main">
+          <div class="rating-place" id="my-rank">?</div>
+          <div class="rating-total">место из <span id="total-users">0</span></div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="sub" id="my-points-text">0 очков</div>
+          <div class="sub" style="color:#fff">Открыть ›</div>
+        </div>
+      </div>
     </section>
   </main>
   <button class="back hidden" id="backBtn">← В меню</button>
 </div>
 
+<!-- ВИЗУАЛЬНАЯ НОВЕЛЛА -->
 <div id="vn-screen" class="hidden">
   <div class="vn-bg" id="vn-bg"></div>
   <div class="vn-char-box" id="vn-char-box"><div class="vn-char" id="vn-char"></div></div>
@@ -128,16 +149,36 @@
   </div>
 </div>
 
-<div id="modal-badges" class="modal hidden">
-  <div class="modal-sheet" style="background:#121016; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; max-height: 85vh;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-      <h2 style="font-family:'Oswald'; font-size:24px;">Мои награды</h2>
-      <button id="badges-close" style="color:#fff; font-size:24px;">✕</button>
-    </div>
-    <div id="badges-list" class="badges-list"></div>
+<!-- МОДАЛКА: ДЕТАЛИ КЕЙСА -->
+<div id="modal-case-details" class="modal hidden">
+  <div class="modal-sheet" style="background: linear-gradient(180deg, #1e1338 0%, #101016 100%); border-top: none; border-radius: 24px 24px 0 0;">
+    <div id="case-modal-content"></div>
   </div>
 </div>
 
+<!-- МОДАЛКА: ИСТОРИЯ ВЫИГРЫШЕЙ -->
+<div id="modal-history" class="modal hidden">
+  <div class="modal-sheet" style="background: #101016; border-radius: 24px 24px 0 0;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h2 style="font-family:'Oswald'; font-size:24px;">История кейсов</h2>
+      <button class="close-modal" style="color:#fff; font-size:24px;">✕</button>
+    </div>
+    <div id="history-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+  </div>
+</div>
+
+<!-- МОДАЛКА: РЕЙТИНГ -->
+<div id="modal-rating" class="modal hidden">
+  <div class="modal-sheet" style="background: #101016; border-radius: 24px 24px 0 0; height: 80vh;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h2 style="font-family:'Oswald'; font-size:24px;">Рейтинг</h2>
+      <button class="close-modal" style="color:#fff; font-size:24px;">✕</button>
+    </div>
+    <div id="rating-list" style="display:flex; flex-direction:column; gap:8px; overflow-y:auto; padding-bottom:20px;"></div>
+  </div>
+</div>
+
+<!-- СТАРЫЕ МОДАЛКИ -->
 <div id="pause-modal" class="modal hidden">
   <div class="modal-sheet" style="background:#121016; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; max-height: 85vh;">
     <div style="text-align:center; padding-bottom:20px;">
@@ -160,7 +201,7 @@
   <div class="modal-sheet" style="background:#0d0d11; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; height: 80vh;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
       <h2 style="font-family:'Oswald'; font-size:24px;">Фотоальбом</h2>
-      <button id="album-close" style="color:#fff; font-size:24px;">✕</button>
+      <button class="close-modal" style="color:#fff; font-size:24px;">✕</button>
     </div>
     <p class="sub" style="margin-bottom:15px; line-height:1.5;">Здесь собираются особые сцены, открытые за алмазы.</p>
     <div class="sub" style="color:#d4b872; margin-bottom:10px; text-transform:uppercase; letter-spacing:1px;">Открыто 0 из 8</div>
@@ -177,7 +218,7 @@
   <div class="modal-sheet" style="background:#0d0d11; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; max-height: 80vh;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
       <h2 style="font-family:'Oswald'; font-size:24px;">Твои выборы</h2>
-      <button id="choices-close" style="color:#fff; font-size:24px;">✕</button>
+      <button class="close-modal" style="color:#fff; font-size:24px;">✕</button>
     </div>
     <div id="choices-content"></div>
   </div>
@@ -206,4 +247,4 @@
 
 <script src="app.js"></script>
 </body>
-</html>
+    </html>
