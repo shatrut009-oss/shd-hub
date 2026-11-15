@@ -10,6 +10,7 @@
 </head>
 <body>
 
+<!-- ЭКРАН ЗАГРУЗКИ -->
 <div id="splash">
   <svg viewBox="900 310 770 815" aria-hidden="true">
     <g class="half l" fill="#fff" fill-rule="evenodd"><path d="M912 322C945 372 966 420 968 455L970 670L972 975C970 1040 948 1085 917 1115L1258 970C1272 962 1275 940 1275 910L1275 530C1276 490 1260 462 1230 450Z M1081 510L1082 928L1158 896L1159 542Z"/></g>
@@ -18,6 +19,7 @@
   <div class="hint">НАЖМИ, ЧТОБЫ ВОЙТИ</div>
 </div>
 
+<!-- ОСНОВНОЕ ПРИЛОЖЕНИЕ -->
 <div id="app">
   <header class="top">
     <div class="who">
@@ -34,6 +36,7 @@
   </header>
   
   <main>
+    <!-- ГЛАВНОЕ МЕНЮ -->
     <section class="sc on" id="s-menu">
       <h2>Главное меню</h2>
       <p class="sub" style="margin-bottom:12px">Выбери раздел.</p>
@@ -47,18 +50,21 @@
       </div>
     </section>
 
+    <!-- ЭДИТЫ -->
     <section class="sc" id="s-edit">
       <h2>Эдиты</h2>
       <p class="sub" style="margin-bottom:12px">Реальные видео.</p>
       <div id="posts"></div>
     </section>
 
+    <!-- КЕЙСЫ -->
     <section class="sc" id="s-cases">
       <h2>Кейсы</h2>
       <p class="sub" style="margin-bottom:12px">Открой кейс.</p>
       <div id="caseList"></div>
     </section>
 
+    <!-- РУЛЕТКА -->
     <section class="sc" id="s-roulette">
       <h2>Рулетка</h2>
       <p class="sub">Крути на удачу!</p>
@@ -81,16 +87,19 @@
       </div>
     </section>
 
+    <!-- ДЕТЕКТИВ -->
     <section class="sc" id="s-detective">
       <div id="nvBody"></div>
     </section>
 
+    <!-- НАГРАДЫ -->
     <section class="sc" id="s-awards">
       <h2>Награды</h2>
       <div class="sub" style="margin-bottom:12px">Нажми на награду, чтобы надеть её на аватарку.</div>
       <div id="achGrid" class="ach-grid"></div>
     </section>
 
+    <!-- ПРОФИЛЬ -->
     <section class="sc" id="s-profile">
       <div class="prof-header">
         <div class="av-wrap">
@@ -133,6 +142,7 @@
   <button class="back hidden" id="backBtn">← В меню</button>
 </div>
 
+<!-- ВИЗУАЛЬНАЯ НОВЕЛЛА -->
 <div id="vn-screen" class="hidden">
   <div class="vn-bg" id="vn-bg"></div>
   <div class="vn-char-box" id="vn-char-box"><div class="vn-char" id="vn-char"></div></div>
@@ -152,12 +162,7 @@
 </div>
 
 <!-- МОДАЛКА: РЕЗУЛЬТАТ (ВЫПАЛ ПЕРСОНАЖ) -->
-<div id="modal-win" class="modal hidden">
-  <!-- Было: <div id="modal-win" class="modal hidden"> -->
-<!-- Стало: -->
 <div id="modal-win" class="modal hidden center">
-  <div class="modal-sheet win-sheet" id="win-content"></div>
-</div>
   <div class="modal-sheet win-sheet" id="win-content"></div>
 </div>
 
@@ -183,6 +188,7 @@
   </div>
 </div>
 
+<!-- ПАУЗА -->
 <div id="pause-modal" class="modal hidden">
   <div class="modal-sheet" style="background:#121016; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; max-height: 85vh;">
     <div style="text-align:center; padding-bottom:20px;">
@@ -201,6 +207,7 @@
   </div>
 </div>
 
+<!-- АЛЬБОМ -->
 <div id="album-modal" class="modal hidden">
   <div class="modal-sheet" style="background:#0d0d11; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; height: 80vh;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -218,6 +225,7 @@
   </div>
 </div>
 
+<!-- ВЫБОРЫ -->
 <div id="choices-modal" class="modal hidden">
   <div class="modal-sheet" style="background:#0d0d11; color:#fff; border-top:none; border-radius:24px; margin: auto; width: 90%; max-width:400px; max-height: 80vh;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -228,10 +236,12 @@
   </div>
 </div>
 
+<!-- ПОПОЛНЕНИЕ -->
 <div id="modal" class="modal hidden"><div class="modal-sheet" id="mSheet"></div></div>
 <div id="toast"></div>
 
 <script>
+  // Логика перехода с экрана заставки
   (function() {
     var splash = document.getElementById('splash');
     var app = document.getElementById('app');
@@ -251,4 +261,4 @@
 
 <script src="app.js"></script>
 </body>
-  </html>
+</html>
