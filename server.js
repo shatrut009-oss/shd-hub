@@ -171,6 +171,26 @@ app.post('/telegram/webhook', async (req, res) => {
   }
 });
 
+// ===== АВАТАРКА ПОЛЬЗОВАТЕЛЯ (фото из Telegram) =====
+app.get('/api/avatar', async (req, res) => {
+  const user = authUser(req, res); if (!user) return;
+  if (!BOT_TOKEN) return res.status(503).end();
+  try {
+    const ph = await tg('getUserProfilePhotos', { user_id: user.id, limit: 1 });
+    if (!ph.total_count || !ph.photos.length) return res.status(404).end();
+    const sizes = ph.photos[0];
+    const file = await tg('getFile', { file_id: sizes[sizes.length - 1].file_id });
+    const r = await fetch(`https://api.telegram.org/file/bot${BOT_TOKEN}/${file.file_path}`);
+    if (!r.ok) return res.status(502).end();
+    res.set('Content-Type', 'image/jpeg');
+    res.set('Cache-Control', 'private, max-age=3600');
+    res.send(Buffer.from(await r.arrayBuffer()));
+  } catch (e) {
+    console.error('Ошибка аватарки:', e.message);
+    res.status(404).end();
+  }
+});
+
 // ===== ПАРСИНГ ТЕЛЕГРАМ КАНАЛОВ =====
 async function fetchTelegramPosts(channels, type) {
   let allPosts = [];
