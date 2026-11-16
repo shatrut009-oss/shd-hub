@@ -280,7 +280,7 @@
         { bg: BG.hall, char: C.dima, name: 'Дима', music: 'calm', text: 'Нашел старые документы. Это связано с сектой, в которую ты ходишь?' },
         { bg: BG.hall, char: C.ksusha, name: 'Ксюша', music: 'calm', text: 'Не называй их так! Приходи на собрание сегодня в актовый зал в шесть. Я тебе все расскажу. Только никому не говори.' },
         { bg: BG.math, char: C.sofia, name: '', music: 'sad', text: 'Кабинет математики. После уроков. Беда пишет уравнения.' },
-        { bg: BG.math, char: C.dima, name: 'Дима', music: 'sad', text: 'Беда, а вы знали Андрея Андреева?' },
+        { bg: BG.math, char: C.dima, name: 'Дима', music: 'sad', text: 'Софья Андреевна, а вы знали Андрея Андреева?' },
         { bg: BG.math, char: C.sofia, name: 'Беда', music: 'sad', text: 'Кто тебе это сказал? Андрей был хорошим мальчиком. Но он сломался. А те, кто его сломал, сейчас сидят очень высоко. Забудь это имя, если не хочешь проблем.' },
         { bg: BG.aud, char: C.woman, name: 'Секта', music: 'tense', text: 'Актовый зал. Добро пожаловать. Я вижу новенького. Дима, верно? Поднимись к нам.' },
         { bg: BG.aud, char: C.dima, name: 'Дима', music: 'tense', text: 'Я медленно иду к сцене. Она кладет руку мне на плечо. Ее пальцы ледяные.' },
@@ -342,7 +342,7 @@
         { bg: BG.math, char: C.vachik, name: "", music: 'tense', text: "Мы с Дерзким ждем у кабинета. Я стучу в дверь. Беда сидит за столом, проверяя тетради. Она поднимает голову, и я вижу, что она не удивлена." },
         { bg: BG.math, char: C.sofia, name: "Беда", music: 'tense', text: "Я так и знала, что ты придешь. Заходите, оба." },
         { bg: BG.math, char: C.sofia, name: "", music: 'tense', text: "Мы проходим внутрь. Беда откладывает ручку в сторону." },
-        { bg: BG.math, char: C.dima, name: "Дима", music: 'tense', text: "Беда, я знаю про эксперимент. Про Андрея. И про то, что вы в этом участвовали." },
+        { bg: BG.math, char: C.dima, name: "Дима", music: 'tense', text: "Софья Андреевна, я знаю про эксперимент. Про Андрея. И про то, что вы в этом участвовали." },
         { bg: BG.math, char: C.dima, name: "", music: 'tense', text: "Она закрывает лицо руками. Проходит несколько секунд, прежде чем она заговаривает." },
         { bg: BG.math, char: C.sofia, name: "Беда", music: 'tense', text: "Это была не моя идея. Директор придумал эту программу. Он сказал, что это поможет выявить сильнейших. А я... я просто ставила оценки. Я не знала, что Андрей настолько сломается." },
         { bg: BG.math, char: C.derz, name: "Дерзкий", music: 'tense', text: "Вы знали, что его травят. И ничего не делали." },
@@ -1567,7 +1567,7 @@
     // Меняй цифру: 1 → открыт 1 эпизод, 2 → открыто 2, и так далее до total.
     // Сезон 2: released: 0 → показывается «СКОРО». Поставь 1 — откроется первый эпизод второго сезона.
     const SEASONS = [
-      { title: 'Сезон 1', total: 9, released: 2, names: EP_NAMES, story: S1_EPISODES },
+      { title: 'Сезон 1', total: 9, released: 1, names: EP_NAMES, story: S1_EPISODES },
       { title: 'Сезон 2', total: 7, released: 0, names: ['Пустая могила', 'Заброшенный завод', 'Крах Андрея', 'Признание Натальи Олеговны', 'Цена мести', 'Секреты старого СТО', 'Ночная встреча на кладбище'], story: S2_EPISODES }
     ];
 
@@ -1864,6 +1864,12 @@
       });
     }
 
+    function preloadEpisode(list) {
+      list.forEach(sc => [sc.bg, sc.char].forEach(url => {
+        if (url) { const im = new Image(); im.src = url; }
+      }));
+    }
+
     function startVN(season, ep) {
       const s = SEASONS[season - 1];
       if (!s || ep >= s.released || ep > seasonDone(season)) return toast('Этот эпизод пока закрыт');
@@ -1871,6 +1877,7 @@
       if (!list || !list.length) return toast('Эпизод скоро');
       vnState = { active: true, season, ep, scene: 0 };
       $('#vn-screen').classList.remove('hidden');
+      preloadEpisode(list);
       playMusic(list[0].music || 'calm');
       showScene();
     }
@@ -1889,18 +1896,20 @@
       if (scene.choice) {
         dialogEl.classList.add('choice-mode');
         const choiceHtml = scene.options.map((opt, i) =>
-          `<button class="btn w" onclick="window.makeChoice(${i})">${esc(opt.text)}</button>`).join('');
+          `<button class="vn-choice" onclick="window.makeChoice(${i})">${i + 1}. ${esc(opt.text)}</button>`).join('');
         dialogEl.innerHTML = `
           <div class="vn-top-row"><div class="vn-speaker${(scene.name || '').length > 9 ? ' long' : ''}">${esc(scene.name)}</div></div>
           <div class="vn-text">${esc(scene.text)}</div>
-          <div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">${choiceHtml}</div>`;
+          <div class="vn-choice-title">Твой выбор:</div>
+          <div class="vn-choices">${choiceHtml}</div>`;
         return;
       }
 
       dialogEl.classList.remove('choice-mode');
       bgEl.style.backgroundImage = `url('${scene.bg}')`;
       bgEl.className = 'vn-bg active';
-      if (scene.char) { charEl.style.backgroundImage = `url('${scene.char}')`; charEl.classList.add('active'); }
+      const speaking = !!scene.name && !/\(сообщение\)/.test(scene.name) && !/^Голос/.test(scene.name);
+      if (scene.char && speaking) { charEl.style.backgroundImage = `url('${scene.char}')`; charEl.classList.add('active'); }
       else charEl.classList.remove('active');
       if ($('#vn-speaker')) { $('#vn-speaker').textContent = scene.name; $('#vn-speaker').classList.toggle('long', (scene.name || '').length > 9); }
       if ($('#vn-text')) $('#vn-text').textContent = scene.text;
