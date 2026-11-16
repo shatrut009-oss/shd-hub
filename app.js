@@ -317,7 +317,7 @@
         { bg: BG.aud, char: C.mila, name: "Мила", music: 'tense', text: "Дима. Я знаю, кто запер тебя в спортзале. Это был директор. Он забрал ключи у Вачика." },
         { bg: BG.aud, char: C.dima, name: "Дима", music: 'tense', text: "Зачем ему это?" },
         { bg: BG.aud, char: C.mila, name: "Мила", music: 'tense', text: "Он боится. И еще… я украла кое-что из его сейфа." },
-        { bg: BG.flash, char: undefined, name: "", music: 'tense', text: "Мила протягивает мне флешку. Здесь видно, как Камран передает деньги, и как директор шантажирует его." },
+        { bg: undefined, char: undefined, name: "", music: 'tense', text: "Мила протягивает мне флешку. Здесь видно, как Камран передает деньги, и как директор шантажирует его." },
         { bg: BG.aud, char: C.dima, name: "Дима", music: 'tense', choice: true, text: "Что делать с флешкой?", options: [ { text: "Отдать флешку полиции", next: 79 }, { text: "Найти Камрана", next: 81 } ] },
         { bg: BG.police, char: undefined, name: "", music: 'tense', text: "Отделение полиции. Я протягиваю флешку Николаю Андреевичу." },
         { bg: BG.police, char: C.nikolay, name: "Николай Андреевич", music: 'tense', text: "Это неполное видео, Дима. Нам нужно больше доказательств.", next: 83 },
@@ -1930,6 +1930,17 @@
       showScene();
     }
 
+    // Размер персонажа зависит от высоты окна текста:
+    // короткий текст - низкий персонаж, длинный текст - персонаж чуть выше текста
+    function layoutChar() {
+      const d = $('#vn-dialog'), box = $('#vn-char-box'), ch = $('#vn-char');
+      if (!d || !box || !ch) return;
+      const dh = d.offsetHeight || 140;
+      box.style.bottom = (20 + dh) + 'px';
+      ch.style.height = Math.max(170, Math.min(dh * 1.2, window.innerHeight * 0.72)) + 'px';
+    }
+    window.addEventListener('resize', () => { if (vnState.active) layoutChar(); });
+
     function showScene() {
       if (!vnState.active) return;
       const list = curList();
@@ -1950,12 +1961,12 @@
           <div class="vn-text">${esc(scene.text)}</div>
           <div class="vn-choice-title">Твой выбор:</div>
           <div class="vn-choices">${choiceHtml}</div>`;
+        requestAnimationFrame(layoutChar);
         return;
       }
 
       dialogEl.classList.remove('choice-mode');
-      bgEl.style.backgroundImage = `url('${scene.bg}')`;
-      bgEl.className = 'vn-bg active';
+      if (scene.bg) { bgEl.style.backgroundImage = `url('${scene.bg}')`; bgEl.className = 'vn-bg active'; }
       const speaking = !!scene.name && !/\(сообщение\)/.test(scene.name) && !/^Голос/.test(scene.name);
       if (scene.char && speaking) { charEl.style.backgroundImage = `url('${scene.char}')`; charEl.classList.add('active'); }
       else charEl.classList.remove('active');
@@ -1971,6 +1982,7 @@
       }
       if ($('#vn-text')) $('#vn-text').textContent = scene.text;
       if ($('#vn-ep-info')) $('#vn-ep-info').textContent = `С${vnState.season} · Э${vnState.ep + 1}`;
+      requestAnimationFrame(layoutChar);
     }
 
     window.makeChoice = (idx) => {
