@@ -1933,11 +1933,12 @@
     // Размер персонажа зависит от высоты окна текста:
     // короткий текст - низкий персонаж, длинный текст - персонаж чуть выше текста
     function layoutChar() {
-      const d = $('#vn-dialog'), box = $('#vn-char-box'), ch = $('#vn-char');
-      if (!d || !box || !ch) return;
-      const dh = d.offsetHeight || 140;
-      box.style.bottom = (20 + dh) + 'px';
-      ch.style.height = Math.max(170, Math.min(dh * 1.2, window.innerHeight * 0.72)) + 'px';
+      const box = $('#vn-char-box'), ch = $('#vn-char');
+      if (!box || !ch) return;
+      // Персонаж одного размера во всех сценах: сверху под шапкой, ноги уходят за окно текста
+      box.style.bottom = '';
+      box.style.top = '11vh';
+      ch.style.height = Math.round(window.innerHeight * 0.66) + 'px';
     }
     window.addEventListener('resize', () => { if (vnState.active) layoutChar(); });
 
