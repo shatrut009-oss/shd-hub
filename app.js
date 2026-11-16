@@ -42,8 +42,33 @@
       if (musicPlayer && musicPlayer.paused && currentMusicUrl) musicPlayer.play().catch(()=>{});
     });
 
+    function playExtraSFX(type) {
+      const t0 = audioCtx.currentTime;
+      const beep = (freq, start, dur, vol) => {
+        const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
+        osc.type = 'square'; osc.frequency.value = freq;
+        g.gain.setValueAtTime(vol * sfxVolume, t0 + start);
+        g.gain.exponentialRampToValueAtTime(0.001, t0 + start + dur);
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.start(t0 + start); osc.stop(t0 + start + dur + 0.02);
+      };
+      if (type === 'car') { beep(1400, 0, 0.08, 0.25); beep(1400, 0.14, 0.08, 0.25); }
+      if (type === 'phone') { for (let i = 0; i < 4; i++) beep(i % 2 ? 660 : 880, i * 0.3, 0.22, 0.18); }
+      if (type === 'msg') { beep(1200, 0, 0.09, 0.18); beep(1800, 0.1, 0.12, 0.18); }
+      if (type === 'shot') {
+        const len = audioCtx.sampleRate * 0.25;
+        const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / len);
+        const src = audioCtx.createBufferSource(); const g = audioCtx.createGain();
+        src.buffer = buf; g.gain.value = 0.5 * sfxVolume;
+        src.connect(g); g.connect(audioCtx.destination); src.start(t0);
+      }
+    }
+
     function playSFX(type) { 
       if (!audioCtx) return; 
+      if (['car', 'phone', 'msg', 'shot'].includes(type)) { if (audioCtx.state === 'suspended') audioCtx.resume(); return playExtraSFX(type); }
       if (audioCtx.state === 'suspended') audioCtx.resume();
       try { 
         const now = audioCtx.currentTime;
@@ -285,21 +310,20 @@
         { bg: BG.math, char: C.sofia, name: '', music: 'sad', text: 'Кабинет математики. После уроков. Беда пишет уравнения.' },
         { bg: BG.math, char: C.dima, name: 'Дима', music: 'sad', text: 'Софья Андреевна, а вы знали Андрея Андреева?' },
         { bg: BG.math, char: C.sofia, name: 'Беда', music: 'sad', text: 'Кто тебе это сказал? Андрей был хорошим мальчиком. Но он сломался. А те, кто его сломал, сейчас сидят очень высоко. Забудь это имя, если не хочешь проблем.' },
-        { bg: BG.aud, char: C.woman, name: 'Секта', music: 'tense', text: 'Добро пожаловать. Я вижу новенького. Дима, верно? Поднимись к нам.' },
+        { bg: BG.aud, char: C.woman, name: 'Секта', music: 'tense', text: 'Актовый зал. Добро пожаловать. Я вижу новенького. Дима, верно? Поднимись к нам.' },
         { bg: BG.aud, char: C.dima, name: 'Дима', music: 'tense', text: 'Я медленно иду к сцене. Она кладет руку мне на плечо. Ее пальцы ледяные.' },
         { bg: BG.aud, char: C.woman, name: 'Секта', music: 'tense', text: 'Расскажи нам, Дима. Ты когда-нибудь чувствовал, что тебя предали? Ищи Андрея в архиве. И передай своей бабушке, Наталье Олеговне, что долг платежом красен.' },
-        { bg: BG.aud, char: undefined, name: "", music: 'tense', text: "Я сбегаю со сцены. В коридоре меня хватает за руку Мила." },
+        { bg: BG.hall, char: undefined, name: "", music: 'tense', text: "Я сбегаю со сцены. В коридоре меня хватает за руку Мила." },
         { bg: BG.aud, char: C.mila, name: "Мила", music: 'tense', text: "Дима. Я знаю, кто запер тебя в спортзале. Это был директор. Он забрал ключи у Вачика." },
         { bg: BG.aud, char: C.dima, name: "Дима", music: 'tense', text: "Зачем ему это?" },
         { bg: BG.aud, char: C.mila, name: "Мила", music: 'tense', text: "Он боится. И еще… я украла кое-что из его сейфа." },
-        { bg: BG.aud, char: undefined, name: "", music: 'tense', text: "Мила протягивает мне флешку. Здесь видно, как Камран передает деньги, и как директор шантажирует его." },
+        { bg: BG.flash, char: undefined, name: "", music: 'tense', text: "Мила протягивает мне флешку. Здесь видно, как Камран передает деньги, и как директор шантажирует его." },
         { bg: BG.aud, char: C.dima, name: "Дима", music: 'tense', choice: true, text: "Что делать с флешкой?", options: [ { text: "Отдать флешку полиции", next: 79 }, { text: "Найти Камрана", next: 81 } ] },
         { bg: BG.police, char: undefined, name: "", music: 'tense', text: "Отделение полиции. Я протягиваю флешку Николаю Андреевичу." },
         { bg: BG.police, char: C.nikolay, name: "Николай Андреевич", music: 'tense', text: "Это неполное видео, Дима. Нам нужно больше доказательств.", next: 83 },
         { bg: BG.street, char: C.kamran, name: "Камран", music: 'tense', text: "Школьный двор. Зачем ты мне помогаешь? Директор заставил меня. Он сказал, что если я не передам деньги, он выгонит мою бабушку из школы." },
         { bg: BG.street, char: C.dima, name: "Дима", music: 'tense', text: "Тогда пойдем в полицию вместе. Николай Андреевич должен это увидеть.", next: 83 },
-        { bg: BG.police, char: undefined, name: "", music: 'tense', text: "Я иду по пустому коридору отделения. Внезапно экран телефона загорается" },
-        { bg: BG.police, char: undefined, name: "Сообщение", music: 'tense', text: "Ты думал, что нашел правду? Ты даже не представляешь, кто настоящий Кукольник. Оглянись»." },
+        { bg: BG.police, char: undefined, name: "", music: 'tense', text: "Я иду по пустому коридору отделения. Внезапно экран телефона загорается: «Ты думал, что нашел правду? Ты даже не представляешь, кто настоящий Кукольник. Оглянись»." },
         { bg: BG.police, char: C.dima, name: "Дима", music: 'tense', text: "Я резко оборачиваюсь. В конце темного коридора мелькает тень. Сердце уходит в пятки." },
       ],
       [
@@ -1575,7 +1599,7 @@
     // Меняй цифру: 1 → открыт 1 эпизод, 2 → открыто 2, и так далее до total.
     // Сезон 2: released: 0 → показывается «СКОРО». Поставь 1 — откроется первый эпизод второго сезона.
     const SEASONS = [
-      { title: 'Сезон 1', total: 9, released: 2, names: EP_NAMES, story: S1_EPISODES },
+      { title: 'Сезон 1', total: 9, released: 1, names: EP_NAMES, story: S1_EPISODES },
       { title: 'Сезон 2', total: 7, released: 0, names: ['Пустая могила', 'Заброшенный завод', 'Крах Андрея', 'Признание Натальи Олеговны', 'Цена мести', 'Секреты старого СТО', 'Ночная встреча на кладбище'], story: S2_EPISODES }
     ];
 
@@ -1807,6 +1831,7 @@
 
     // ===== ДЕТЕКТИВ =====
     let vnState = { active: false, season: 1, ep: 0, scene: 0 };
+    let lastMusic = null;
     const seasonDone = n => Math.min(((S.stat.progress || {})[n]) || 0, SEASONS[n - 1].total);
     const curList = () => SEASONS[vnState.season - 1].story[vnState.ep];
 
@@ -1872,6 +1897,20 @@
       });
     }
 
+    // Звуки по тексту сцены: машина, звонок, сообщение, дверь, шаги, выстрел
+    function autoSfx(scene) {
+      if (scene.sfx) return scene.sfx;
+      const t = (scene.text || '').toLowerCase();
+      const name = scene.name || '';
+      if (/\(сообщение\)/.test(name) || /пришло сообщение|экран телефона загорается|телефон.*вибрир|сообщение от/.test(t)) return 'msg';
+      if (/звонит|звонок|зазвонил|телефон звонит|мой телефон звонит/.test(t)) return 'phone';
+      if (/машин.*(открыл|открыв|заве)|открыл.*машин|открылась машина|сигнализац/.test(t)) return 'car';
+      if (/выстрел|стреля|пули|пуля|пистолет.*(выстрел|стреля)/.test(t)) return 'shot';
+      if (/дверь|дверь.*(захлоп|распахн|открыв|открывается)|захлопыва/.test(t)) return 'door';
+      if (/шаги|бегу|бежит|бежать|выбегаю|бросаюсь/.test(t)) return 'step';
+      return null;
+    }
+
     function preloadEpisode(list) {
       list.forEach(sc => [sc.bg, sc.char].forEach(url => {
         if (url) { const im = new Image(); im.src = url; }
@@ -1886,7 +1925,8 @@
       vnState = { active: true, season, ep, scene: 0 };
       $('#vn-screen').classList.remove('hidden');
       preloadEpisode(list);
-      playMusic(list[0].music || 'calm');
+      lastMusic = list[0].music || 'calm';
+      playMusic(lastMusic);
       showScene();
     }
 
@@ -1898,8 +1938,8 @@
 
       const bgEl = $('#vn-bg'), charEl = $('#vn-char'), dialogEl = $('#vn-dialog');
       dialogEl.style.display = 'block';
-      if (scene.music) playMusic(scene.music);
-      if (scene.sfx) playSFX(scene.sfx);
+      if (scene.music) { lastMusic = scene.music; playMusic(scene.music); } else if (lastMusic) playMusic(lastMusic);
+      const sfxKey = autoSfx(scene); if (sfxKey) playSFX(sfxKey);
 
       if (scene.choice) {
         dialogEl.classList.add('choice-mode');
@@ -1919,7 +1959,16 @@
       const speaking = !!scene.name && !/\(сообщение\)/.test(scene.name) && !/^Голос/.test(scene.name);
       if (scene.char && speaking) { charEl.style.backgroundImage = `url('${scene.char}')`; charEl.classList.add('active'); }
       else charEl.classList.remove('active');
-      if ($('#vn-speaker')) { $('#vn-speaker').textContent = scene.name; $('#vn-speaker').classList.toggle('long', (scene.name || '').length > 9); }
+      if ($('#vn-speaker')) {
+        const isMsg = /\(сообщение\)/.test(scene.name || '') || (!scene.name && /сообщени|экран телефона загорается|пришло сообщение/.test((scene.text || '').toLowerCase()));
+        const isCall = /\(звонок\)/.test(scene.name || '') || (!scene.name && /звонит|звонок|зазвонил/.test((scene.text || '').toLowerCase()));
+        const plain = (scene.name || '').replace(/\s*\((сообщение|звонок)\)/, '');
+        let label = plain;
+        if (isMsg) label = 'СООБЩЕНИЕ' + (plain ? ' · ' + plain : '');
+        else if (isCall) label = 'ЗВОНОК' + (plain ? ' · ' + plain : '');
+        $('#vn-speaker').textContent = label;
+        $('#vn-speaker').classList.toggle('long', label.length > 9);
+      }
       if ($('#vn-text')) $('#vn-text').textContent = scene.text;
       if ($('#vn-ep-info')) $('#vn-ep-info').textContent = `С${vnState.season} · Э${vnState.ep + 1}`;
     }
