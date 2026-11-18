@@ -171,8 +171,8 @@
 
 
     // Персонажи второго сезона: вставьте ссылки
-    Object.assign(C, { sergey: '', rita: '' });
-    CHARS.push({ n: 'Сергей', r: 'mythic', img: C.sergey, story: true });
+    
+    
 
     // ===== КЕЙСЫ: ИНТЕРВАЛ И ШАНСЫ (проценты в каждом кейсе = 100) =====
     const CASES = {
@@ -230,6 +230,65 @@
 
     // Иконка флешки из первого эпизода: вставьте ссылку на картинку
     Object.assign(BG, { flash: '' });
+
+
+    // Фоны 3 и 4 сезонов
+    Object.assign(BG, {
+      newYearHall: 'https://i.postimg.cc/SNd0XjbJ/f0482382e34d11f19a798aca3635d12d-1.jpg',
+      nyStreet: 'https://i.postimg.cc/g0f19Z8S/0432a35ae34e11f1af5d0e44567a5659-1.jpg',
+      nyApt: 'https://i.postimg.cc/3Nh6NQS5/21ed0b63e34e11f19122aa6270386144-1.jpg',
+      nyDisco: 'https://i.postimg.cc/2SytVwwm/36f5e955e34e11f1bda21a9eb1acb801-1.jpg',
+      floor2: 'https://i.postimg.cc/hjWZZqq4/4c931808e34e11f182d3a2d9c9abc235-1.jpg',
+      nyYard: 'https://i.postimg.cc/1RK7BT7t/625c4355e34e11f198cd3e3ecddc87a2-1.jpg',
+      itRoom: 'https://i.postimg.cc/TPmCDH5F/751da264e34e11f198cd3e3ecddc87a2-1.jpg',
+      theatreNY: 'https://i.postimg.cc/3NLBTszW/8bd2ed32e34e11f182d3a2d9c9abc235-1.jpg',
+      theatreStreet: 'https://i.postimg.cc/9QwB6NbC/a324975ae34e11f182d3a2d9c9abc235-1.jpg',
+      cityChase: 'https://i.postimg.cc/TwfqW26C/b7e0f0f4e34e11f186b2b2ef94b5359b-1.jpg',
+      hangar: 'https://i.postimg.cc/Kv6TMc7c/cc6d4d51e34e11f1bda21a9eb1acb801-1.jpg',
+      library: 'https://i.postimg.cc/vmzxkWJh/e0453f0fe34e11f1b1fa5279096def6d-1.jpg',
+      deputyOffice: 'https://i.postimg.cc/brGGZ4sJ/03623121e34f11f184d816a5a3972705-1.jpg',
+      directorFlat: 'https://i.postimg.cc/RhjWKGHd/130b1f26e34f11f19122aa6270386144-1.jpg',
+      directorStreet: 'https://i.postimg.cc/FsLdN5tQ/24e0a17ee34f11f19122aa6270386144-1.jpg'
+    });
+
+    // Образы персонажей 3 и 4 сезонов
+    Object.assign(C, {
+      dimaWinter: 'https://i.postimg.cc/TPY4wmV1/1794950979753.png',
+      dimaNY: 'https://i.postimg.cc/Y0cR1mWF/1794950981510.png',
+      dimaCrumpled: 'https://i.postimg.cc/mZM8TVv6/1794950983652.png',
+      dimaSchool: 'https://i.postimg.cc/dVQBmFLN/1794950988205.png',
+      derzNY: 'https://i.postimg.cc/ZRPBM9QL/1794951493892.png',
+      derzWinter: 'https://i.postimg.cc/7hmCqFwT/1794951497893.png',
+      derzSnow: 'https://i.postimg.cc/gk2Xg2HN/1794951503739.png',
+      ksusha1: 'https://i.postimg.cc/50H1XDBr/1794951804579.png',
+      ksusha2: 'https://i.postimg.cc/Fz34Zcnm/IMG-20261118-004625-727.png',
+      ksusha3: 'https://i.postimg.cc/Fz34Zcn0/1794952012408.png',
+      ksusha4: 'https://i.postimg.cc/KvhFYqRY/1794952014901.png',
+      kamranNY: 'https://i.postimg.cc/tgx2751R/1794952356981.png',
+      kamranCoat: 'https://i.postimg.cc/QtgmJdk4/1794952361791.png',
+      milaNY: 'https://i.postimg.cc/TYTd9NGZ/1794953108358.png',
+      salaNY: 'https://i.postimg.cc/4xdJCKYb/1794953113213.png',
+      ritaNY: 'https://i.postimg.cc/L8bmmHf5/1794953118800.png',
+      ritaWinter: 'https://i.postimg.cc/G2kRPGfR/1794953124539.png',
+      daniil1: 'https://i.postimg.cc/FKCDKHVz/1794953953270.png',
+      daniil2: 'https://i.postimg.cc/Y9JR1DPD/1794954023185.png',
+      daniil3: 'https://i.postimg.cc/bYt3z8GW/1794954078906.png',
+      daniil4: 'https://i.postimg.cc/YqB80VY9/1794954131448.png',
+      nikolayA: 'https://i.postimg.cc/cHMCmrkJ/1794954689727.png',
+      nikolayB: 'https://i.postimg.cc/v8hDxx6V/1794954697951.png',
+      nikolayC: 'https://i.postimg.cc/kX5GQMQD/1794954702653.png',
+      vachikA: 'https://i.postimg.cc/D0rNmKzx/1794955473466.png',
+      vachikB: 'https://i.postimg.cc/x1TZjhSV/1794955479986.png',
+      vachikC: 'https://i.postimg.cc/zfyPKhBT/1794955492721.png',
+      sofiaLib: 'https://i.postimg.cc/DzY0p9nj/1794955835789.png',
+      sofiaOpen: 'https://i.postimg.cc/nzyzpqsm/1794955841386.png',
+      zavuch1: 'https://i.postimg.cc/Wz043trx/1794956241159.png',
+      zavuch2: 'https://i.postimg.cc/FFSzGCqn/1794956246056.png',
+      director2: 'https://i.postimg.cc/5ym0G1YR/1795005380176.png',
+      rita: 'https://i.postimg.cc/G2kRPGfR/1794953124539.png'
+    });
+    CHARS.push({ n: 'Даниил', r: 'mythic', img: C.daniil1, story: true });
+    CHARS.push({ n: 'Завуч', r: 'mythic', img: C.zavuch1, story: true });
 
     const EP_NAMES = [
       'Тот, кто дергает за ниточки', 'Праведные сёстры', 'Скелет в шкафу',
@@ -1534,47 +1593,47 @@
         { bg: BG.cemetery, char: C.dima, name: "", music: 'tense', text: "Старое кладбище. Ночь. Туман, старые надгробия, одинокий фонарь." },
         { bg: BG.cemetery, char: C.dima, name: "", music: 'tense', text: "Полночь. Я стою у могилы Натальи Олеговны. Вокруг тишина, только ветер шуршит сухими листьями. В руке я сжимаю фонарик. В кармане перочинный нож." },
         { bg: BG.cemetery, char: C.dima, name: "", music: 'tense', text: "Проходит несколько минут. Я слышу шаги. Они медленные, уверенные. Из тумана выходит мужчина. Высокий, седой, в длинном черном пальто. Его лицо кажется знакомым, но я не могу вспомнить, где я его видел. Он останавливается в нескольких метрах от меня." },
-        { bg: BG.cemetery, char: C.sergey, name: "Сергей", music: 'tense', text: "Здравствуй, Дима. Ты вырос. Совсем как твоя мать." },
+        { bg: BG.cemetery, char: C.sergey, name: "Даниил", music: 'tense', text: "Здравствуй, Дима. Ты вырос. Совсем как твоя мать." },
         { bg: BG.cemetery, char: C.dima, name: "Дима", music: 'tense', text: "Ты кто?" },
-        { bg: BG.cemetery, char: C.sergey, name: "Сергей", music: 'tense', text: "Я тот, кого ты ищешь. Твой отец. Меня зовут Сергей." },
+        { bg: BG.cemetery, char: C.sergey, name: "Даниил", music: 'tense', text: "Я тот, кого ты ищешь. Твой отец. Меня зовут Даниил." },
         { bg: BG.cemetery, char: C.sergey, name: "", music: 'tense', text: "Я смотрю на него. В голове проносятся обрывки воспоминаний. Я никогда не знал своего отца. Наталья Олеговна говорила, что он умер. А теперь он стоит передо мной." },
         { bg: BG.cemetery, char: C.dima, name: "Дима", music: 'tense', text: "Ты жив. Все эти годы ты был жив, и ты не попытался найти меня?" },
-        { bg: BG.cemetery, char: C.sergey, name: "Сергей", music: 'tense', text: "Я не мог. Я работал под прикрытием. Если бы я появился в твоей жизни, ты был бы в опасности." },
+        { bg: BG.cemetery, char: C.sergey, name: "Даниил", music: 'tense', text: "Я не мог. Я работал под прикрытием. Если бы я появился в твоей жизни, ты был бы в опасности." },
         { bg: BG.cemetery, char: C.dima, name: "Дима", music: 'tense', text: "В опасности? Я и так был в опасности! Из-за Натальи Олеговны, из-за секты, из-за всего!" },
-        { bg: BG.cemetery, char: C.sergey, name: "Сергей", music: 'tense', text: "Я знаю. И я сожалею. Но я здесь, чтобы все исправить." },
+        { bg: BG.cemetery, char: C.sergey, name: "Даниил", music: 'tense', text: "Я знаю. И я сожалею. Но я здесь, чтобы все исправить." },
         { bg: BG.cemetery, char: C.sergey, name: "", music: 'tense', choice: true, text: "Что спросить?", options: [ { text: "Спросить, что ему нужно от меня.", next: 35 }, { text: "Спросить, почему он не помог, когда я был в опасности.", next: 39 } ] },
         { bg: BG.cemetery, char: C.dima, name: "Дима", music: 'tense', text: "Что тебе от меня нужно? Зачем ты пришел?" },
-        { bg: BG.cemetery, char: C.sergey, name: "Сергей", music: 'tense', text: "Мне нужен документ, который ты нашел в сейфе. Финансовые отчеты. Списки. Фотографии. Это мой компромат на людей, которые до сих пор находятся у власти. Если он попадет в чужие руки, начнется война." },
+        { bg: BG.cemetery, char: C.sergey, name: "Даниил", music: 'tense', text: "Мне нужен документ, который ты нашел в сейфе. Финансовые отчеты. Списки. Фотографии. Это мой компромат на людей, которые до сих пор находятся у власти. Если он попадет в чужие руки, начнется война." },
         { bg: BG.cemetery, char: C.dima, name: "Дима", music: 'tense', text: "Ты хочешь, чтобы я отдал тебе то, что нашел Михаил?" },
-        { bg: BG.cemetery, char: C.sergey, name: "Сергей", music: 'tense', text: "Да. Я хочу, чтобы ты передал это мне. И тогда я смогу завершить то, что начал он.", next: 43 },
+        { bg: BG.cemetery, char: C.sergey, name: "Даниил", music: 'tense', text: "Да. Я хочу, чтобы ты передал это мне. И тогда я смогу завершить то, что начал он.", next: 43 },
         { bg: BG.cemetery, char: C.dima, name: "Дима", music: 'tense', text: "Почему ты не помог мне? Когда меня похищали, когда меня шантажировали, когда моя жизнь была под угрозой?" },
-        { bg: BG.cemetery, char: C.sergey, name: "Сергей", music: 'tense', text: "Я следил за тобой. Каждый день. Я знал, что происходит. Но я не мог вмешаться. Если бы я это сделал, я бы раскрыл себя. И тогда все, над чем я работал, рухнуло бы." },
+        { bg: BG.cemetery, char: C.sergey, name: "Даниил", music: 'tense', text: "Я следил за тобой. Каждый день. Я знал, что происходит. Но я не мог вмешаться. Если бы я это сделал, я бы раскрыл себя. И тогда все, над чем я работал, рухнуло бы." },
         { bg: BG.cemetery, char: C.dima, name: "Дима", music: 'tense', text: "И ты думаешь, что это оправдание?" },
-        { bg: BG.cemetery, char: C.sergey, name: "Сергей", music: 'tense', text: "Нет. Я не ищу оправданий. Я просто объясняю." },
+        { bg: BG.cemetery, char: C.sergey, name: "Даниил", music: 'tense', text: "Нет. Я не ищу оправданий. Я просто объясняю." },
         { bg: BG.cemetery, char: C.sergey, name: "", music: 'tense', text: "Старое кладбище. Ночь. Из тумана появляется еще одна фигура." },
         { bg: BG.cemetery, char: C.sergey, name: "", music: 'tense', text: "В этот момент из тумана выходит Дерзкий. Он держит в руках монтировку." },
         { bg: BG.cemetery, char: C.derz, name: "Дерзкий", music: 'tense', text: "Дима! Я не мог остаться в стороне!" },
-        { bg: BG.cemetery, char: C.derz, name: "", music: 'tense', text: "Сергей резко оборачивается. В его руке появляется пистолет." },
-        { bg: BG.cemetery, char: C.sergey, name: "Сергей", music: 'tense', text: "Я же сказал прийти одному!" },
+        { bg: BG.cemetery, char: C.derz, name: "", music: 'tense', text: "Даниил резко оборачивается. В его руке появляется пистолет." },
+        { bg: BG.cemetery, char: C.sergey, name: "Даниил", music: 'tense', text: "Я же сказал прийти одному!" },
         { bg: BG.cemetery, char: C.dima, name: "Дима", music: 'tense', text: "Не стреляй! Это мой друг!" },
-        { bg: BG.cemetery, char: C.sergey, name: "Сергей", music: 'tense', text: "Ты нарушил условие. Я не могу тебе доверять." },
+        { bg: BG.cemetery, char: C.sergey, name: "Даниил", music: 'tense', text: "Ты нарушил условие. Я не могу тебе доверять." },
         { bg: BG.cemetery, char: C.sergey, name: "", music: 'tense', text: "Он делает шаг назад, не опуская пистолет." },
-        { bg: BG.cemetery, char: C.sergey, name: "", music: 'tense', choice: true, text: "Что делаем?", options: [ { text: "Попытаться успокоить Сергея и объяснить, что Дерзкий не опасен.", next: 52 }, { text: "Броситься на Сергея и попытаться отобрать пистолет.", next: 56 } ] },
+        { bg: BG.cemetery, char: C.sergey, name: "", music: 'tense', choice: true, text: "Что делаем?", options: [ { text: "Попытаться успокоить Даниила и объяснить, что Дерзкий не опасен.", next: 52 }, { text: "Броситься на Даниила и попытаться отобрать пистолет.", next: 56 } ] },
         { bg: BG.cemetery, char: C.dima, name: "Дима", music: 'tense', text: "Он не опасен. Он просто хочет помочь. Пожалуйста, опусти пистолет." },
-        { bg: BG.cemetery, char: C.sergey, name: "Сергей", music: 'tense', text: "Я не верю людям. Я слишком долго жил в мире, где каждый может предать." },
+        { bg: BG.cemetery, char: C.sergey, name: "Даниил", music: 'tense', text: "Я не верю людям. Я слишком долго жил в мире, где каждый может предать." },
         { bg: BG.cemetery, char: C.dima, name: "Дима", music: 'tense', text: "Он не предаст. Он мой друг. И он единственный, кто был рядом, когда мне было трудно." },
-        { bg: BG.cemetery, char: C.dima, name: "", music: 'tense', text: "Сергей медленно опускает пистолет.", next: 59 },
-        { bg: BG.cemetery, char: C.dima, name: "", music: 'tense', text: "Я бросаюсь на Сергея. Он не ожидает этого. Пистолет отлетает в сторону. Мы падаем на землю. Дерзкий подбегает и хватает пистолет." },
+        { bg: BG.cemetery, char: C.dima, name: "", music: 'tense', text: "Даниил медленно опускает пистолет.", next: 59 },
+        { bg: BG.cemetery, char: C.dima, name: "", music: 'tense', text: "Я бросаюсь на Даниила. Он не ожидает этого. Пистолет отлетает в сторону. Мы падаем на землю. Дерзкий подбегает и хватает пистолет." },
         { bg: BG.cemetery, char: C.derz, name: "Дерзкий", music: 'tense', text: "Лежи, не дергайся!" },
-        { bg: BG.cemetery, char: C.sergey, name: "Сергей", music: 'tense', text: "Глупец. Ты только что подписал себе приговор." },
-        { bg: BG.cemetery, char: C.sergey, name: "", music: 'tense', text: "Старое кладбище. Ночь. Сергей сидит на земле. Дерзкий держит его на прицеле." },
-        { bg: BG.cemetery, char: C.sergey, name: "", music: 'tense', text: "Я встаю и отряхиваюсь. Сергей смотрит на меня с презрением." },
-        { bg: BG.cemetery, char: C.sergey, name: "Сергей", music: 'tense', text: "Ты думаешь, что победил? Я пришел сюда не один. Мои люди уже здесь." },
+        { bg: BG.cemetery, char: C.sergey, name: "Даниил", music: 'tense', text: "Глупец. Ты только что подписал себе приговор." },
+        { bg: BG.cemetery, char: C.sergey, name: "", music: 'tense', text: "Старое кладбище. Ночь. Даниил сидит на земле. Дерзкий держит его на прицеле." },
+        { bg: BG.cemetery, char: C.sergey, name: "", music: 'tense', text: "Я встаю и отряхиваюсь. Даниил смотрит на меня с презрением." },
+        { bg: BG.cemetery, char: C.sergey, name: "Даниил", music: 'tense', text: "Ты думаешь, что победил? Я пришел сюда не один. Мои люди уже здесь." },
         { bg: BG.cemetery, char: C.sergey, name: "", music: 'tense', text: "В этот момент из тумана появляются две тени. Это люди в черных костюмах. Они направляются к нам." },
         { bg: BG.cemetery, char: C.dima, name: "Дима", music: 'tense', text: "Дерзкий, уходи!" },
         { bg: BG.cemetery, char: C.derz, name: "Дерзкий", music: 'tense', text: "Я тебя не оставлю!" },
         { bg: BG.cemetery, char: C.derz, name: "", music: 'tense', text: "Старое кладбище. Ночь. Перестрелка. Люди в черных костюмах наступают." },
-        { bg: BG.cemetery, char: C.derz, name: "", music: 'tense', text: "Люди в черных костюмах открывают огонь. Мы с Дерзким прячемся за надгробиями. Сергей поднимается с земли и убегает в туман." },
+        { bg: BG.cemetery, char: C.derz, name: "", music: 'tense', text: "Люди в черных костюмах открывают огонь. Мы с Дерзким прячемся за надгробиями. Даниил поднимается с земли и убегает в туман." },
         { bg: BG.cemetery, char: C.dima, name: "Дима", music: 'tense', text: "Он уходит!" },
         { bg: BG.cemetery, char: C.derz, name: "Дерзкий", music: 'tense', text: "Плевать! Нам нужно выбираться отсюда!" },
         { bg: BG.cemetery, char: C.derz, name: "", music: 'tense', text: "Мы бежим к машине. Пули свистят над головами. Мы запрыгиваем в машину и уезжаем." },
@@ -1599,8 +1658,8 @@
     // Меняй цифру: 1 → открыт 1 эпизод, 2 → открыто 2, и так далее до total.
     // Сезон 2: released: 0 → показывается «СКОРО». Поставь 1 — откроется первый эпизод второго сезона.
     const SEASONS = [
-      { title: 'Сезон 1', total: 9, released: 3, names: EP_NAMES, story: S1_EPISODES },
-      { title: 'Сезон 2', total: 7, released: 0, names: ['Пустая могила', 'Заброшенный завод', 'Крах Андрея', 'Признание Натальи Олеговны', 'Цена мести', 'Секреты старого СТО', 'Ночная встреча на кладбище'], story: S2_EPISODES }
+      { title: 'Сезон 1', total: 9, released: 1, names: EP_NAMES, story: S1_EPISODES },
+      { title: 'Сезон 2', total: 7, released: 0, names: ['Пустая могила', 'Заброшенный завод', 'Крах Андрея', 'Признание Натальи Олеговны', 'Цена мести', 'Секреты старого СТО', 'Ночная встреча на кладбище'], story: S2_EPISODES }, { title: 'Сезон 3', total: 5, released: 0, names: ['Эпизод 1', 'Эпизод 2', 'Эпизод 3', 'Эпизод 4', 'Эпизод 5'], story: [] }, { title: 'Сезон 4', total: 8, released: 0, names: ['Эпизод 1', 'Эпизод 2', 'Эпизод 3', 'Эпизод 4', 'Эпизод 5', 'Эпизод 6', 'Эпизод 7', 'Эпизод 8'], story: [] }
     ];
 
     // Награда за прохождение эпизода. Ключ: 'номер сезона-номер эпизода'
