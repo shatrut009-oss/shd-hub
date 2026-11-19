@@ -171,6 +171,9 @@ app.post('/telegram/webhook', async (req, res) => {
   }
 });
 
+// Серверное время: нужно для открытия эпизодов по дате
+app.get('/api/time', (req, res) => res.json({ now: Date.now() }));
+
 // ===== АВАТАРКА ПОЛЬЗОВАТЕЛЯ (фото из Telegram) =====
 app.get('/api/avatar', async (req, res) => {
   const user = authUser(req, res); if (!user) return;
